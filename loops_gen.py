@@ -37,7 +37,7 @@ def outer_loop(d, i):
     if d == 1:
         return inner_loop(i)
     else:
-        return c.For('int %s = 0', 'i < ' + str(i), 'i++', outer_loop(d - 1, i))
+        return c.For('int i = 0', 'i < ' + str(i), 'i++', outer_loop(d - 1, i))
 
 
 def depth_loop(d, i):
