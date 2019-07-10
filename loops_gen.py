@@ -20,9 +20,9 @@ print(func)
 def number_of_iters(n):
     """:arg n: number of iterations in the loop"""
 
-    for_loop = c.For('i = 0', 'i < ' + str(n), 'i++', c.Statement('cout << "hello world"'))
+    for_loop = c.For('int i = 0', 'i < ' + str(n), 'i++', c.Statement('printf("hello world")'))
 
-    with open('feature1.c', 'a+') as file:
+    with open('src/feature1.c', 'a+') as file:
         for line in str(for_loop).splitlines():
             file.write('\t' + line + '\n')
 
