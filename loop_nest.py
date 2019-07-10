@@ -23,8 +23,10 @@ if __name__ == '__main__':
 
     create_cfile_head()
 
-    for i in range(2, 5):  # range(2, 2**15+1)
-        """loop nest iterations"""
-        lg.number_of_iters(i)
+
+    lg.depth_loop(0, 6)
+   # for i in range(2, 5):  # range(2, 2**15+1)
+    #    """loop nest iterations"""
+     #   lg.inner_loop(i)
 
     create_cfile_tail()

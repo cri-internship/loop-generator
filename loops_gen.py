@@ -17,15 +17,25 @@ print(func)
 """
 
 
-def number_of_iters(n):
-    """:arg n: number of iterations in the loop"""
+def inner_loop(i):
+    """:arg i: number of iterations in the loop"""
 
-    for_loop = c.For('int i = 0', 'i < ' + str(n), 'i++', c.Statement('printf("hello world")'))
+    for_loop = c.For('int i = 0', 'i < ' + str(i), 'i++', c.Block([c.Statement('printf("hello world\\n")')]))
 
+    return for_loop
+
+
+def outher_loop(d, i):
+    """:arg d: the loop nest depth"""
+    assert (d, i) > (0, 0)
+
+    if d == 1:
+        return inner_loop(i)
+    else:
+        return c.For('int i = 0', 'i < ' + str(i), 'i++', outher_loop(d - 1, i))
+
+
+def depth_loop(d, i):
     with open('src/feature1.c', 'a+') as file:
-        for line in str(for_loop).splitlines():
+        for line in str(outher_loop(d, i)).splitlines():
             file.write('\t' + line + '\n')
-
-
-def loop_depth(n):
-    """:arg n: the loop nest depth"""
