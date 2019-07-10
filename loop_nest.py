@@ -1,32 +1,30 @@
-import cgen as c
+import loops_gen as lg
 
+
+def create_cfile_head():
+    start_c = """#include <stdio.h>
+
+int main( int argc, const char* argv[] )
+{
 """
-func = c.FunctionBody(
-    c.FunctionDeclaration(c.Const(c.Pointer(c.Value("char", "greet"))), []),
-    c.Block([
-        c.Statement('return "hello world"'),
-        c.Value('int', 'a'),
-        c.Assign('a',5),
-        c.If('a < 7', c.Statement('a++')),
-        c.While('a < 100', c.Statement('return "hello world"')),
-        c.For('i = 0', 'i < 9', 'i++', c.Statement('return "hello world"')),
-        ])
-    )
+    with open('feature1.c', 'w') as file:
+        file.write(start_c)
 
-print(func)
-"""
 
-def number_of_iters(n):
-    for_loop = c.FunctionBody(
-        c.FunctionDeclaration(c.Value("void", "for_loop"), [c.Value('int', 'n'),]),
-        c.Block([
-            c.For('i = 0', 'i < ' + str(n), 'i++', c.Statement('cout << "hello world"')),
-            ])
-        )
+def create_cfile_tail():
+    end_c = """
+    return 0;
+}"""
+    with open('feature1.c', 'a+') as file:
+        file.write(end_c)
 
-    print(for_loop, '\n\n')
 
 if __name__ == '__main__':
-    for i in range(1,3):
-        """loop nest depth"""
-        number_of_iters(i)
+
+    create_cfile_head()
+
+    for i in range(2, 5):  # range(2, 2**15+1)
+        """loop nest iterations"""
+        lg.number_of_iters(i)
+
+    create_cfile_tail()
