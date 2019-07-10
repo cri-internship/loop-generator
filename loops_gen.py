@@ -1,3 +1,5 @@
+import uuid
+
 import cgen as c
 
 """
@@ -25,17 +27,27 @@ def inner_loop(i):
     return for_loop
 
 
-def outher_loop(d, i):
+def outer_loop(d, i):
     """:arg d: the loop nest depth"""
     assert (d, i) > (0, 0)
 
     if d == 1:
         return inner_loop(i)
     else:
-        return c.For('int i = 0', 'i < ' + str(i), 'i++', outher_loop(d - 1, i))
+        return c.For('int %s = 0', 'i < ' + str(i), 'i++', outer_loop(d - 1, i))
 
 
 def depth_loop(d, i):
     with open('src/feature1.c', 'a+') as file:
-        for line in str(outher_loop(d, i)).splitlines():
+        for line in str(outer_loop(d, i)).splitlines():
             file.write('\t' + line + '\n')
+
+def generate_loop_indexes(loop_level):
+    first_iterator = 'a'
+    calculated_iterator = chr(ord(first_iterator) + loop_level - 1)
+    return calculated_iterator
+
+def generate_file_name(feature_id):
+    unique_identifier = uuid.uuid4()
+    file_name = str(feature_id) + " " + str(unique_identifier)
+    return file_name
