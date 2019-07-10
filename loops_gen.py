@@ -42,10 +42,12 @@ def depth_loop(d, i):
         for line in str(outer_loop(d, i)).splitlines():
             file.write('\t' + line + '\n')
 
+
 def generate_loop_indexes(loop_level):
     first_iterator = 'a'
     calculated_iterator = chr(ord(first_iterator) + loop_level - 1)
     return calculated_iterator
+
 
 def generate_file_name(feature_id):
     unique_identifier = uuid.uuid4()
