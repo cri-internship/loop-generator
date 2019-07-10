@@ -1,5 +1,5 @@
 import loops_gen as lg
-
+import random
 
 def create_cfile_head():
     start_c = """#include <stdio.h>
@@ -20,13 +20,11 @@ def create_cfile_tail():
 
 
 if __name__ == '__main__':
-
     create_cfile_head()
+    loop_nest_depth = random.randint(1, 5)
+    number_of_iterations = random.randint(1,10)
 
-    for d in range(1, 4):
-        lg.depth_loop(d, 6)
-    # for i in range(2, 5):  # range(2, 2**15+1)
-    #    """loop nest iterations"""
-    #   lg.inner_loop(i)
+    lg.depth_loop(loop_nest_depth, number_of_iterations)
+
 
     create_cfile_tail()
