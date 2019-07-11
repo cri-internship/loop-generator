@@ -1,3 +1,5 @@
+CC := gcc
+CFLAGS = -std=gnu99
 SRC_DIR := src
 OBJ_DIR := obj
 SRC_FILES := $(wildcard $(SRC_DIR)/*.c)

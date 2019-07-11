@@ -78,25 +78,47 @@ def generate_calculations():
         generated_arrays[generate_loop_index(i)] = generate_array()
     return generated_arrays
 
-# todo COMPLETELY! change the strategy for arrays generation [use malloc/calloc function]
-#      ASK wheter the arrays should be predefined and kept in source code or they should be calculated in a runtime
-#      -> Should random array dimensions be calculated by C program?
-def generate_array():
-    number_of_dimensions = random.randint(2, 5)
-    sizes_of_dimensions = np.random.randint(3, size=number_of_dimensions)
-    sizes_of_dimensions.tolist()
-    array = np.random.rand(*sizes_of_dimensions)
-    return array
 
+def generate_array():
+    func = c.FunctionBody(
+        c.FunctionDeclaration(c.Pointer(c.Value("float", "create_one_dim")), [c.Value('int', 'size_dim1')]),
+        c.Block([
+            c.Statement(
+
+                """ 
+	   float *array = malloc(size_dim1 * sizeof(float));
+	    
+ 
+	   for (int i = 0; i<size_dim1; i++)
+	         *(array+i) = (float) rand() / ((float) RAND_MAX + 1);  // OR *(arr+i) = ++count
+	 
+	   for (int i = 0; i < size_dim1; i++)
+	         printf("%f ", array[i]);'
+	         
+	    return array"""),
+
+
+            c.Assign('float *array', 'malloc(size_dim1 * sizeof(float))'),
+            c.For('int i = 0', 'i < size_dim1', 'i++', c.Statement(' *(array+i) = (float) rand() / ((float) RAND_MAX + 1)')),
+            c.For('int i = 0', 'i < size_dim1', 'i++', c.Statement('printf("%f ", array[i])')),
+            c.Statement('return array'),
+
+        ])
+    )
+
+    print(func)
 
 """ DYNAMICAL ARRAYS IN C  
 
 2DIM:
-double (*a)[y] = malloc(sizeof(double[x][y]));
+float (*a)[y] = malloc(sizeof(float[x][y]));
 free(a);
 
 3DIM
-double (*a)[y][z] = malloc(sizeof(double[x][y][z]));
+float (*a)[y][z] = malloc(sizeof(float[x][y][z]));
 free(a)
 
 """
+
+if __name__ == '__main__':
+    generate_array()
