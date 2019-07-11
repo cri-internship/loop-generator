@@ -136,4 +136,5 @@ free(a)
 """
 
 if __name__ == '__main__':
+    print(test)
     generate_array()
