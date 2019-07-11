@@ -22,3 +22,5 @@ install:
   - source activate test-environment
   - pip install -r requirements.txt
 
+script: make test
+
