@@ -108,6 +108,21 @@ def generate_array():
 
     print(func)
 
+def generate_array_dimensions():
+    """
+    amount of dimensions 1 - 3
+    max size of each dimension: 1024
+    :return: array of dimension sizes
+    """
+    max_dimension_size = 1024
+    number_of_dimensions = random.randint(1, 3)
+    print("number of dimensions", number_of_dimensions)
+    sizes_of_dimensions = []
+    for i in range(number_of_dimensions):
+        print(i, "\n")
+        sizes_of_dimensions.append(random.randint(1, max_dimension_size))
+    return sizes_of_dimensions
+
 """ DYNAMICAL ARRAYS IN C  
 
 2DIM:
