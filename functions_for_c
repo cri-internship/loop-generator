@@ -55,6 +55,3 @@ float ***create_three_dim(int size_dim1, int size_dim2, int size_dim3)
 int main( int argc, const char* argv[] )
 {
     srand(time(NULL));
-    float *array1 = create_one_dim(3);
-    float **array2 = create_two_dim(3, 5);
-    float ***array3 = create_three_dim(3, 5, 7);
