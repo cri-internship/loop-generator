@@ -7,6 +7,7 @@ import random
 import numpy as np
 
 maths_operations = ['+', '-', '*', '/']  # random.choice(maths_operations.values())
+array_init_functions = {1: 'create_one_dim', 2: 'create_two_dim', 3: 'create_three_dim'}
 
 
 def generate_nested_loops(d, i):
@@ -40,6 +41,7 @@ def depth_loop(d, i):
        :arg i: number of iterations
        calls generate_nested_loops(d, i) and write it to file"""
     with open('src/feature1.c', 'a+') as file:
+        file.write('\n\n')
         for line in str(generate_nested_loops(d, i)).splitlines():
             file.write('\t' + line + '\n')
 
@@ -67,14 +69,14 @@ def init_arrays():
     dict_of_arrays = {}
     for i in range(number_of_arrays):
         dim = generate_array_dimensions()
-        index = generate_array_index(i+1)
+        index = generate_array_index(i + 1)
         write_array_to_file(index, dim)
         dict_of_arrays[index] = dim
     return dict_of_arrays
 
 
 def write_array_to_file(array_name, array_size):
-    init_array = c.Statement('\n\tfloat {}{}'.format(array_name, create_array_brackets(array_size)))
+    init_array = c.Statement('\n\tfloat {}{} = {}{}'.format(array_name, create_array_brackets(array_size), array_init_functions[len(array_size)], tuple(array_size)))
     with open('src/feature1.c', 'a+') as file:
         file.write(str(init_array))
 
@@ -96,6 +98,7 @@ def generate_array_dimensions():
     for i in range(number_of_dimensions):
         sizes_of_dimensions.append(random.randint(1, max_dimension_size))
     return sizes_of_dimensions
+
 
 def generate_calculations():
     return None
