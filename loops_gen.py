@@ -6,26 +6,30 @@ import random
 
 import numpy as np
 
+MAX_NUMBER_OF_ARRAY = 5
+MAX_DIM_SIZE = 1024
+MAX_DIMS = 3
+
 maths_operations = ['+', '-', '*', '/']  # random.choice(maths_operations.values())
 array_init_functions = {1: 'create_one_dim', 2: 'create_two_dim', 3: 'create_three_dim'}
 
 
-def generate_nested_loops(d, i):
-    """:arg d: the loop nest depth
-       :arg i: number of iterations
+def generate_nested_loops(loop_nest_depth, num_of_iters):
+    """:arg loop_nest_depth: the loop nest depth
+       :arg num_of_iters: number of iterations
        recursively function to create for loop with depth d.
        The most inner loop calls function inner_loop
        :return for loop with depth d"""
-    assert (d, i) > (0, 0)  # todo move to the RANDOM generator
-    loop_index = generate_loop_index(d)
+    loop_index = generate_loop_index(loop_nest_depth)
     lower_bound = 0
     upper_bound = random.randint(lower_bound + 1, 2 ** 15)
     inner_stmt = c.Block([c.Statement('printf("hello world\\n")')])
 
-    if d == 1:
+    if loop_nest_depth == 1:
         return print_loop_structure(loop_index, lower_bound, upper_bound, inner_stmt)
     else:
-        return print_loop_structure(loop_index, lower_bound, upper_bound, generate_nested_loops(d - 1, i))
+        return print_loop_structure(loop_index, lower_bound, upper_bound,
+                                    generate_nested_loops(loop_nest_depth - 1, num_of_iters))
 
 
 def print_loop_structure(loop_index, lower_bound, upper_bound, fun):
@@ -36,14 +40,14 @@ def print_loop_structure(loop_index, lower_bound, upper_bound, fun):
                  fun)
 
 
-def depth_loop(d, i):
-    """:arg d: loop nest depth
-       :arg i: number of iterations
-       calls generate_nested_loops(d, i) and write it to file"""
+def create_nested_loop():
+    """calls generate_nested_loops(d, i) and write it to file"""
+    loop_nest_depth = random.randint(1, 5)
+    num_of_iters = random.randint(1, 10)
     with open('src/feature1.c', 'a+') as file:
         file.write('\n\n')
-        for line in str(generate_nested_loops(d, i)).splitlines():
-            file.write('\t' + line + '\n')
+        for line in str(generate_nested_loops(loop_nest_depth, num_of_iters)).splitlines():
+            file.write('\t{}\n'.format(line))
 
 
 def generate_loop_index(loop_level):
@@ -65,17 +69,22 @@ def generate_file_name(feature_id):
 
 
 def init_arrays():
-    number_of_arrays = random.randint(1, 5)
-    dict_of_arrays = {}
+    """Generate random amount of arrays and write its initialization to file
+    :return dict of array name and dims size"""
+    number_of_arrays = random.randint(1, MAX_NUMBER_OF_ARRAY)
     for i in range(number_of_arrays):
         dim = generate_array_dimensions()
-        index = generate_array_index(i + 1)
+        index = generate_array_index(i)
         write_array_to_file(index, dim)
-        dict_of_arrays[index] = dim
+        try:
+            dict_of_arrays[index] = dim
+        except NameError:
+            dict_of_arrays = {}
     return dict_of_arrays
 
 
 def write_array_to_file(array_name, array_size):
+    """Write declaration and calling functions to init arrays to file"""
     init_array = c.Statement('\n\tfloat {}{} = {}({})'.format('*' * len(array_size), array_name,
                                                               array_init_functions[len(array_size)],
                                                               str(array_size)[1:-1]))
@@ -83,22 +92,15 @@ def write_array_to_file(array_name, array_size):
         file.write(str(init_array))
 
 
-def create_array_brackets(array_size):
-    s = ''
-    for i in array_size:
-        s += ('[{}]'.format(i))
-    return s
-
-
 def generate_array_dimensions():
-    """amount of dimensions 1 - 3
-    max size of each dimension: 1024
-    :return: array of dimension sizes"""
-    max_dimension_size = 1024
-    number_of_dimensions = random.randint(1, 3)
-    sizes_of_dimensions = []
+    """:return: array of random dimension sizes"""
+    number_of_dimensions = random.randint(1, MAX_DIMS)
     for i in range(number_of_dimensions):
-        sizes_of_dimensions.append(random.randint(1, max_dimension_size))
+        try:
+            sizes_of_dimensions.append(random.randint(1, MAX_DIM_SIZE))
+        except NameError:
+            sizes_of_dimensions = []
+
     return sizes_of_dimensions
 
 
