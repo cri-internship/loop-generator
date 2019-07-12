@@ -79,35 +79,6 @@ def generate_calculations():
     return generated_arrays
 
 
-def generate_array():
-    func = c.FunctionBody(
-        c.FunctionDeclaration(c.Pointer(c.Value("float", "create_one_dim")), [c.Value('int', 'size_dim1')]),
-        c.Block([
-            c.Statement(
-
-                """ 
-	   float *array = malloc(size_dim1 * sizeof(float));
-	    
- 
-	   for (int i = 0; i<size_dim1; i++)
-	         *(array+i) = (float) rand() / ((float) RAND_MAX + 1);  // OR *(arr+i) = ++count
-	 
-	   for (int i = 0; i < size_dim1; i++)
-	         printf("%f ", array[i]);'
-	         
-	    return array"""),
-
-
-            c.Assign('float *array', 'malloc(size_dim1 * sizeof(float))'),
-            c.For('int i = 0', 'i < size_dim1', 'i++', c.Statement(' *(array+i) = (float) rand() / ((float) RAND_MAX + 1)')),
-            c.For('int i = 0', 'i < size_dim1', 'i++', c.Statement('printf("%f ", array[i])')),
-            c.Statement('return array'),
-
-        ])
-    )
-
-    print(func)
-
 def generate_array_dimensions():
     """
     amount of dimensions 1 - 3
@@ -122,6 +93,7 @@ def generate_array_dimensions():
         print(i, "\n")
         sizes_of_dimensions.append(random.randint(1, max_dimension_size))
     return sizes_of_dimensions
+
 
 """ DYNAMICAL ARRAYS IN C  
 
