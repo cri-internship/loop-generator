@@ -5,22 +5,6 @@ import cgen as c
 import random
 
 import numpy as np
-
-"""
-func = c.FunctionBody(
-    c.FunctionDeclaration(c.Const(c.Pointer(c.Value("char", "greet"))), []),
-    c.Block([
-        c.Statement('return "hello world"'),
-        c.Value('int', 'a'),
-        c.Assign('a',5),
-        c.If('a < 7', c.Statement('a++')),
-        c.While('a < 100', c.Statement('return "hello world"')),
-        c.For('i = 0', 'i < 9', 'i++', c.Statement('return "hello world"')),
-        ])
-    )
-
-print(func)
-"""
 maths_operations = ['+', '-', '*', '/']  # random.choice(maths_operations.values())
 
 
@@ -71,12 +55,12 @@ def generate_file_name(feature_id):
     return file_name
 
 
-def generate_calculations():
-    number_of_arrays = random.randint(1, 5)
-    generated_arrays = {}
-    for i in range(number_of_arrays + 1):
-        generated_arrays[generate_loop_index(i)] = generate_array()
-    return generated_arrays
+# def generate_calculations():
+#     number_of_arrays = random.randint(1, 5)
+#     generated_arrays = {}
+#     for i in range(number_of_arrays + 1):
+#         generated_arrays[generate_loop_index(i)] = generate_array()
+#     return generated_arrays
 
 
 def generate_array_dimensions():
@@ -108,4 +92,4 @@ free(a)
 """
 
 if __name__ == '__main__':
-    generate_array()
+    pass
