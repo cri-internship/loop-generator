@@ -18,7 +18,7 @@ def generate_nested_loops(d, i):
     assert (d, i) > (0, 0)  # todo move to the RANDOM generator
     loop_index = generate_loop_index(d)
     lower_bound = 0
-    upper_bound = random.randint(lower_bound + 1, 50)
+    upper_bound = random.randint(lower_bound + 1, 2 ** 15)
     inner_stmt = c.Block([c.Statement('printf("hello world\\n")')])
 
     if d == 1:
@@ -50,9 +50,9 @@ def generate_loop_index(loop_level):
     return calculated_iterator
 
 
-def generate_array_index(array_id):
+def generate_array_index(array_id):  # up to 26 letters
     first_iterator = 'A'
-    calculated_index = chr(ord(first_iterator) + array_id - 1)
+    calculated_index = chr(ord(first_iterator) + array_id)
     return calculated_index
 
 
@@ -62,23 +62,23 @@ def generate_file_name(feature_id):
     return file_name
 
 
-# def generate_calculations():
-#     number_of_arrays = random.randint(1, 5)
-#     generated_arrays = {}
-#     for i in range(number_of_arrays + 1):
-#         generated_arrays[generate_loop_index(i)] = generate_array()
-#     return generated_arrays
+def generate_calculations():
+    number_of_arrays = random.randint(1, 5)
+    for i in range(number_of_arrays):
+        write_array_to_file(generate_array_index(i), generate_array_dimensions())
+
+def write_array_to_file(array_name, array_size):
+    init_array = c.Statement('float {} = {}'.format(array_name, array_size))
+    with open('src/feature1.c', 'a+') as file:
+        file.write(str(init_array))
 
 
 def generate_array_dimensions():
-    """
-    amount of dimensions 1 - 3
+    """amount of dimensions 1 - 3
     max size of each dimension: 1024
-    :return: array of dimension sizes
-    """
+    :return: array of dimension sizes"""
     max_dimension_size = 1024
     number_of_dimensions = random.randint(1, 3)
-    print("number of dimensions", number_of_dimensions)
     sizes_of_dimensions = []
     for i in range(number_of_dimensions):
         sizes_of_dimensions.append(random.randint(1, max_dimension_size))
@@ -98,4 +98,4 @@ free(a)
 """
 
 if __name__ == '__main__':
-    pass
+    generate_calculations()
