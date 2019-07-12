@@ -64,11 +64,13 @@ def generate_file_name(feature_id):
 
 def init_arrays():
     number_of_arrays = random.randint(1, 5)
-    dict_of_arrays = []
+    dict_of_arrays = {}
     for i in range(number_of_arrays):
         dim = generate_array_dimensions()
-        dict_of_arrays.append(dim)
-        write_array_to_file(generate_array_index(i), dim)
+        index = generate_array_index(i+1)
+        write_array_to_file(index, dim)
+        dict_of_arrays[index] = dim
+    return dict_of_arrays
 
 
 def write_array_to_file(array_name, array_size):
@@ -95,6 +97,9 @@ def generate_array_dimensions():
         sizes_of_dimensions.append(random.randint(1, max_dimension_size))
     return sizes_of_dimensions
 
+def generate_calculations():
+    return None
+
 
 """ DYNAMICAL ARRAYS IN C  
 
@@ -109,4 +114,4 @@ free(a)
 """
 
 if __name__ == '__main__':
-    generate_calculations()
+    pass
