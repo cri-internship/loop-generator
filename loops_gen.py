@@ -62,10 +62,13 @@ def generate_file_name(feature_id):
     return file_name
 
 
-def generate_calculations():
+def init_arrays():
     number_of_arrays = random.randint(1, 5)
+    dict_of_arrays = []
     for i in range(number_of_arrays):
-        write_array_to_file(generate_array_index(i), generate_array_dimensions())
+        dim = generate_array_dimensions()
+        dict_of_arrays.append(dim)
+        write_array_to_file(generate_array_index(i), dim)
 
 
 def write_array_to_file(array_name, array_size):
