@@ -5,6 +5,7 @@ import cgen as c
 import random
 
 import numpy as np
+
 maths_operations = ['+', '-', '*', '/']  # random.choice(maths_operations.values())
 
 
@@ -49,6 +50,12 @@ def generate_loop_index(loop_level):
     return calculated_iterator
 
 
+def generate_array_index(array_id):
+    first_iterator = 'A'
+    calculated_index = chr(ord(first_iterator) + array_id - 1)
+    return calculated_index
+
+
 def generate_file_name(feature_id):
     unique_identifier = uuid.uuid4()
     file_name = str(feature_id) + " " + str(unique_identifier)
@@ -74,7 +81,6 @@ def generate_array_dimensions():
     print("number of dimensions", number_of_dimensions)
     sizes_of_dimensions = []
     for i in range(number_of_dimensions):
-        print(i, "\n")
         sizes_of_dimensions.append(random.randint(1, max_dimension_size))
     return sizes_of_dimensions
 
