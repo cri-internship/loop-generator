@@ -76,7 +76,9 @@ def init_arrays():
 
 
 def write_array_to_file(array_name, array_size):
-    init_array = c.Statement('\n\tfloat {}{} = {}{}'.format(array_name, create_array_brackets(array_size), array_init_functions[len(array_size)], tuple(array_size)))
+    init_array = c.Statement('\n\tfloat {}{} = {}({})'.format('*' * len(array_size), array_name,
+                                                              array_init_functions[len(array_size)],
+                                                              str(array_size)[1:-1]))
     with open('src/feature1.c', 'a+') as file:
         file.write(str(init_array))
 
