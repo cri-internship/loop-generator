@@ -67,10 +67,18 @@ def generate_calculations():
     for i in range(number_of_arrays):
         write_array_to_file(generate_array_index(i), generate_array_dimensions())
 
+
 def write_array_to_file(array_name, array_size):
-    init_array = c.Statement('float {} = {}'.format(array_name, array_size))
+    init_array = c.Statement('\n\tfloat {}{}'.format(array_name, create_array_brackets(array_size)))
     with open('src/feature1.c', 'a+') as file:
         file.write(str(init_array))
+
+
+def create_array_brackets(array_size):
+    s = ''
+    for i in array_size:
+        s += ('[{}]'.format(i))
+    return s
 
 
 def generate_array_dimensions():
