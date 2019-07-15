@@ -73,6 +73,8 @@ def init_arrays():
     :return dict of array name and dims size"""
     number_of_arrays = random.randint(1, MAX_NUMBER_OF_ARRAY)
     dict_of_arrays = {}
+    result_array = [dim_size for _ in range(loop_nest_depth)]
+    write_array_to_file('result', result_array)
     for i in range(number_of_arrays):
         dim = generate_array_dimensions()
         index = generate_array_index(i + 1)
