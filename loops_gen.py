@@ -7,7 +7,7 @@ import random
 import numpy as np
 
 MAX_NUMBER_OF_ARRAY = 5
-MAX_DIM_SIZE = 2 ** 15
+MAX_DIM_SIZE = 10  # 2 ** 15
 MAX_DIMS = 3
 MAX_DEPTH = 3
 
@@ -17,20 +17,20 @@ dim_size = random.randint(1, MAX_DIM_SIZE)
 loop_nest_depth = random.randint(1, MAX_DEPTH)
 
 
-def generate_nested_loops(loop_nest_depth, num_of_iters):
+def generate_nested_loops(loop_nest_depth):
     """:arg loop_nest_depth: the loop nest depth
-       :arg num_of_iters: number of iterations
        recursively function to create for loop with depth d.
        The most inner loop calls function inner_loop
        :return for loop with depth d"""
     loop_index = generate_loop_index(loop_nest_depth)
     lower_bound = 0
     upper_bound = dim_size
-    if loop_nest_depth == 1:
-        return print_loop_structure(loop_index, lower_bound, upper_bound, c.Block([c.Statement(generate_calculations(init_arrays()))]))
+    if loop_nest_depth == 0:
+        return print_loop_structure(loop_index, lower_bound, upper_bound,
+                                    c.Block([c.Statement(generate_calculations(init_arrays()))]))
     else:
         return print_loop_structure(loop_index, lower_bound, upper_bound,
-                                    generate_nested_loops(loop_nest_depth - 1, num_of_iters))
+                                    generate_nested_loops(loop_nest_depth - 1))
 
 
 def print_loop_structure(loop_index, lower_bound, upper_bound, fun):
@@ -43,22 +43,21 @@ def print_loop_structure(loop_index, lower_bound, upper_bound, fun):
 
 def create_nested_loop():
     """calls generate_nested_loops(d, i) and write it to file"""
-    num_of_iters = random.randint(1, 10)
     with open('src/feature1.c', 'a+') as file:
         file.write('\n\n')
-        for line in str(generate_nested_loops(loop_nest_depth, num_of_iters)).splitlines():
+        for line in str(generate_nested_loops(loop_nest_depth - 1)).splitlines():
             file.write('\t{}\n'.format(line))
 
 
 def generate_loop_index(loop_level):
     first_iterator = 'a'
-    calculated_iterator = chr(ord(first_iterator) + loop_level - 1)
+    calculated_iterator = chr(ord(first_iterator) + loop_level)
     return calculated_iterator
 
 
-def generate_array_index(array_id):  # up to 26 letters
+def generate_array_name(array_id):  # up to 26 letters
     first_iterator = 'A'
-    calculated_index = chr(ord(first_iterator) + array_id - 1)
+    calculated_index = chr(ord(first_iterator) + array_id)
     return calculated_index
 
 
@@ -73,17 +72,17 @@ def init_arrays():
     :return dict of array name and dims size"""
     number_of_arrays = random.randint(1, MAX_NUMBER_OF_ARRAY)
     dict_of_arrays = {}
-    result_array = [dim_size for _ in range(loop_nest_depth)]
-    write_array_to_file('result', result_array)
+    result_array_dims = [dim_size for _ in range(loop_nest_depth)]
+    write_init_array('result', result_array_dims)
     for i in range(number_of_arrays):
-        dim = generate_array_dimensions()
-        index = generate_array_index(i + 1)
-        write_array_to_file(index, dim)
-        dict_of_arrays[index] = dim
+        dims = generate_array_dimensions()
+        index = generate_array_name(i)
+        write_init_array(index, dims)
+        dict_of_arrays[index] = dims
     return dict_of_arrays
 
 
-def write_array_to_file(array_name, array_size):
+def write_init_array(array_name, array_size):
     """Write declaration and calling functions to init arrays to file"""
     init_array = c.Statement('\n\tfloat {}{} = {}({})'.format('*' * len(array_size), array_name,
                                                               array_init_functions[len(array_size)],
@@ -95,21 +94,19 @@ def write_array_to_file(array_name, array_size):
 def generate_array_dimensions():
     """:return: array of random dimension sizes"""
     number_of_dimensions = random.randint(1, MAX_DIMS)
-    sizes_of_dimensions = []
-    for i in range(number_of_dimensions):
-        sizes_of_dimensions.append(dim_size)
-
+    sizes_of_dimensions = [dim_size for _ in range(number_of_dimensions)]
     return sizes_of_dimensions
 
 
 def generate_calculations(arrays_dict):  # todo randomize the parameters
-    num_of_calculations = random.randint(0, 14)
-    tabl = ''
-    for i in range(1, loop_nest_depth + 1):
-        tabl= '['+generate_loop_index(i) + ']' + tabl
-    print(tabl)
-    calculations = "result" + tabl + ' = '
-    for i in range(num_of_calculations + 2):
+    num_of_calculations = random.randint(2, 16)
+    for i in range(loop_nest_depth):
+        try:
+            result_dims = '[' + generate_loop_index(i) + ']' + result_dims
+        except NameError:
+            result_dims = '[' + generate_loop_index(i) + ']'
+    calculations = "result" + result_dims + ' = '
+    for i in range(num_of_calculations):
         coin_flip = random.randint(0, 1)
         if coin_flip == 0:
             array_index, array_dims = random.choice(list(arrays_dict.items()))
@@ -117,14 +114,14 @@ def generate_calculations(arrays_dict):  # todo randomize the parameters
             calculations += array_index
             for j in range(number_of_dims):
                 rand_parameter = random.randint(0, loop_nest_depth - 1)
-                array_id = generate_loop_index(rand_parameter+1)
+                array_id = generate_loop_index(rand_parameter)
                 calculations += '[' + str(array_id) + ']'  # random array value
         else:
             calculations += str(random.random())  # random scalar
 
-        if not (i == num_of_calculations + 1):
-            calculations += random.choice(maths_operations)  # random operator
-    return calculations
+        calculations += random.choice(maths_operations)  # random operator
+
+    return calculations[:-1]
 
 
 if __name__ == '__main__':

@@ -22,7 +22,6 @@ def create_cfile_tail():
 if __name__ == '__main__':
     create_cfile_head()
 
-   # lg.init_arrays()
     lg.create_nested_loop()
 
     create_cfile_tail()
