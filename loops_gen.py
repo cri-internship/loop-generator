@@ -104,7 +104,11 @@ def generate_array_dimensions():
 
 def generate_calculations(arrays_dict):  # todo randomize the parameters
     num_of_calculations = random.randint(0, 14)
-    calculations = ""
+    tabl = ''
+    for i in range(1, loop_nest_depth + 1):
+        tabl= '['+generate_loop_index(i) + ']' + tabl
+    print(tabl)
+    calculations = "result" + tabl + ' = '
     for i in range(num_of_calculations + 2):
         coin_flip = random.randint(0, 1)
         if coin_flip == 0:
