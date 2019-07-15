@@ -24,10 +24,8 @@ def generate_nested_loops(loop_nest_depth, num_of_iters):
     loop_index = generate_loop_index(loop_nest_depth)
     lower_bound = 0
     upper_bound = dim_size
-    inner_stmt = c.Block([c.Statement(generate_calculations(init_arrays()))])
-
     if loop_nest_depth == 1:
-        return print_loop_structure(loop_index, lower_bound, upper_bound, inner_stmt)
+        return print_loop_structure(loop_index, lower_bound, upper_bound, c.Block([c.Statement(generate_calculations(init_arrays()))]))
     else:
         return print_loop_structure(loop_index, lower_bound, upper_bound,
                                     generate_nested_loops(loop_nest_depth - 1, num_of_iters))
@@ -73,14 +71,12 @@ def init_arrays():
     """Generate random amount of arrays and write its initialization to file
     :return dict of array name and dims size"""
     number_of_arrays = random.randint(1, MAX_NUMBER_OF_ARRAY)
+    dict_of_arrays = {}
     for i in range(number_of_arrays):
         dim = generate_array_dimensions()
         index = generate_array_index(i)
         write_array_to_file(index, dim)
-        try:
-            dict_of_arrays[index] = dim
-        except NameError:
-            dict_of_arrays = {}
+        dict_of_arrays[index] = dim
     return dict_of_arrays
 
 
@@ -96,24 +92,20 @@ def write_array_to_file(array_name, array_size):
 def generate_array_dimensions():
     """:return: array of random dimension sizes"""
     number_of_dimensions = random.randint(1, MAX_DIMS)
-    for i in range(number_of_dimensions + 1):
-        try:
-            sizes_of_dimensions.append(dim_size)
-        except NameError:
-            sizes_of_dimensions = []
+    sizes_of_dimensions = []
+    for i in range(number_of_dimensions):
+        sizes_of_dimensions.append(dim_size)
+
     return sizes_of_dimensions
 
 
 def generate_calculations(arrays_dict):  # todo randomize the parameters
     num_of_calculations = random.randint(1, 16)
-
     calculations = ""
-
-    for i in range(num_of_calculations):
+    for i in range(1, num_of_calculations):
         coin_flip = random.randint(0, 1)
         if coin_flip == 0:
             array_index, array_dims = random.choice(list(arrays_dict.items()))
-            print(array_dims)
             number_of_dims = len(array_dims)
             calculations += array_index
             for j in range(number_of_dims):
@@ -125,10 +117,8 @@ def generate_calculations(arrays_dict):  # todo randomize the parameters
 
         if not (i == num_of_calculations - 1):
             calculations += random.choice(maths_operations)  # random operator
-
     return calculations
 
 
 if __name__ == '__main__':
-    # print(generate_calculations(init_arrays()))
     pass
