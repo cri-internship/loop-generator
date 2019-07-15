@@ -6,8 +6,6 @@ import random
 
 import numpy as np
 
-maths_operations = ['+', '-', '*', '/']  # random.choice(maths_operations.values())
-
 
 def generate_nested_loops(d, i):
     """:arg d: the loop nest depth
@@ -67,8 +65,8 @@ def init_arrays():
     dict_of_arrays = {}
     for i in range(number_of_arrays):
         dim = generate_array_dimensions()
-        index = generate_array_index(i+1)
-        write_array_to_file(index, dim)
+        index = generate_array_index(i + 1)
+        # write_array_to_file(index, dim)
         dict_of_arrays[index] = dim
     return dict_of_arrays
 
@@ -97,8 +95,25 @@ def generate_array_dimensions():
         sizes_of_dimensions.append(random.randint(1, max_dimension_size))
     return sizes_of_dimensions
 
-def generate_calculations():
-    return None
+
+def generate_calculations(arrays_dict):  # todo randomize the parameters
+    maths_operations = ['+', '-', '*', '/']
+    num_of_calculations = random.randint(1, 16)
+
+    calculations = ""
+
+    for i in range(num_of_calculations):
+        coin_flip = random.randint(0, 1)
+        if coin_flip == 0:
+            array_index, array_dims = random.choice(list(arrays_dict.items()))
+            calculations += array_index + str(array_dims)  # random array value
+        else:
+            calculations += str(random.random())  # random scalar
+
+        if not (i == num_of_calculations - 1):
+            calculations += random.choice(maths_operations)  # random operator
+
+    return calculations
 
 
 """ DYNAMICAL ARRAYS IN C  
@@ -114,4 +129,4 @@ free(a)
 """
 
 if __name__ == '__main__':
-    pass
+    print(generate_calculations(init_arrays()))
