@@ -7,12 +7,13 @@ import random
 import numpy as np
 
 MAX_NUMBER_OF_ARRAY = 5
-MAX_DIM_SIZE = 2**15
+MAX_DIM_SIZE = 2 ** 15
 MAX_DIMS = 3
 
-maths_operations = ['+', '-', '*', '/']  # random.choice(maths_operations.values())
+maths_operations = ['+', '-', '*', '/']
 array_init_functions = {1: 'create_one_dim', 2: 'create_two_dim', 3: 'create_three_dim'}
 dim_size = random.randint(1, MAX_DIM_SIZE)
+
 
 def generate_nested_loops(loop_nest_depth, num_of_iters):
     """:arg loop_nest_depth: the loop nest depth
@@ -23,7 +24,7 @@ def generate_nested_loops(loop_nest_depth, num_of_iters):
     loop_index = generate_loop_index(loop_nest_depth)
     lower_bound = 0
     upper_bound = dim_size
-    inner_stmt = c.Block([c.Statement('printf("hello world\\n")')])
+    inner_stmt = c.Block([c.Statement(generate_calculations(init_arrays()))])
 
     if loop_nest_depth == 1:
         return print_loop_structure(loop_index, lower_bound, upper_bound, inner_stmt)
@@ -104,7 +105,6 @@ def generate_array_dimensions():
 
 
 def generate_calculations(arrays_dict):  # todo randomize the parameters
-    maths_operations = ['+', '-', '*', '/']
     num_of_calculations = random.randint(1, 16)
 
     calculations = ""
@@ -113,7 +113,13 @@ def generate_calculations(arrays_dict):  # todo randomize the parameters
         coin_flip = random.randint(0, 1)
         if coin_flip == 0:
             array_index, array_dims = random.choice(list(arrays_dict.items()))
-            calculations += array_index + str(array_dims)  # random array value
+            print(array_dims)
+            number_of_dims = len(array_dims)
+            calculations += array_index
+            for j in range(number_of_dims):
+                rand_parameter = random.randint(1, len(array_dims))
+                array_id = generate_loop_index(rand_parameter)
+                calculations += '[' + str(array_id) + ']'  # random array value
         else:
             calculations += str(random.random())  # random scalar
 
@@ -122,21 +128,7 @@ def generate_calculations(arrays_dict):  # todo randomize the parameters
 
     return calculations
 
-def generate_calculations():
-    return None
-
-
-""" DYNAMICAL ARRAYS IN C  
-
-2DIM:
-float (*a)[y] = malloc(sizeof(float[x][y]));
-free(a);
-
-3DIM
-float (*a)[y][z] = malloc(sizeof(float[x][y][z]));
-free(a)
-
-"""
 
 if __name__ == '__main__':
+    # print(generate_calculations(init_arrays()))
     pass
