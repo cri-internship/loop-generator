@@ -73,9 +73,6 @@ def init_arrays():
     number_of_arrays = random.randint(1, MAX_NUMBER_OF_ARRAY)
     for i in range(number_of_arrays):
         dim = generate_array_dimensions()
-        index = generate_array_index(i + 1)
-        # write_array_to_file(index, dim)
-        dict_of_arrays[index] = dim
         index = generate_array_index(i)
         write_array_to_file(index, dim)
         try:
@@ -97,12 +94,11 @@ def write_array_to_file(array_name, array_size):
 def generate_array_dimensions():
     """:return: array of random dimension sizes"""
     number_of_dimensions = random.randint(1, MAX_DIMS)
-    for i in range(number_of_dimensions):
+    for i in range(number_of_dimensions + 1):
         try:
             sizes_of_dimensions.append(random.randint(1, MAX_DIM_SIZE))
         except NameError:
             sizes_of_dimensions = []
-
     return sizes_of_dimensions
 
 
