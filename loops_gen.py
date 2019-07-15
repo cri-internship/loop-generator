@@ -7,11 +7,12 @@ import random
 import numpy as np
 
 MAX_NUMBER_OF_ARRAY = 5
-MAX_DIM_SIZE = 1024
+MAX_DIM_SIZE = 2**15
 MAX_DIMS = 3
 
 maths_operations = ['+', '-', '*', '/']  # random.choice(maths_operations.values())
 array_init_functions = {1: 'create_one_dim', 2: 'create_two_dim', 3: 'create_three_dim'}
+dim_size = random.randint(1, MAX_DIM_SIZE)
 
 def generate_nested_loops(loop_nest_depth, num_of_iters):
     """:arg loop_nest_depth: the loop nest depth
@@ -21,7 +22,7 @@ def generate_nested_loops(loop_nest_depth, num_of_iters):
        :return for loop with depth d"""
     loop_index = generate_loop_index(loop_nest_depth)
     lower_bound = 0
-    upper_bound = random.randint(lower_bound + 1, 2 ** 15)
+    upper_bound = dim_size
     inner_stmt = c.Block([c.Statement('printf("hello world\\n")')])
 
     if loop_nest_depth == 1:
@@ -96,7 +97,7 @@ def generate_array_dimensions():
     number_of_dimensions = random.randint(1, MAX_DIMS)
     for i in range(number_of_dimensions + 1):
         try:
-            sizes_of_dimensions.append(random.randint(1, MAX_DIM_SIZE))
+            sizes_of_dimensions.append(dim_size)
         except NameError:
             sizes_of_dimensions = []
     return sizes_of_dimensions

@@ -1,5 +1,4 @@
 import loops_gen as lg
-import random
 
 
 def create_cfile_head():
