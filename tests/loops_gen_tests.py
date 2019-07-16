@@ -19,7 +19,7 @@ class TestPrint_loop_structure(unittest.TestCase):
 
 class TestGenerate_loop_index(unittest.TestCase):
     def test_index_26(self):
-        self.assertEqual(lg.generate_loop_index(26), 'a')
+        self.assertEqual(lg.generate_loop_index(26), 'b')
 
     def test_index_0(self):
         self.assertEqual(lg.generate_loop_index(0), 'a')

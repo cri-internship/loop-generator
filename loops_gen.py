@@ -1,10 +1,6 @@
 import uuid
-
 import cgen as c
-
 import random
-
-import numpy as np
 
 MAX_NUMBER_OF_ARRAY = 5
 MAX_DIM_SIZE = 10  # 2 ** 15
@@ -22,10 +18,10 @@ def generate_nested_loops(loop_nest_depth):
        recursively function to create for loop with depth d.
        The most inner loop calls function inner_loop
        :return for loop with depth d"""
-    loop_index = generate_loop_index(loop_nest_depth)
+    loop_index = generate_loop_index(loop_nest_depth - 1)
     lower_bound = 0
     upper_bound = dim_size
-    if loop_nest_depth == 0:
+    if loop_nest_depth == 1:
         return print_loop_structure(loop_index, lower_bound, upper_bound,
                                     c.Block([c.Statement(generate_calculations(init_arrays()))]))
     else:
@@ -45,19 +41,19 @@ def create_nested_loop():
     """calls generate_nested_loops(d, i) and write it to file"""
     with open('src/feature1.c', 'a+') as file:
         file.write('\n\n')
-        for line in str(generate_nested_loops(loop_nest_depth - 1)).splitlines():
+        for line in str(generate_nested_loops(loop_nest_depth )).splitlines():
             file.write('\t{}\n'.format(line))
 
 
 def generate_loop_index(loop_level):
     first_iterator = 'a'
-    calculated_iterator = chr(ord(first_iterator) + loop_level)
+    calculated_iterator = chr(ord(first_iterator) + loop_level%26)
     return calculated_iterator
 
 
 def generate_array_name(array_id):  # up to 26 letters
     first_iterator = 'A'
-    calculated_index = chr(ord(first_iterator) + array_id)
+    calculated_index = chr(ord(first_iterator) + array_id%26)
     return calculated_index
 
 
