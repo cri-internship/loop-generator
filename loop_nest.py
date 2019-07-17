@@ -3,11 +3,20 @@ import loops_gen as lg
 
 def create_cfile_head():
     """Read C functions from functions_for_c.txt and write it to feature.c """
-    with open('functions_for_c', 'r') as file:
-        functions = file.read()
+    start_c = """#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "../_init.h"
+
+
+int main( int argc, const char* argv[] )
+{
+    srand(time(NULL));
+
+    """
 
     with open('src/feature1.c', 'w') as file:
-        file.write(functions)
+        file.write(start_c)
 
 
 def create_cfile_tail():
