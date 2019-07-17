@@ -3,7 +3,7 @@ import cgen as c
 import random
 
 MAX_NUMBER_OF_ARRAY = 5
-MAX_DIM_SIZE = 10  # 2 ** 15
+MAX_DIM_SIZE = 23 # 2 ** 15
 MAX_DIMS = 3
 MAX_DEPTH = 3
 
@@ -103,19 +103,17 @@ def generate_calculations(arrays_dict):  # todo randomize the parameters
             result_dims = '[' + generate_loop_index(i) + ']'
     calculations = "result" + result_dims + ' = '
     for i in range(num_of_calculations):
-        coin_flip = random.randint(0, 1)
-        if coin_flip == 0:
-            array_index, array_dims = random.choice(list(arrays_dict.items()))
-            number_of_dims = len(array_dims)
-            calculations += array_index
-            for j in range(number_of_dims):
-                rand_parameter = random.randint(0, loop_nest_depth - 1)
-                array_id = generate_loop_index(rand_parameter)
-                calculations += '[' + str(array_id) + ']'  # random array value
-        else:
-            calculations += str(random.random())  # random scalar
-
+        # coin_flip = random.randint(0, 1)
+        # if coin_flip == 0:
+        array_index, array_dims = random.choice(list(arrays_dict.items()))
+        number_of_dims = len(array_dims)
+        calculations += array_index
+        for j in range(number_of_dims):
+            rand_parameter = random.randint(0, loop_nest_depth - 1)
+            array_id = generate_loop_index(rand_parameter)
+            calculations += '[' + str(array_id) + ']'  # random array value
         calculations += random.choice(maths_operations)  # random operator
+    calculations += str(random.random())  # random scalar
 
     return calculations[:-1]
 
