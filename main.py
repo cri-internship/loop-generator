@@ -19,7 +19,6 @@ class MyVisitor(c_ast.NodeVisitor):
                               'statements per loop level': 0, 'unique arrays read per statement': 0,
                               'dimensions per array read': 0, }
 
-
     def visit_For(self, node):
         self.features_dict['loop depth'] += 1
         self.generic_visit(node)
@@ -37,12 +36,10 @@ def count_array_write(node):
     if type(node.name) != c_ast.ID:
         count_array_write(node.name)
 
+
 def print_result(MyVisitor):
     for key, value in MyVisitor.features_dict.items():
         print(f'{key}:{value}')
-
-
-
 
 
 if __name__ == "__main__":
@@ -50,8 +47,6 @@ if __name__ == "__main__":
         filename = sys.argv[1]
     else:
         filename = 'examples/if_loop.c'
-
-
 
     ast = parse_file(filename, use_cpp=True)
     myVisitor = MyVisitor()
