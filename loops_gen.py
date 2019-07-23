@@ -11,6 +11,7 @@ maths_operations = ['+', '-', '*', '/']
 array_init_functions = {1: 'create_one_dim', 2: 'create_two_dim', 3: 'create_three_dim'}
 dim_size = random.randint(1, MAX_DIM_SIZE)
 loop_nest_depth = random.randint(1, MAX_DEPTH)
+file_name = 'src/feature1.c'
 
 
 def generate_nested_loops(loop_nest_depth):
@@ -39,7 +40,7 @@ def print_loop_structure(loop_index, lower_bound, upper_bound, fun):
 
 def create_nested_loop():
     """calls generate_nested_loops(d, i) and write it to file"""
-    with open('src/feature1.c', 'a+') as file:
+    with open(file_name, 'a+') as file:
         file.write('\n\n')
         for line in str(generate_nested_loops(loop_nest_depth )).splitlines():
             file.write('\t{}\n'.format(line))
@@ -83,7 +84,7 @@ def write_init_array(array_name, array_size):
     init_array = c.Statement('\n\tfloat {}{} = {}({})'.format('*' * len(array_size), array_name,
                                                               array_init_functions[len(array_size)],
                                                               str(array_size)[1:-1]))
-    with open('src/feature1.c', 'a+') as file:
+    with open(file_name, 'a+') as file:
         file.write(str(init_array))
 
 

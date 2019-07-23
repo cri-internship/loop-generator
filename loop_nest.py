@@ -15,7 +15,7 @@ int main( int argc, const char* argv[] )
 
     """
 
-    with open('src/feature1.c', 'w') as file:
+    with open(lg.file_name, 'w') as file:
         file.write(start_c)
 
 
@@ -24,7 +24,7 @@ def create_cfile_tail():
     end_c = """
     return 0;
 }"""
-    with open('src/feature1.c', 'a+') as file:
+    with open(lg.file_name, 'a+') as file:
         file.write(end_c)
 
 
