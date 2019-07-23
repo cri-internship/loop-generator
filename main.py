@@ -1,14 +1,5 @@
 from __future__ import print_function
 import sys
-from ast import dump
-from io import StringIO
-from venv import logger
-
-from pycparser import c_parser
-
-# This is not required if you've installed pycparser into
-# your site-packages/ with setup.py
-sys.path.extend(['.', '..'])
 
 from pycparser import c_ast, parse_file
 
@@ -28,13 +19,16 @@ class MyVisitor(c_ast.NodeVisitor):
         self.features_dict['unique arrays write'].add(count_array_write(node.lvalue))
 
 
-def count_array_write(node):
-    print(node.name)
-    print(type(node))
+def count_array_write(node, dims=''):
+
+    try:
+        dims = f'[{node.subscript.name}]' + dims
+    except AttributeError:
+        dims = f'[{node.subscript.left.name}{node.subscript.op}{node.subscript.right.value}]' + dims
     if type(node.name) == c_ast.ID:
-        return f'{node.name.name}'
+        return f'{node.name.name}{dims}'
     if type(node.name) != c_ast.ID:
-        count_array_write(node.name)
+        return count_array_write(node.name, dims)
 
 
 def print_result(MyVisitor):
