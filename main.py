@@ -1,9 +1,7 @@
-
 import sys
 
 from pycparser import parse_file
 import loopVisitor as lv
-
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
