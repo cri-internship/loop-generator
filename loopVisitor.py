@@ -17,8 +17,8 @@ class MyVisitor(c_ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Assignment(self, node):
-        if type(self.current_parent) == c_ast.Compound:
 
+        if type(self.current_parent)== c_ast.Compound or self.current_parent.stmt == node:
 
             self.features_dict['statements per loop level'][self.loop_lvl - 1] += 1
             self.stmt_num += 1
@@ -34,8 +34,6 @@ class MyVisitor(c_ast.NodeVisitor):
             self.features_dict['unique arrays read per statement'][self.stmt_num] = len(tmp)
 
             self.features_dict['unique arrays read'].update(tmp.keys())
-
-
 
     def print_features(self):
         for key, value in self.features_dict.items():
@@ -72,7 +70,6 @@ def count_arrays_read(node, array_dims):
 
 
 def count_arrays_write(node):
-
     if type(node.name) == c_ast.ID:
         return f'{node.name.name}'
     else:
