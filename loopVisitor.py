@@ -21,7 +21,7 @@ class MyVisitor(c_ast.NodeVisitor):
         if type(self.current_parent)== c_ast.Compound or self.current_parent.stmt == node:
 
             self.features_dict['statements per loop level'][self.loop_lvl - 1] += 1
-            self.stmt_num += 1
+
 
             if type(node.lvalue) == c_ast.ArrayRef:
                 self.features_dict['unique arrays write'].add(count_arrays_write(node.lvalue))
@@ -34,6 +34,8 @@ class MyVisitor(c_ast.NodeVisitor):
             self.features_dict['unique arrays read per statement'][self.stmt_num] = len(tmp)
 
             self.features_dict['unique arrays read'].update(tmp.keys())
+            self.stmt_num += 1
+
 
     def print_features(self):
         for key, value in self.features_dict.items():
