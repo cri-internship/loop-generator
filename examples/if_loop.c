@@ -1,11 +1,10 @@
 int main() {
-
-for(int j=0; j<M; ++j) {
-c[i][j] = a[j][i] * c[o] + b[u] *6 *z;
-    for(int i=0; i<N; ++i) {
-        c[i][j] = a[j][i] * c[o];
-    }
+for(int i=0; i<N; ++i) {
+    a[i] = b[y];
+    prod = a[i]*b[i];
+    y = prod-c;
+    t = sum+y;
+    c = (t-sum)-y;
+    sum = t;
 }
-
 }
-

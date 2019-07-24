@@ -8,6 +8,7 @@ class MyVisitor(c_ast.NodeVisitor):
                               'dimensions per array read': {}, }
         self.loop_lvl = 0
         self.stmt_num = 0
+        self.current_parent = None
 
     def visit_For(self, node):
         self.features_dict['loop depth'] += 1
@@ -16,10 +17,14 @@ class MyVisitor(c_ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Assignment(self, node):
+        if type(self.current_parent) == c_ast.Compound:
 
-        if type(node.lvalue) == c_ast.ArrayRef:
+
             self.features_dict['statements per loop level'][self.loop_lvl - 1] += 1
-            self.features_dict['unique arrays write'].add(count_arrays_write(node.lvalue))
+            self.stmt_num += 1
+
+            if type(node.lvalue) == c_ast.ArrayRef:
+                self.features_dict['unique arrays write'].add(count_arrays_write(node.lvalue))
 
             tmp = {}
             count_arrays_read(node.rvalue, tmp)
@@ -30,7 +35,7 @@ class MyVisitor(c_ast.NodeVisitor):
 
             self.features_dict['unique arrays read'].update(tmp.keys())
 
-            self.stmt_num += 1
+
 
     def print_features(self):
         for key, value in self.features_dict.items():
@@ -38,6 +43,16 @@ class MyVisitor(c_ast.NodeVisitor):
                 print(f'{key}:{len(value)}')
             else:
                 print(f'{key}:{value}')
+
+    def generic_visit(self, node):
+        """ Called if no explicit visitor function exists for a
+            node. Implements preorder visiting of the node.
+        """
+        oldparent = self.current_parent
+        self.current_parent = node
+        for c in node:
+            self.visit(c)
+        self.current_parent = oldparent
 
 
 def count_arrays_read(node, array_dims):
@@ -47,12 +62,13 @@ def count_arrays_read(node, array_dims):
         if type(node.right) != c_ast.Constant and type(node.right) != c_ast.ID:
             count_arrays_read(node.right, array_dims)
     except AttributeError:
-        counter = 1
-        while type(node.name) != c_ast.ID:
-            node = node.name
-            counter += 1
+        if type(node) == c_ast.ArrayRef:
+            counter = 1
+            while type(node.name) != c_ast.ID:
+                node = node.name
+                counter += 1
 
-        array_dims[node.name.name] = counter
+            array_dims[node.name.name] = counter
 
 
 def count_arrays_write(node):
