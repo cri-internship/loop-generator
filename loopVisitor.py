@@ -16,19 +16,21 @@ class MyVisitor(c_ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Assignment(self, node):
-        self.features_dict['statements per loop level'][self.loop_lvl - 1] += 1
-        self.features_dict['unique arrays write'].add(count_arrays_write(node.lvalue))
 
-        tmp = {}
-        count_arrays_read(node.rvalue, tmp)
+        if type(node.lvalue) == c_ast.ArrayRef:
+            self.features_dict['statements per loop level'][self.loop_lvl - 1] += 1
+            self.features_dict['unique arrays write'].add(count_arrays_write(node.lvalue))
 
-        self.features_dict['dimensions per array read'].update(tmp)
+            tmp = {}
+            count_arrays_read(node.rvalue, tmp)
 
-        self.features_dict['unique arrays read per statement'][self.stmt_num] = len(tmp)
+            self.features_dict['dimensions per array read'].update(tmp)
 
-        self.features_dict['unique arrays read'].update(tmp.keys())
+            self.features_dict['unique arrays read per statement'][self.stmt_num] = len(tmp)
 
-        self.stmt_num += 1
+            self.features_dict['unique arrays read'].update(tmp.keys())
+
+            self.stmt_num += 1
 
     def print_features(self):
         for key, value in self.features_dict.items():
@@ -54,7 +56,8 @@ def count_arrays_read(node, array_dims):
 
 
 def count_arrays_write(node):
+
     if type(node.name) == c_ast.ID:
         return f'{node.name.name}'
-    if type(node.name) != c_ast.ID:
+    else:
         return count_arrays_write(node.name)
