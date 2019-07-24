@@ -18,8 +18,9 @@ class MyVisitor(c_ast.NodeVisitor):
     def visit_Assignment(self, node):
         self.features_dict['statements per loop level'][self.loop_lvl - 1] += 1
         self.features_dict['unique arrays write'].add(count_arrays_write(node.lvalue))
-        self.features_dict['unique arrays read'].update(count_arrays_read(node.rvalue))
-        self.features_dict['unique arrays read per statement'][self.stmt_num] = count_arrays_read(node.rvalue)
+        count_arrays_read(node.rvalue, self.features_dict['unique arrays read'])
+        self.features_dict['unique arrays read per statement'][self.stmt_num] = set()
+        count_arrays_read(node.rvalue, self.features_dict['unique arrays read per statement'][self.stmt_num])
         self.stmt_num += 1
 
     def print_features(self):
@@ -34,7 +35,7 @@ def count_arrays_write(node):
         return count_arrays_write(node.name)
 
 
-def count_arrays_read(node, tmp=set()):
+def count_arrays_read(node, tmp):
     try:
         if type(node.left) != c_ast.Constant:
             count_arrays_read(node.left, tmp)
@@ -44,4 +45,6 @@ def count_arrays_read(node, tmp=set()):
         while type(node.name) != c_ast.ID:
             node = node.name
         tmp.add(node.name.name)
-    return tmp
+
+
+
