@@ -40,6 +40,8 @@ class MyVisitor(c_ast.NodeVisitor):
         for key, value in self.features_dict.items():
             if type(value) == set:
                 print(f'{key}:{len(value)}')
+            elif key == 'dimensions per array read':
+                print(f'{key}:{list(value.values())}')
             else:
                 print(f'{key}:{value}')
 
