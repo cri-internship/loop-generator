@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
         filename = sys.argv[1]
     else:
-        filename = 'examples/if_loop.c'
+        filename = 'examples/for_loop.c'
 
     ast = parse_file(filename, use_cpp=True)
     myVisitor = lv.MyVisitor()
