@@ -16,28 +16,28 @@ class MyVisitor(c_ast.NodeVisitor):
         self.features_dict['loop depth'] += 1
         current_loop_lvl = self.features_dict['loop depth'] - 1
         self.features_dict['statements per loop level'][current_loop_lvl] = 0
-        self.generic_visit(node)
+        self.visit(node.stmt)
 
     def visit_Assignment(self, node):
         """If parent of current assigment is Compound(block) or parent.stmt == current assigment(it is only possible
         if parent is For), then increment counter for statements, count read and write arrays
         """
-        if type(self.current_parent) == c_ast.Compound or self.current_parent.stmt == node:
-            current_loop_lvl = self.features_dict['loop depth'] - 1
-            self.features_dict['statements per loop level'][current_loop_lvl] += 1
-            tmp = {}
-            count_arrays_read(node.rvalue, tmp)
+        #if type(self.current_parent) == c_ast.Compound or self.current_parent.stmt == node:
+        current_loop_lvl = self.features_dict['loop depth'] - 1
+        self.features_dict['statements per loop level'][current_loop_lvl] += 1
+        tmp = {}
+        count_arrays_read(node.rvalue, tmp)
 
-            if type(node.lvalue) == c_ast.ArrayRef:
-                self.features_dict['unique arrays write'].add(count_arrays_write(node.lvalue))
+        if type(node.lvalue) == c_ast.ArrayRef:
+            self.features_dict['unique arrays write'].add(count_arrays_write(node.lvalue))
 
-            self.features_dict['dimensions per array read'].update(tmp)
-            try:
-                current_stmt_num = list(self.features_dict['unique arrays read per statement'].keys())[-1] + 1
-            except IndexError:
-                current_stmt_num = 0
-            self.features_dict['unique arrays read per statement'][current_stmt_num] = len(tmp)
-            self.features_dict['unique arrays read'].update(tmp.keys())
+        self.features_dict['dimensions per array read'].update(tmp)
+        try:
+            current_stmt_num = list(self.features_dict['unique arrays read per statement'].keys())[-1] + 1
+        except IndexError:
+            current_stmt_num = 0
+        self.features_dict['unique arrays read per statement'][current_stmt_num] = len(tmp)
+        self.features_dict['unique arrays read'].update(tmp.keys())
 
     def print_features(self):
         """Print dict of features"""
