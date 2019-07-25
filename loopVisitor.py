@@ -12,17 +12,14 @@ class MyVisitor(c_ast.NodeVisitor):
         self.current_parent = None
 
     def visit_For(self, node):
-        """Increment loop depth entering For, create counter for statements for current loop level"""
+        """Increment loop depth entering For, create counter for statements for current loop level, visit for.stmt"""
         self.features_dict['loop depth'] += 1
         current_loop_lvl = self.features_dict['loop depth'] - 1
         self.features_dict['statements per loop level'][current_loop_lvl] = 0
         self.visit(node.stmt)
 
     def visit_Assignment(self, node):
-        """If parent of current assigment is Compound(block) or parent.stmt == current assigment(it is only possible
-        if parent is For), then increment counter for statements, count read and write arrays
-        """
-        #if type(self.current_parent) == c_ast.Compound or self.current_parent.stmt == node:
+        """Increment counter for statements, count read and write arrays"""
         current_loop_lvl = self.features_dict['loop depth'] - 1
         self.features_dict['statements per loop level'][current_loop_lvl] += 1
         tmp = {}
