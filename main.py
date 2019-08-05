@@ -14,8 +14,8 @@ def output_dependency(array_name):
     return result
 
 def input_dependency(array_name):
-    result = f'{do_random}={array_name}\n' \
-             f'{do_random}={array_name}'
+    result = f'{do_random()}={array_name}\n' \
+             f'{do_random()}={array_name}'
     return result
 
 def do_random():
