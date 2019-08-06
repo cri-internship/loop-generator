@@ -22,3 +22,8 @@ int main( int argc, const char* argv[] )
 
     return 0;
 }
+	float *result = create_one_dim(12);
+	float *A = create_one_dim(12);
+	float **B = create_two_dim(12, 12);
+	float **C = create_two_dim(12, 12);
+	float ***D = create_three_dim(12, 12, 12);
