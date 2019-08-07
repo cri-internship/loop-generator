@@ -39,7 +39,12 @@ def gen_random_stmt_write():
         unique_arrays_write['used'].append(el)
     else:
         el = random.choice(list(unique_arrays_write['used']))
-    return parse_array(el)
+    el = parse_array(el)
+    str = el[0]
+    for size in range(len(el[1])):
+        str += f'[{lg.generate_loop_index(size)}]'
+    return str
+
 
 
 def parse_array(name_with_dims):
