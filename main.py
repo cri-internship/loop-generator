@@ -39,11 +39,10 @@ def gen_random_stmt(unique_arrays):
         unique_arrays['used'].append(el)
     else:
         el = random.choice(list(unique_arrays['used']))
-    el = parse_array(el)
-    str = el[0]
+    curr = el[0]
     for size in range(len(el[1])):
-        str += f'[{lg.generate_loop_index(size)}]'
-    return str
+        curr += f'[{lg.generate_loop_index(size)}]'
+    return curr
 
 
 def parse_array(name_with_dims):
@@ -56,12 +55,13 @@ def parse_array(name_with_dims):
 
 def do_random(read_array):
     maths_operations = ['+', '-', '*', '/']
-    num_of_calculations = random.randint(2, 6)
+    num_of_calculations = random.randint(2, 7)
     stmt = ""
     for i in range(num_of_calculations):
-        stmt += gen_random_stmt(read_array)
         stmt += random.choice(maths_operations)
+        stmt += gen_random_stmt(read_array)
 
+    stmt += random.choice(maths_operations)
     stmt += str(random.random())  # random scalar
     return stmt[:-1]
 
@@ -88,10 +88,10 @@ def parse_input():
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
         for arr in unparsed_arrays_write:
-            unique_arrays_write['unused'].append(arr)
+            unique_arrays_write['unused'].append(parse_array(arr))
 
         for arr in unparsed_arrays_read:
-            unique_arrays_read['unused'].append(arr)
+            unique_arrays_read['unused'].append(parse_array(arr))
 
         unique_arrays_write['used'] = []
         unique_arrays_read['used'] = []
@@ -100,6 +100,7 @@ def parse_input():
 
 if __name__ == '__main__':
     parse_input()
+    print(unique_arrays_write)
     print(do_random(unique_arrays_read))
     # print(loop_nest_level)
     # print(unique_arrays_write)
