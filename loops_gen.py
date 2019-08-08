@@ -3,7 +3,7 @@ import cgen as c
 import random
 
 MAX_NUMBER_OF_ARRAY = 5
-MAX_DIM_SIZE = 23 # 2 ** 15
+MAX_DIM_SIZE = 23  # 2 ** 15
 MAX_DIMS = 3
 MAX_DEPTH = 3
 
@@ -42,19 +42,19 @@ def create_nested_loop():
     """calls generate_nested_loops(d, i) and write it to file"""
     with open(file_name, 'a+') as file:
         file.write('\n\n')
-        for line in str(generate_nested_loops(loop_nest_depth )).splitlines():
+        for line in str(generate_nested_loops(loop_nest_depth)).splitlines():
             file.write('\t{}\n'.format(line))
 
 
 def generate_loop_index(loop_level):
     first_iterator = 'a'
-    calculated_iterator = chr(ord(first_iterator) + loop_level%26)
+    calculated_iterator = chr(ord(first_iterator) + loop_level % 26)
     return calculated_iterator
 
 
 def generate_array_name(array_id):  # up to 26 letters
     first_iterator = 'A'
-    calculated_index = chr(ord(first_iterator) + array_id%26)
+    calculated_index = chr(ord(first_iterator) + array_id % 26)
     return calculated_index
 
 
@@ -120,4 +120,4 @@ def generate_calculations(arrays_dict):  # todo randomize the parameters
 
 
 if __name__ == '__main__':
-    pass
+    print(generate_calculations({'A': [12], 'B': [12, 12], 'C': [12, 12], 'D': [12, 12, 12]}))
