@@ -6,6 +6,8 @@ import cgen as c
 import random
 
 file_name = 'src/feature1.c'
+dependency_function = {'F': (lambda name: flow_dependency(name)), 'A': (lambda name: anti_dependency(name)),
+                'O': (lambda name: output_dependency(name)), 'I': (lambda name: input_dependency(name))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
@@ -119,10 +121,19 @@ def init_arrays(file=file_name):
         lg.write_init_array(arr[0], arr[1], file)
 
 
+def run_dependencies():
+    for dependency, arrays in dependencies.items():
+        if arrays:
+            for array in arrays:
+                yield dependency_function[dependency](array)
+
+
+
 if __name__ == '__main__':
     parse_input()
     init_arrays()
     print(dependencies)
+
     # print(gen_calc_for_read(unique_arrays_read))
     # print(loop_nest_level)
     # print(unique_arrays_write)
