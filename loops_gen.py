@@ -70,11 +70,11 @@ def init_arrays(file=file_name):
     number_of_arrays = random.randint(1, MAX_NUMBER_OF_ARRAY)
     dict_of_arrays = {}
     result_array_dims = [dim_size for _ in range(loop_nest_depth)]
-    write_init_array('result', result_array_dims)
+    write_init_array('result', result_array_dims, file)
     for i in range(number_of_arrays):
         dims = generate_array_dimensions()
         index = generate_array_name(i)
-        write_init_array(index, dims)
+        write_init_array(index, dims, file)
         dict_of_arrays[index] = dims
     return dict_of_arrays
 
