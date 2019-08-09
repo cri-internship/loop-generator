@@ -64,7 +64,7 @@ def generate_file_name(feature_id):
     return file_name
 
 
-def init_arrays():
+def init_arrays(file=file_name):
     """Generate random amount of arrays and write its initialization to file
     :return dict of array name and dims size"""
     number_of_arrays = random.randint(1, MAX_NUMBER_OF_ARRAY)
@@ -79,7 +79,7 @@ def init_arrays():
     return dict_of_arrays
 
 
-def write_init_array(array_name, array_sizes):
+def write_init_array(array_name, array_sizes, file):
     """Write declaration and calling functions to init arrays to file"""
     if type(array_sizes) == tuple and len(array_sizes) == 1:
         init_array = c.Statement('\n\tfloat {}{} = {}({})'.format('*' * len(array_sizes), array_name,
@@ -89,7 +89,7 @@ def write_init_array(array_name, array_sizes):
         init_array = c.Statement('\n\tfloat {}{} = {}({})'.format('*' * len(array_sizes), array_name,
                                                                   array_init_functions[len(array_sizes)],
                                                                   str(array_sizes)[1:-1]))
-    with open(file_name, 'a+') as file:
+    with open(file, 'a+') as file:
         file.write(str(init_array))
 
 

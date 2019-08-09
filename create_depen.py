@@ -114,9 +114,9 @@ def create_nested_loop():
             file.write('\t{}\n'.format(line))
 
 
-def init_arrays():
+def init_arrays(file=file_name):
     for arr in all_arrays:
-        lg.write_init_array(arr[0], arr[1])
+        lg.write_init_array(arr[0], arr[1], file)
 
 
 if __name__ == '__main__':
