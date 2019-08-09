@@ -7,8 +7,8 @@ import random
 
 file_name = 'src/feature1.c'
 
-unique_arrays_write = {"used": [], "unused": []}
-unique_arrays_read = {"used": [], "unused": []}
+unique_arrays_write = {"used": set(), "unused": set()}
+unique_arrays_read = {"used": set(), "unused": set()}
 
 
 def flow_dependency(array_name):
@@ -37,11 +37,11 @@ def input_dependency(array_name):
 
 def gen_random_stmt(unique_arrays):
     if unique_arrays['unused']:
-        el = random.choice(list(unique_arrays['unused']))
+        el = random.sample(unique_arrays['unused'], 1)[0]
         unique_arrays['unused'].remove(el)
-        unique_arrays['used'].append(el)
+        unique_arrays['used'].add(el)
     else:
-        el = random.choice(list(unique_arrays['used']))
+        el = random.sample(unique_arrays['used'], 1)[0]
     curr = el[0]
     for size in range(len(el[1])):
         curr += f'[{lg.generate_loop_index(size)}]'
@@ -52,7 +52,7 @@ def parse_string_array(name_with_dims):
     name_with_dims = name_with_dims.split('[')
     array_name = name_with_dims[0]
     sizes = name_with_dims[1][:-1].split(',')
-    sizes = list(map(int, sizes))
+    sizes = tuple(map(int, sizes))
     return (array_name, sizes)
 
 
@@ -70,15 +70,16 @@ def parse_input():
     with open('input.json', 'r') as file:
         data = json.load(file)
         data = data[0]
-        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies
+        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays
         loop_nest_level = data['loop_nest_level']
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
         for arr in unparsed_arrays_write:
-            unique_arrays_write['unused'].append(parse_string_array(arr))
+            unique_arrays_write['unused'].add(parse_string_array(arr))
         for arr in unparsed_arrays_read:
-            unique_arrays_read['unused'].append(parse_string_array(arr))
+            unique_arrays_read['unused'].add(parse_string_array(arr))
         dependencies = data['dependencies']
+        all_arrays = set.union(unique_arrays_read['unused'], unique_arrays_write['unused'])
 
 
 def generate_nested_loops(loop_nest_depth):
@@ -113,13 +114,18 @@ def create_nested_loop():
             file.write('\t{}\n'.format(line))
 
 
+def init_arrays():
+    for arr in all_arrays:
+        lg.write_init_array(arr[0], arr[1])
+
+
 if __name__ == '__main__':
     parse_input()
+    init_arrays()
     print(dependencies)
     # print(gen_calc_for_read(unique_arrays_read))
     # print(loop_nest_level)
     # print(unique_arrays_write)
-    # print(unique_arrays_read)
     # print(dependencies)
     # print(unique_arrays_write)
     # print(unique_arrays_read)
@@ -129,7 +135,7 @@ if __name__ == '__main__':
     # print(flow_dependency("A[i]"))
     # print(anti_dependency("A[i]"))
     # print(output_dependency("A[i]"))
-    print(input_dependency("A[i]"))
-    # print(unique_arrays_write)
-    # print(unique_arrays_read)
-    # print(lg.generate_calculations(unique_arrays_read))
+# print(input_dependency("A[i]"))
+# print(unique_arrays_write)
+# print(unique_arrays_read)
+# print(lg.generate_calculations(unique_arrays_read))
