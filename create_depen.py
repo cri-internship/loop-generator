@@ -1,5 +1,4 @@
 import json
-# check if sizes are the same
 import random
 
 import cgen as c
@@ -41,6 +40,9 @@ def input_dependency(array_name):
 
 
 def gen_random_stmt(unique_arrays):
+    """If there are any unused arrays, get one, other way choose randomly from used.
+    Add indexes to array(less than loops nest depth)
+    """
     if unique_arrays['unused']:
         el = random.sample(unique_arrays['unused'], 1)[0]
         unique_arrays['unused'].remove(el)
@@ -54,6 +56,7 @@ def gen_random_stmt(unique_arrays):
 
 
 def parse_string_array(name_with_dims):
+    """From string array in input make a tuple (name, (sizes))"""
     name_with_dims = name_with_dims.split('[')
     array_name = name_with_dims[0]
     sizes = name_with_dims[1][:-1].split(',')
@@ -93,7 +96,6 @@ def generate_arrays_helper(arrays_drew_by_lot, num_of_calculations):
         else:
             random_sample = random.sample(unique_arrays_read['used'],
                                           min(num_of_calculations, len(unique_arrays_read['used'])))
-
         num_of_calculations -= len(random_sample)
         arrays_drew_by_lot += random_sample
         generate_arrays_helper(arrays_drew_by_lot, num_of_calculations)
@@ -110,14 +112,15 @@ def generate_operators(num_of_calculations):
 
 def generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations):
     if num_of_calculations > 0:
-        maths_oper_drew_by_lot += random.sample(maths_operations, min(num_of_calculations, maths_operations_size))
-        num_of_calculations -= len(maths_oper_drew_by_lot)
+        tmp = random.sample(maths_operations, min(num_of_calculations, maths_operations_size))
+        maths_oper_drew_by_lot += tmp
+        num_of_calculations -= len(tmp)
         generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations)
-
     return maths_oper_drew_by_lot
 
 
 def parse_input():
+    """Parse input, init global variables, call validate sizes for arrays. Put all arrays to 'unused'"""
     with open('input.json', 'r') as file:
         data = json.load(file)
         data = data[0]
@@ -137,7 +140,8 @@ def generate_nested_loops(loop_nest_depth):
     """:arg loop_nest_depth: the loop nest depth
        recursively function to create for loop with depth d.
        The most inner loop calls function inner_loop
-       :return for loop with depth d"""
+       :return for loop with depth d
+       """
     loop_index = lg.generate_loop_index(loop_nest_depth - 1)
     lower_bound = 0
     upper_bound = 10  # TO DO
@@ -158,7 +162,7 @@ def print_loop_structure(loop_index, lower_bound, upper_bound, fun):
 
 
 def create_nested_loop():
-    """calls generate_nested_loops(d, i) and write it to file"""
+    """Calls generate_nested_loops(d, i) and write it to file"""
     with open(file_name, 'a+') as file:
         file.write('\n\n')
         for line in str(generate_nested_loops(loop_nest_level)).splitlines():
@@ -166,11 +170,15 @@ def create_nested_loop():
 
 
 def init_arrays(file=file_name):
+    """Init all arrays"""
     for arr in all_arrays:
         lg.write_init_array(arr[0], arr[1], file)
 
 
 def run_dependencies():
+    """Go throw all dependencies, create each dependency with prepared functions and put it into c.Statement
+    :return c.Block containing all dependencies with c.Statement
+    """
     block_with_dependencies = []
     for dependency, arrays in dependencies.items():
         if arrays:
@@ -185,6 +193,9 @@ def run_dependencies():
 
 
 def validate_array_sizes():
+    """Make union of read and write arrays, check with the dict if the sizes for similar arrays are the same,
+    if not raise an error
+    :return set with all arrays"""
     uni = unique_arrays_write['unused'].union(unique_arrays_read[
                                                   'unused'])
     hash_dict = {}

@@ -30,10 +30,7 @@ def create_cfile_tail():
 
 if __name__ == '__main__':
     cd.parse_input()
-
     create_cfile_head()
     cd.init_arrays()
-
     cd.create_nested_loop()
-
     create_cfile_tail()

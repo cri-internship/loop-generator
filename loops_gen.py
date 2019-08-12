@@ -18,7 +18,8 @@ def generate_nested_loops(loop_nest_depth):
     """:arg loop_nest_depth: the loop nest depth
        recursively function to create for loop with depth d.
        The most inner loop calls function inner_loop
-       :return for loop with depth d"""
+       :return for loop with depth d
+       """
     loop_index = generate_loop_index(loop_nest_depth - 1)
     lower_bound = 0
     upper_bound = dim_size
@@ -66,7 +67,8 @@ def generate_file_name(feature_id):
 
 def init_arrays(file=file_name):
     """Generate random amount of arrays and write its initialization to file
-    :return dict of array name and dims size"""
+    :return dict of array name and dims size
+    """
     number_of_arrays = random.randint(1, MAX_NUMBER_OF_ARRAY)
     dict_of_arrays = {}
     result_array_dims = [dim_size for _ in range(loop_nest_depth)]
