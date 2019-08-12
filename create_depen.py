@@ -13,25 +13,25 @@ unique_arrays_read = {"used": set(), "unused": set()}
 
 def flow_dependency(array_name):
     result = f'{array_name}={gen_calc_for_read()[1:]}\n' \
-             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
+        f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
     return result
 
 
 def anti_dependency(array_name):
     result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}\n' \
-             f'{array_name}={gen_calc_for_read()[1:]}'
+        f'{array_name}={gen_calc_for_read()[1:]}'
     return result
 
 
 def output_dependency(array_name):
     result = f'{array_name}={gen_calc_for_read()[1:]}\n' \
-             f'{array_name}={gen_calc_for_read()[1:]}'
+        f'{array_name}={gen_calc_for_read()[1:]}'
     return result
 
 
 def input_dependency(array_name):
     result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}\n' \
-             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
+        f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
     return result
 
 
@@ -56,14 +56,60 @@ def parse_string_array(name_with_dims):
     return (array_name, sizes)
 
 
-def gen_calc_for_read():
-    maths_operations = ['+', '-', '*', '/']
-    num_of_calculations = random.randint(2, 7)
+def gen_calc_for_read(num_of_calculations):
     stmt = ""
+    operators = generate_operators(num_of_calculations)
+    arrays = generate_arrays_with_indexes(num_of_calculations)
     for i in range(num_of_calculations):
-        stmt += random.choice(maths_operations) + gen_random_stmt(unique_arrays_read)
-    stmt += random.choice(maths_operations) + str(random.random())
+        stmt += operators[i]
+        stmt += arrays[i]
     return stmt
+
+
+def generate_arrays_with_indexes(num_of_calculations):
+    gen_arr = generate_arrays_helper([], num_of_calculations)
+    res = []
+    for el in gen_arr:
+        curr = el[0]
+        for size in range(len(el[1])):
+            curr += f'[{lg.generate_loop_index(size)}]'
+        res.append(curr)
+    return res
+
+
+def generate_arrays_helper(arrays_drew_by_lot, num_of_calculations):
+    if num_of_calculations > 0:
+        unused_arr_size = len(unique_arrays_read['unused'])
+        if unused_arr_size > 0:
+            random_sample = random.sample(unique_arrays_read['unused'], min(num_of_calculations, unused_arr_size))
+            for el in random_sample:
+                unique_arrays_read['unused'].remove(el)
+                unique_arrays_read['used'].add(el)
+        else:
+            random_sample = random.sample(unique_arrays_read['used'],
+                                          min(num_of_calculations, len(unique_arrays_read['used'])))
+
+        num_of_calculations -= len(random_sample)
+        arrays_drew_by_lot += random_sample
+        generate_arrays_helper(arrays_drew_by_lot, num_of_calculations)
+
+    return arrays_drew_by_lot
+
+
+def generate_operators(num_of_calculations):
+    global maths_operations, maths_operations_size
+    maths_operations = ['+', '-', '*', '/']
+    maths_operations_size = len(maths_operations)
+    return generate_operators_helper([], num_of_calculations)
+
+
+def generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations):
+    if num_of_calculations > 0:
+        maths_oper_drew_by_lot += random.sample(maths_operations, min(num_of_calculations, maths_operations_size))
+        num_of_calculations -= len(maths_oper_drew_by_lot)
+        generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations)
+
+    return maths_oper_drew_by_lot
 
 
 def parse_input():
@@ -122,20 +168,5 @@ def init_arrays(file=file_name):
 if __name__ == '__main__':
     parse_input()
     init_arrays()
-    print(dependencies)
-    # print(gen_calc_for_read(unique_arrays_read))
-    # print(loop_nest_level)
-    # print(unique_arrays_write)
-    # print(dependencies)
-    # print(unique_arrays_write)
-    # print(unique_arrays_read)
-    # print(input_dependency("A[i]"))
-    # print(unique_arrays_write)
-    # print(unique_arrays_read)
-    # print(flow_dependency("A[i]"))
-    # print(anti_dependency("A[i]"))
-    # print(output_dependency("A[i]"))
-# print(input_dependency("A[i]"))
-# print(unique_arrays_write)
-# print(unique_arrays_read)
-# print(lg.generate_calculations(unique_arrays_read))
+    rand_num_of_calculations = random.randint(2, 10)
+    print(gen_calc_for_read(rand_num_of_calculations))
