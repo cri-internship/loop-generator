@@ -7,33 +7,33 @@ import random
 
 file_name = 'src/feature1.c'
 dependency_function = {'F': (lambda name: flow_dependency(name)), 'A': (lambda name: anti_dependency(name)),
-                'O': (lambda name: output_dependency(name)), 'I': (lambda name: input_dependency(name))}
+                       'O': (lambda name: output_dependency(name)), 'I': (lambda name: input_dependency(name))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
 
 def flow_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read()[1:]};\n' \
-             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
+    result = f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]};\n' \
+        f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)}'
     return result
 
 
 def anti_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()};\n' \
-             f'{array_name}={gen_calc_for_read()[1:]}'
+    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)};\n' \
+        f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]}'
     return result
 
 
 def output_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read()[1:]};\n' \
-             f'{array_name}={gen_calc_for_read()[1:]}'
+    result = f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]};\n' \
+        f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]}'
     return result
 
 
 def input_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()};\n' \
-             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
+    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)};\n' \
+        f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)}'
     return result
 
 
@@ -55,7 +55,7 @@ def parse_string_array(name_with_dims):
     array_name = name_with_dims[0]
     sizes = name_with_dims[1][:-1].split(',')
     sizes = tuple(map(int, sizes))
-    return (array_name, sizes)
+    return array_name, sizes
 
 
 def gen_calc_for_read(num_of_calculations):
@@ -172,7 +172,6 @@ def run_dependencies():
         if arrays:
             for array in arrays:
                 yield dependency_function[dependency](array)
-
 
 
 if __name__ == '__main__':
