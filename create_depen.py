@@ -16,7 +16,7 @@ rand_num_of_calculations = random.randint(2, 10)
 
 
 def flow_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read()[1:]};\n' + loop_nest_level * '  ' + \
+    result = f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]};\n' + loop_nest_level * '  ' + \
              f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)}'
     return result
 
@@ -48,7 +48,7 @@ def gen_random_stmt(unique_arrays):
         el = random.sample(unique_arrays['used'], 1)[0]
     curr = el[0]
     for size in range(len(el[1])):
-        curr += f'[{lg.generate_loop_index(size)}]'
+        curr += f'[{lg.generate_loop_index(size%loop_nest_level)}]'
     return curr
 
 
@@ -76,7 +76,7 @@ def generate_arrays_with_indexes(num_of_calculations):
     for el in gen_arr:
         curr = el[0]
         for size in range(len(el[1])):
-            curr += f'[{lg.generate_loop_index(size)}]'
+            curr += f'[{lg.generate_loop_index(size%loop_nest_level)}]'
         res.append(curr)
     return res
 
@@ -178,7 +178,7 @@ def run_dependencies():
                     if array_name == each_array[0]:
                         array = array_name
                         for index in range(len(each_array[1])):
-                            array += f'[{lg.generate_loop_index(index)}]'
+                            array += f'[{lg.generate_loop_index(index%loop_nest_level)}]'
                         block_with_dependencies.append(c.Statement(dependency_function[dependency](array)))
     return c.Block(block_with_dependencies)
 
