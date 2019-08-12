@@ -7,33 +7,33 @@ import random
 
 file_name = 'src/feature1.c'
 dependency_function = {'F': (lambda name: flow_dependency(name)), 'A': (lambda name: anti_dependency(name)),
-                'O': (lambda name: output_dependency(name)), 'I': (lambda name: input_dependency(name))}
+                       'O': (lambda name: output_dependency(name)), 'I': (lambda name: input_dependency(name))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
 
 def flow_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read()[1:]};\n' \
+    result = f'{array_name}={gen_calc_for_read()[1:]};\n' + loop_nest_level * '  ' + \
              f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
     return result
 
 
 def anti_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()};\n' \
-             f'{array_name}={gen_calc_for_read()[1:]}'
+    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()};\n' + \
+             loop_nest_level * '  ' + f'{array_name}={gen_calc_for_read()[1:]}'
     return result
 
 
 def output_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read()[1:]};\n' \
+    result = f'{array_name}={gen_calc_for_read()[1:]};\n' + loop_nest_level * '  ' + \
              f'{array_name}={gen_calc_for_read()[1:]}'
     return result
 
 
 def input_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()};\n' \
-             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
+    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()};\n' + \
+             loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
     return result
 
 
@@ -94,7 +94,7 @@ def generate_nested_loops(loop_nest_depth):
     upper_bound = 10  # TO DO
     if loop_nest_depth == 1:
         return print_loop_structure(loop_index, lower_bound, upper_bound,
-                                    c.Block([c.Statement(input_dependency("A[i]"))]))
+                                    run_dependencies())
     else:
         return print_loop_structure(loop_index, lower_bound, upper_bound,
                                     generate_nested_loops(loop_nest_depth - 1))
@@ -122,18 +122,24 @@ def init_arrays(file=file_name):
 
 
 def run_dependencies():
+    block_with_dependencies = []
     for dependency, arrays in dependencies.items():
         if arrays:
-            for array in arrays:
-                yield dependency_function[dependency](array)
-
+            for array_name in arrays:
+                for each_array in all_arrays:
+                    if array_name == each_array[0]:
+                        array = array_name
+                        for index in range(len(each_array[1])):
+                            array += f'[{lg.generate_loop_index(index)}]'
+                        block_with_dependencies.append(c.Statement(dependency_function[dependency](array)))
+    return c.Block(block_with_dependencies)
 
 
 if __name__ == '__main__':
     parse_input()
     init_arrays()
-    print(dependencies)
-
+    run_dependencies()
+    print(all_arrays)
     # print(gen_calc_for_read(unique_arrays_read))
     # print(loop_nest_level)
     # print(unique_arrays_write)

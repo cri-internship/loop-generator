@@ -1,6 +1,6 @@
 [
   {
-    "loop_nest_level": 3,
+    "loop_nest_level": 5,
     "unique_arrays_write": ["A[1]", "B[1,2]"],
     "unique_arrays_read": ["A[1]", "B[1,2]", "C[1,2,3]"],
     "dependencies": {"F":["A"], "A":["B"], "O": [], "I": []}
