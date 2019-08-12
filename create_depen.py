@@ -1,9 +1,10 @@
 import json
-import loops_gen as lg
-import cgen as c
-
 # check if sizes are the same
 import random
+
+import cgen as c
+
+import loops_gen as lg
 
 file_name = 'src/feature1.c'
 dependency_function = {'F': (lambda name: flow_dependency(name)), 'A': (lambda name: anti_dependency(name)),
@@ -129,7 +130,7 @@ def parse_input():
         for arr in unparsed_arrays_read:
             unique_arrays_read['unused'].add(parse_string_array(arr))
         dependencies = data['dependencies']
-        all_arrays = set.union(unique_arrays_read['unused'], unique_arrays_write['unused'])
+        all_arrays = validate_array_sizes()
 
 
 def generate_nested_loops(loop_nest_depth):
@@ -183,29 +184,19 @@ def run_dependencies():
     return c.Block(block_with_dependencies)
 
 
-def validate_input():
-    return validate_array_sizes()
-
-
 def validate_array_sizes():
-    uni = unique_arrays_write['unused'].union(unique_arrays_read['unused']) #todo replace with "all_arrays = set.union(unique_arrays_read['unused'], unique_arrays_write['unused'])"
+    uni = unique_arrays_write['unused'].union(unique_arrays_read[
+                                                  'unused'])
     hash_dict = {}
-    print(uni)
     for el in uni:
-        print(el)
-        print("dict" + str(hash_dict))
         if el[0] in hash_dict and el[1] != hash_dict[el[0]]:
-            print('buu')
-            return False
+            error = f'Arrays {el[0]} have different sizes'
+            raise TypeError(error)
         else:
-            print("ok")
             hash_dict[el[0]] = el[1]
-    return True
+    return uni
 
 
 if __name__ == '__main__':
     parse_input()
     init_arrays()
-    print(validate_input()) #todo important method! should be called after initialization [probably move the call of this method to initialization part]
-    # rand_num_of_calculations = random.randint(2, 10)
-    # print(gen_calc_for_read(rand_num_of_calculations))
