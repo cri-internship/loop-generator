@@ -7,33 +7,33 @@ import random
 
 file_name = 'src/feature1.c'
 dependency_function = {'F': (lambda name: flow_dependency(name)), 'A': (lambda name: anti_dependency(name)),
-                       'O': (lambda name: output_dependency(name)), 'I': (lambda name: input_dependency(name))}
+                'O': (lambda name: output_dependency(name)), 'I': (lambda name: input_dependency(name))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
 
 def flow_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read()[1:]};\n' + loop_nest_level * '  ' + \
-             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
+    result = f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]};\n' + loop_nest_level * '  ' + \
+             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)}'
     return result
 
 
 def anti_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()};\n' + \
-             loop_nest_level * '  ' + f'{array_name}={gen_calc_for_read()[1:]}'
+    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)};\n' + \
+             loop_nest_level * '  ' + f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]}'
     return result
 
 
 def output_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read()[1:]};\n' + loop_nest_level * '  ' + \
-             f'{array_name}={gen_calc_for_read()[1:]}'
+    result = f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]};\n' + loop_nest_level * '  ' + \
+             f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]}'
     return result
 
 
 def input_dependency(array_name):
     result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()};\n' + \
-             loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
+             loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)}'
     return result
 
 
@@ -179,7 +179,6 @@ def run_dependencies():
                             array += f'[{lg.generate_loop_index(index)}]'
                         block_with_dependencies.append(c.Statement(dependency_function[dependency](array)))
     return c.Block(block_with_dependencies)
-
 
 if __name__ == '__main__':
     parse_input()
