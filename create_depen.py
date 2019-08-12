@@ -48,7 +48,7 @@ def gen_random_stmt(unique_arrays):
         el = random.sample(unique_arrays['used'], 1)[0]
     curr = el[0]
     for size in range(len(el[1])):
-        curr += f'[{lg.generate_loop_index(size%loop_nest_level)}]'
+        curr += f'[{lg.generate_loop_index(size % loop_nest_level)}]'
     return curr
 
 
@@ -76,7 +76,7 @@ def generate_arrays_with_indexes(num_of_calculations):
     for el in gen_arr:
         curr = el[0]
         for size in range(len(el[1])):
-            curr += f'[{lg.generate_loop_index(size%loop_nest_level)}]'
+            curr += f'[{lg.generate_loop_index(size % loop_nest_level)}]'
         res.append(curr)
     return res
 
@@ -178,13 +178,34 @@ def run_dependencies():
                     if array_name == each_array[0]:
                         array = array_name
                         for index in range(len(each_array[1])):
-                            array += f'[{lg.generate_loop_index(index%loop_nest_level)}]'
+                            array += f'[{lg.generate_loop_index(index % loop_nest_level)}]'
                         block_with_dependencies.append(c.Statement(dependency_function[dependency](array)))
     return c.Block(block_with_dependencies)
+
+
+def validate_input():
+    return validate_array_sizes()
+
+
+def validate_array_sizes():
+    uni = unique_arrays_write['unused'].union(unique_arrays_read['unused']) #todo replace with "all_arrays = set.union(unique_arrays_read['unused'], unique_arrays_write['unused'])"
+    hash_dict = {}
+    print(uni)
+    for el in uni:
+        print(el)
+        print("dict" + str(hash_dict))
+        if el[0] in hash_dict and el[1] != hash_dict[el[0]]:
+            print('buu')
+            return False
+        else:
+            print("ok")
+            hash_dict[el[0]] = el[1]
+    return True
 
 
 if __name__ == '__main__':
     parse_input()
     init_arrays()
-    rand_num_of_calculations = random.randint(2, 10)
-    print(gen_calc_for_read(rand_num_of_calculations))
+    print(validate_input()) #todo important method! should be called after initialization [probably move the call of this method to initialization part]
+    # rand_num_of_calculations = random.randint(2, 10)
+    # print(gen_calc_for_read(rand_num_of_calculations))
