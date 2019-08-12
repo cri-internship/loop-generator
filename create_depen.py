@@ -6,32 +6,34 @@ import cgen as c
 import random
 
 file_name = 'src/feature1.c'
+dependency_function = {'F': (lambda name: flow_dependency(name)), 'A': (lambda name: anti_dependency(name)),
+                'O': (lambda name: output_dependency(name)), 'I': (lambda name: input_dependency(name))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
 
 def flow_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read()[1:]}\n' \
-        f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
+    result = f'{array_name}={gen_calc_for_read()[1:]};\n' \
+             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
     return result
 
 
 def anti_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}\n' \
-        f'{array_name}={gen_calc_for_read()[1:]}'
+    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()};\n' \
+             f'{array_name}={gen_calc_for_read()[1:]}'
     return result
 
 
 def output_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read()[1:]}\n' \
-        f'{array_name}={gen_calc_for_read()[1:]}'
+    result = f'{array_name}={gen_calc_for_read()[1:]};\n' \
+             f'{array_name}={gen_calc_for_read()[1:]}'
     return result
 
 
 def input_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}\n' \
-        f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
+    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()};\n' \
+             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read()}'
     return result
 
 
@@ -163,6 +165,14 @@ def create_nested_loop():
 def init_arrays(file=file_name):
     for arr in all_arrays:
         lg.write_init_array(arr[0], arr[1], file)
+
+
+def run_dependencies():
+    for dependency, arrays in dependencies.items():
+        if arrays:
+            for array in arrays:
+                yield dependency_function[dependency](array)
+
 
 
 if __name__ == '__main__':
