@@ -1,6 +1,5 @@
 import json
 import random
-import numpy as np
 
 import cgen as c
 
@@ -120,7 +119,6 @@ def generate_operators(num_of_calculations):
     maths_operations = ['+', '-', '*', '/']
     maths_operations_size = len(maths_operations)
     if coin_flip > 0.5:
-        print('type' + str(type(num_of_calculations)))
         num_of_calculations += 1
     return generate_operators_helper([], num_of_calculations)
 
@@ -159,7 +157,11 @@ def generate_nested_loops(loop_nest_depth):
        """
     loop_index = lg.generate_loop_index(loop_nest_depth - 1)
     lower_bound = 0
-    upper_bound = 10  # TO DO
+    upper_bound = float("inf")  # TO DO
+    for array in all_arrays:
+        if len(array[1]) >= loop_nest_depth:
+            if array[1][loop_nest_depth-1]<upper_bound:
+                upper_bound = array[1][loop_nest_depth-1]
     if loop_nest_depth == 1:
         return print_loop_structure(loop_index, lower_bound, upper_bound,
                                     run_dependencies())
@@ -210,8 +212,9 @@ def run_dependencies():
 def validate_array_sizes():
     """Make union of read and write arrays, check with the dict if the sizes for similar arrays are the same,
     if not raise an error
-    :return set with all arrays"""
-    uni = unique_arrays_write['unused'] \
+    :return set with all arrays
+    """
+    uni = unique_arrays_write['unused']\
         .union(unique_arrays_read['unused'])
     hash_dict = {}
     for el in uni:
