@@ -1,6 +1,5 @@
 import json
 import random
-import sys
 
 import cgen as c
 
@@ -14,6 +13,7 @@ unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
 rand_num_of_calculations = random.randint(2, 10)
+coin_flip = random.uniform(0, 1)
 
 
 def flow_dependency(array_name):
@@ -78,9 +78,9 @@ def gen_calc_for_read(num_of_calculations):
 def generate_arrays_with_indexes(num_of_calculations):
     gen_arr = generate_arrays_helper([], num_of_calculations)
 
-    coin_flip = random.uniform(0, 1)
     if coin_flip > 0.5:
         scalar_position_in_arr = random.randrange(0, len(gen_arr))
+        gen_arr.append(gen_arr[scalar_position_in_arr])
         gen_arr[scalar_position_in_arr] = ('', random.uniform(0, 1))
 
     res = []
@@ -116,6 +116,8 @@ def generate_operators(num_of_calculations):
     global maths_operations, maths_operations_size
     maths_operations = ['+', '-', '*', '/']
     maths_operations_size = len(maths_operations)
+    if coin_flip > 0.5:
+        num_of_calculations += 1
     return generate_operators_helper([], num_of_calculations)
 
 
