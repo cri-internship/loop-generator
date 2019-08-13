@@ -70,17 +70,26 @@ def gen_calc_for_read(num_of_calculations):
     arrays = generate_arrays_with_indexes(num_of_calculations)
     for i in range(num_of_calculations):
         stmt += operators[i]
-        stmt += arrays[i]
+        stmt += str(arrays[i])
     return stmt
 
 
 def generate_arrays_with_indexes(num_of_calculations):
     gen_arr = generate_arrays_helper([], num_of_calculations)
+
+    coin_flip = random.uniform(0, 1)
+    if coin_flip > 0.5:
+        scalar_position_in_arr = random.randrange(0, len(gen_arr))
+        gen_arr[scalar_position_in_arr] = (gen_arr[scalar_position_in_arr][0], random.uniform(0, 1))
+
     res = []
     for el in gen_arr:
         curr = el[0]
-        for size in range(len(el[1])):
-            curr += f'[{lg.generate_loop_index(size % loop_nest_level)}]'
+        if type(el[1]) is tuple:
+            for size in range(len(el[1])):
+                curr += f'[{lg.generate_loop_index(size % loop_nest_level)}]'
+        else:
+            curr = el[1]
         res.append(curr)
     return res
 
@@ -99,7 +108,6 @@ def generate_arrays_helper(arrays_drew_by_lot, num_of_calculations):
         num_of_calculations -= len(random_sample)
         arrays_drew_by_lot += random_sample
         generate_arrays_helper(arrays_drew_by_lot, num_of_calculations)
-
     return arrays_drew_by_lot
 
 
@@ -196,8 +204,8 @@ def validate_array_sizes():
     """Make union of read and write arrays, check with the dict if the sizes for similar arrays are the same,
     if not raise an error
     :return set with all arrays"""
-    uni = unique_arrays_write['unused'].union(unique_arrays_read[
-                                                  'unused'])
+    uni = unique_arrays_write['unused']\
+        .union(unique_arrays_read['unused'])
     hash_dict = {}
     for el in uni:
         if el[0] in hash_dict and el[1] != hash_dict[el[0]]:
@@ -211,3 +219,4 @@ def validate_array_sizes():
 if __name__ == '__main__':
     parse_input()
     init_arrays()
+    print(gen_calc_for_read(10))
