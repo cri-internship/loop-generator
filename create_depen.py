@@ -80,7 +80,7 @@ def generate_arrays_with_indexes(num_of_calculations):
     coin_flip = random.uniform(0, 1)
     if coin_flip > 0.5:
         scalar_position_in_arr = random.randrange(0, len(gen_arr))
-        gen_arr[scalar_position_in_arr] = (gen_arr[scalar_position_in_arr][0], random.uniform(0, 1))
+        gen_arr[scalar_position_in_arr] = ('', random.uniform(0, 1))
 
     res = []
     for el in gen_arr:
