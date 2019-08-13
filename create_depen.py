@@ -1,5 +1,6 @@
 import json
 import random
+import numpy as np
 
 import cgen as c
 
@@ -12,31 +13,31 @@ dependency_function = {'F': (lambda name: flow_dependency(name)), 'A': (lambda n
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
-rand_num_of_calculations = random.randint(2, 10)
-coin_flip = random.uniform(0, 1)
+rand_num_of_calculations = [2, 3, 4, 5, 6, 7, 8, 9]  # random.randint(2, 10)
+coin_flip_possibilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
 
 
 def flow_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]};\n' + loop_nest_level * '  ' + \
-             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)}'
+    result = f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  ' + \
+             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     return result
 
 
 def anti_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)};\n' + \
-             loop_nest_level * '  ' + f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]}'
+    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
+             loop_nest_level * '  ' + f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
     return result
 
 
 def output_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]};\n' + loop_nest_level * '  ' + \
-             f'{array_name}={gen_calc_for_read(rand_num_of_calculations)[1:]}'
+    result = f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  ' + \
+             f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
     return result
 
 
 def input_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)};\n' + \
-             loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(rand_num_of_calculations)}'
+    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
+             loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     return result
 
 
@@ -67,8 +68,8 @@ def parse_string_array(name_with_dims):
 
 def gen_calc_for_read(num_of_calculations):
     stmt = ""
-    operators = generate_operators(num_of_calculations)
     arrays = generate_arrays_with_indexes(num_of_calculations)
+    operators = generate_operators(num_of_calculations)
     for i in range(num_of_calculations):
         stmt += operators[i]
         stmt += str(arrays[i])
@@ -78,6 +79,8 @@ def gen_calc_for_read(num_of_calculations):
 def generate_arrays_with_indexes(num_of_calculations):
     gen_arr = generate_arrays_helper([], num_of_calculations)
 
+    global coin_flip
+    coin_flip = random.choice(coin_flip_possibilities)
     if coin_flip > 0.5:
         scalar_position_in_arr = random.randrange(0, len(gen_arr))
         gen_arr.append(gen_arr[scalar_position_in_arr])
@@ -117,6 +120,7 @@ def generate_operators(num_of_calculations):
     maths_operations = ['+', '-', '*', '/']
     maths_operations_size = len(maths_operations)
     if coin_flip > 0.5:
+        print('type' + str(type(num_of_calculations)))
         num_of_calculations += 1
     return generate_operators_helper([], num_of_calculations)
 
@@ -207,7 +211,7 @@ def validate_array_sizes():
     """Make union of read and write arrays, check with the dict if the sizes for similar arrays are the same,
     if not raise an error
     :return set with all arrays"""
-    uni = unique_arrays_write['unused']\
+    uni = unique_arrays_write['unused'] \
         .union(unique_arrays_read['unused'])
     hash_dict = {}
     for el in uni:
@@ -222,4 +226,3 @@ def validate_array_sizes():
 if __name__ == '__main__':
     parse_input()
     init_arrays()
-    run_dependencies()
