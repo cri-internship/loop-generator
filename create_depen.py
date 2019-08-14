@@ -160,7 +160,7 @@ def generate_nested_loops(loop_nest_depth):
     upper_bound = float("inf")
     for array in all_arrays:
         array_length = len(array[1])
-        for index in range(loop_nest_depth-1, array_length, loop_nest_level):
+        for index in range(loop_nest_depth - 1, array_length, loop_nest_level):
             if array[1][index] < upper_bound:
                 upper_bound = array[1][index]
     if loop_nest_depth == 1:
