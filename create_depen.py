@@ -77,7 +77,6 @@ def gen_calc_for_read(num_of_calculations):
 
 def generate_arrays_with_indexes(num_of_calculations):
     gen_arr = generate_arrays_helper([], num_of_calculations)
-
     global coin_flip
     coin_flip = random.choice(coin_flip_possibilities)
     if coin_flip > 0.5:
@@ -152,16 +151,18 @@ def parse_input():
 def generate_nested_loops(loop_nest_depth):
     """:arg loop_nest_depth: the loop nest depth
        recursively function to create for loop with depth d.
-       The most inner loop calls function inner_loop
+       The most inner loop run dependencies.
+       Choose upper bound by going through each appropriate size of each array.
        :return for loop with depth d
        """
     loop_index = lg.generate_loop_index(loop_nest_depth - 1)
     lower_bound = 0
-    upper_bound = float("inf")  # TO DO
+    upper_bound = float("inf")
     for array in all_arrays:
-        if len(array[1]) >= loop_nest_depth:
-            if array[1][loop_nest_depth-1]<upper_bound:
-                upper_bound = array[1][loop_nest_depth-1]
+        array_length = len(array[1])
+        for index in range(loop_nest_depth-1, array_length, loop_nest_level):
+            if array[1][index] < upper_bound:
+                upper_bound = array[1][index]
     if loop_nest_depth == 1:
         return print_loop_structure(loop_index, lower_bound, upper_bound,
                                     run_dependencies())
@@ -214,7 +215,7 @@ def validate_array_sizes():
     if not raise an error
     :return set with all arrays
     """
-    uni = unique_arrays_write['unused']\
+    uni = unique_arrays_write['unused'] \
         .union(unique_arrays_read['unused'])
     hash_dict = {}
     for el in uni:

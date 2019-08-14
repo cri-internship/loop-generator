@@ -17,7 +17,7 @@ file_name = 'src/feature1.c'
 def generate_nested_loops(loop_nest_depth):
     """:arg loop_nest_depth: the loop nest depth
        recursively function to create for loop with depth d.
-       The most inner loop calls function inner_loop
+       The most inner loop calls generate_calculations
        :return for loop with depth d
        """
     loop_index = generate_loop_index(loop_nest_depth - 1)
