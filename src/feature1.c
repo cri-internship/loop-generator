@@ -9,16 +9,18 @@ int main( int argc, const char* argv[] )
     srand(time(NULL));
 
     
-	float *result = create_one_dim(14);
-	float ***A = create_three_dim(14, 10, 12);
-	float *B = create_one_dim(14);
-	float *C = create_one_dim(14);
-	float **D = create_two_dim(14, 14);
+	float **B = create_two_dim(100, 66);
+	float *A = create_one_dim(10);
+	float ***C = create_three_dim(55, 46, 1);
 
-	for (int a = 0; a < 14; a++)
-	{
-	  result[a] = D[a][a]-A[a][a][a]-D[a][a]+B[a]*C[a]/C[a]/D[a][a]+C[a]-B[a]/B[a]/0.856252566918660;
-	}
+	for (int b = 0; b < 46; b++)
+	  for (int a = 0; a < 1; a++)
+	  {
+	    A[a]=B[a][b]*C[a][b][a]+0.00342760539895548-C[a][b][a]+B[a][b];
+	    B[a][b]=A[a]/B[a][b]-A[a]+C[a][b][a]*A[a]*C[a][b][a]/B[a][b]+C[a][b][a]-A[a];
+	    A[a]=B[a][b]/A[a]+C[a][b][a]-B[a][b]*C[a][b][a]*A[a];
+	    B[a][b]=C[a][b][a]-B[a][b]+A[a]/B[a][b]+A[a];
+	  }
 
     return 0;
 }

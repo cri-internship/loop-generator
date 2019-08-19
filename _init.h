@@ -1,6 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 float *create_one_dim(int size_dim1);
-
 
 float **create_two_dim(int size_dim1, int size_dim2);
 

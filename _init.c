@@ -3,6 +3,7 @@
 
 float *create_one_dim(int size_dim1)
 {
+
     // Allocating one dimensional dynamic array
     float *array = malloc(size_dim1 * sizeof(float));
 
@@ -18,7 +19,7 @@ float **create_two_dim(int size_dim1, int size_dim2)
 {
     // Allocating two dimensional dynamic array
     float **array = (float **)malloc(size_dim1 * sizeof(float *));
-    for (int i=0; i<size_dim2; i++)
+    for (int i=0; i<size_dim1; i++)
         array[i] = (float *)malloc(size_dim2 * sizeof(float));
 
     // Accessing two dimensional array
@@ -36,7 +37,7 @@ float ***create_three_dim(int size_dim1, int size_dim2, int size_dim3)
 	for(int i=0;  i<size_dim1;  i++)
 	{
 		array[i]=(float **)malloc(size_dim2 * sizeof(float *));
-		for(int j=0;  j<size_dim3;  j++)
+		for(int j=0;  j<size_dim2;  j++)
 			array[i][j]=(float *)malloc(size_dim3 * sizeof(float));
 	}
 
