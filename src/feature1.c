@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "../_init.h"
+#include "../init_array_lib/init_dyn_array.h"
 
 
 int main( int argc, const char* argv[] )

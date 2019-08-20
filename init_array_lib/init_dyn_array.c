@@ -1,4 +1,4 @@
-#include "_init.h"
+#include "init_dyn_array.h"
 
 
 float *create_one_dim(int size_dim1)
