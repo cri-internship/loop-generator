@@ -29,8 +29,8 @@ def anti_dependency(array_name):
 
 
 def output_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  ' + \
-             f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
+    result = f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + \
+             loop_nest_level * '  ' + f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
     return result
 
 
@@ -82,7 +82,7 @@ def generate_arrays_with_indexes(num_of_calculations):
     if coin_flip > 0.5:
         scalar_position_in_arr = random.randrange(0, len(gen_arr))
         gen_arr.append(gen_arr[scalar_position_in_arr])
-        gen_arr[scalar_position_in_arr] = ('', random.uniform(0, 1))
+        gen_arr[scalar_position_in_arr] = ('', round(random.random(), 2))
 
     res = []
     for el in gen_arr:
