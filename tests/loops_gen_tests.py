@@ -1,5 +1,5 @@
 import unittest
-import loops_gen as lg
+import loops_gen_random as lg
 import cgen as c
 
 

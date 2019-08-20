@@ -22,5 +22,6 @@ install:
   - source activate test-environment
   - pip install -r requirements.txt
 
-script: python3 loop_nest.py
+script: python3 create_random_kernels.py
         python3 loops_gen_tests.py
+        python3 create_kernels_with_deps.py

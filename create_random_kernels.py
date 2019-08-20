@@ -1,4 +1,4 @@
-import loops_gen as lg
+import loops_gen_random as lg
 
 
 def create_cfile_head():
@@ -6,7 +6,7 @@ def create_cfile_head():
     start_c = """#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "../init_dyn_array.h"
+#include "../init_array_lib/init_dyn_array.h"
 
 
 int main( int argc, const char* argv[] )

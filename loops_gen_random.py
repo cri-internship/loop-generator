@@ -121,7 +121,7 @@ def generate_calculations(arrays_dict):  # todo randomize the parameters
             array_id = generate_loop_index(rand_parameter)
             calculations += '[' + str(array_id) + ']'  # random array value
         calculations += random.choice(maths_operations)  # random operator
-    calculations += str(random.random())  # random scalar
+    calculations += str(round(random.random(), 5))  # random scalar
 
     return calculations[:-1]
 

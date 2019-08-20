@@ -3,9 +3,10 @@ import random
 
 import cgen as c
 
-import loops_gen as lg
+import loops_gen_random as lgr
 
-file_name = 'src/feature1.c'
+result_c_file = 'src/feature1.c'
+input_file = 'input/input.json'
 dependency_function = {'F': (lambda name: flow_dependency(name)), 'A': (lambda name: anti_dependency(name)),
                        'O': (lambda name: output_dependency(name)), 'I': (lambda name: input_dependency(name))}
 
@@ -52,7 +53,7 @@ def gen_random_stmt(unique_arrays):
         el = random.sample(unique_arrays['used'], 1)[0]
     curr = el[0]
     for size in range(len(el[1])):
-        curr += f'[{lg.generate_loop_index(size % loop_nest_level)}]'
+        curr += f'[{lgr.generate_loop_index(size % loop_nest_level)}]'
     return curr
 
 
@@ -89,7 +90,7 @@ def generate_arrays_with_indexes(num_of_calculations):
         curr = el[0]
         if type(el[1]) is tuple:
             for size in range(len(el[1])):
-                curr += f'[{lg.generate_loop_index(size % loop_nest_level)}]'
+                curr += f'[{lgr.generate_loop_index(size % loop_nest_level)}]'
         else:
             curr = el[1]
         res.append(curr)
@@ -133,7 +134,7 @@ def generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations):
 
 def parse_input():
     """Parse input, init global variables, call validate sizes for arrays. Put all arrays to 'unused'"""
-    with open('input.json', 'r') as file:
+    with open(input_file, 'r') as file:
         data = json.load(file)
         data = data[0]
         global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays
@@ -155,7 +156,7 @@ def generate_nested_loops(loop_nest_depth):
        Choose upper bound by going through each appropriate size of each array.
        :return for loop with depth d
        """
-    loop_index = lg.generate_loop_index(loop_nest_depth - 1)
+    loop_index = lgr.generate_loop_index(loop_nest_depth - 1)
     lower_bound = 0
     upper_bound = float("inf")
     for array in all_arrays:
@@ -181,16 +182,16 @@ def print_loop_structure(loop_index, lower_bound, upper_bound, fun):
 
 def create_nested_loop():
     """Calls generate_nested_loops(d, i) and write it to file"""
-    with open(file_name, 'a+') as file:
+    with open(result_c_file, 'a+') as file:
         file.write('\n\n')
         for line in str(generate_nested_loops(loop_nest_level)).splitlines():
             file.write('\t{}\n'.format(line))
 
 
-def init_arrays(file=file_name):
+def init_arrays(file=result_c_file):
     """Init all arrays"""
     for arr in all_arrays:
-        lg.write_init_array(arr[0], arr[1], file)
+        lgr.write_init_array(arr[0], arr[1], file)
 
 
 def run_dependencies():
@@ -205,7 +206,7 @@ def run_dependencies():
                     if array_name == each_array[0]:
                         array = array_name
                         for index in range(len(each_array[1])):
-                            array += f'[{lg.generate_loop_index(index % loop_nest_level)}]'
+                            array += f'[{lgr.generate_loop_index(index % loop_nest_level)}]'
                         block_with_dependencies.append(c.Statement(dependency_function[dependency](array)))
     return c.Block(block_with_dependencies)
 
@@ -225,8 +226,3 @@ def validate_array_sizes():
         else:
             hash_dict[el[0]] = el[1]
     return uni
-
-
-if __name__ == '__main__':
-    parse_input()
-    init_arrays()
