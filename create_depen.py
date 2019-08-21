@@ -16,27 +16,51 @@ rand_num_of_calculations = [2, 3, 4, 5, 6, 7, 8, 9]  # random.randint(2, 10)
 coin_flip_possibilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
 
 
+# def first_stmt(array, array_part, array_name): #todo write this function in a better way so as to generalize the code
+#     if array[array_part] is not None:
+#         firsts, seconds = zip(*array[array_part])
+#         if array_name[0] in firsts:
+#             return True
+#     return False
+
+
 def flow_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  ' + \
-             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+    result = ""
+    if len(unique_arrays_write["unused"]) > 0:
+        firsts, seconds = zip(*unique_arrays_write["unused"])
+        if array_name[0] in firsts:
+            result += f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  '
+    result += f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}' + 'F'
     return result
 
 
 def anti_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
-             loop_nest_level * '  ' + f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
+    result = ""
+    if len(unique_arrays_read["unused"]) > 0:
+        firsts, seconds = zip(*unique_arrays_read["unused"])
+        if array_name[0] in firsts:
+            result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + loop_nest_level * '  '
+    result += f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}' + 'A'
     return result
 
 
 def output_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + \
-             loop_nest_level * '  ' + f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
+    result = ""
+    if len(unique_arrays_read["unused"]) > 0:
+        firsts, seconds = zip(*unique_arrays_read["unused"])
+        if array_name[0] in firsts:
+            result += f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  '
+    result += f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}' + 'O'
     return result
 
 
 def input_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
-             loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+    result = ""
+    if len(unique_arrays_write["unused"]) > 0:
+        firsts, seconds = zip(unique_arrays_write["unused"])
+        if array_name[0] in firsts:
+            result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + loop_nest_level * '  '
+    result += f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}' + 'I'
     return result
 
 
@@ -82,7 +106,7 @@ def generate_arrays_with_indexes(num_of_calculations):
     if coin_flip > 0.5:
         scalar_position_in_arr = random.randrange(0, len(gen_arr))
         gen_arr.append(gen_arr[scalar_position_in_arr])
-        gen_arr[scalar_position_in_arr] = ('', round(random.random(), 2))
+        gen_arr[scalar_position_in_arr] = ('', round(random.random(), 5))
 
     res = []
     for el in gen_arr:
