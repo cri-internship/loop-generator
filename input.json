@@ -3,6 +3,6 @@
     "loop_nest_level": 2,
     "unique_arrays_write": ["A[100]", "B[100,100]"],
     "unique_arrays_read": ["A[100]", "B[100,100]", "C[100,100,100]"],
-    "dependencies": {"F":["A","B"], "A":[], "O": ["A"], "I": ["C"]}
+    "dependencies": {"F":["A", "B"], "A":[], "O": [], "I": ["C"]}
   }
 ]

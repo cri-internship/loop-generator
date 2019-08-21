@@ -30,7 +30,7 @@ def flow_dependency(array_name):
         firsts, seconds = zip(*unique_arrays_write["unused"])
         if array_name[0] in firsts:
             result += f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  '
-    result += f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}' + 'F'
+    result += f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}' + ' >>F'
     return result
 
 
@@ -40,27 +40,27 @@ def anti_dependency(array_name):
         firsts, seconds = zip(*unique_arrays_read["unused"])
         if array_name[0] in firsts:
             result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + loop_nest_level * '  '
-    result += f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}' + 'A'
+    result += f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}' + ' >>A'
     return result
 
 
 def output_dependency(array_name):
     result = ""
     if len(unique_arrays_read["unused"]) > 0:
-        firsts, seconds = zip(*unique_arrays_read["unused"])
+        firsts, seconds = zip(*unique_arrays_write["unused"])
         if array_name[0] in firsts:
             result += f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  '
-    result += f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}' + 'O'
+    result += f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}' + ' >>O'
     return result
 
 
 def input_dependency(array_name):
     result = ""
     if len(unique_arrays_write["unused"]) > 0:
-        firsts, seconds = zip(unique_arrays_write["unused"])
+        firsts, seconds = zip(unique_arrays_read["unused"])
         if array_name[0] in firsts:
             result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + loop_nest_level * '  '
-    result += f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}' + 'I'
+    result += f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}' + ' >>I'
     return result
 
 
