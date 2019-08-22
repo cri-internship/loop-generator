@@ -1,3 +1,4 @@
+import ast
 import json
 import random
 
@@ -200,14 +201,15 @@ def run_dependencies():
     :return c.Block containing all dependencies with c.Statement
     """
     block_with_dependencies = []
-    for dependency, arrays in dependencies.items():
+    for dependency, arrays in dependencies.items():  # {"F": {"A": "(1)"},"A": {"B": "(0, 1)"}, "O": [],"I": []}
         if arrays:
-            for array_name in arrays:
-                for each_array in all_arrays:
+            for array_name, distance in arrays.items():  # {"A": "(1)"}
+                distance = ast.literal_eval(distance)
+                for each_array in all_arrays:  # {('B', (100, 66)), ('C', (55, 46, 100)), ('A', (10,))}
                     if array_name == each_array[0]:
                         array = array_name
                         for index in range(len(each_array[1])):
-                            array += f'[{lgr.generate_loop_index(index % loop_nest_level)}]'
+                            array += f'[{lgr.generate_loop_index(index % loop_nest_level)}+{distance[index]}]'
                         block_with_dependencies.append(c.Statement(dependency_function[dependency](array)))
     return c.Block(block_with_dependencies)
 
