@@ -137,10 +137,11 @@ def parse_input():
     with open(input_file, 'r') as file:
         data = json.load(file)
         data = data[0]
-        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays
+        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, variables
         loop_nest_level = data['loop_nest_level']
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
+        variables = data['variables']
         for arr in unparsed_arrays_write:
             unique_arrays_write['unused'].add(parse_string_array(arr))
         for arr in unparsed_arrays_read:

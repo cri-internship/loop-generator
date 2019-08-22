@@ -1,8 +1,27 @@
 [
   {
+    "variables": {
+      "d": 100
+    },
     "loop_nest_level": 2,
-    "unique_arrays_write": ["A[10]", "B[100,66]"],
-    "unique_arrays_read": ["A[10]", "B[100,66]", "C[55,46,100]"],
-    "dependencies": {"F":["A"], "A":["B"], "O": [], "I": []}
+    "unique_arrays_write": [
+      "A[10]",
+      "B[100,66]"
+    ],
+    "unique_arrays_read": [
+      "A[10]",
+      "B[100,66]",
+      "C[55,46,100]"
+    ],
+    "dependencies": {
+      "F": {
+        "A": "(1)"
+      },
+      "A": {
+        "B": "(0, 1)"
+      },
+      "O": [],
+      "I": []
+    }
   }
 ]
