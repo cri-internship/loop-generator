@@ -16,7 +16,6 @@ unique_arrays_read = {"used": set(), "unused": set()}
 rand_num_of_calculations = [2, 3, 4, 5, 6, 7, 8, 9]  # random.randint(2, 10)
 coin_flip_possibilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
 
-
 def flow_dependency(array_name):
     result = f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  ' + \
              f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
@@ -62,6 +61,10 @@ def parse_string_array(name_with_dims):
     name_with_dims = name_with_dims.split('[')
     array_name = name_with_dims[0]
     sizes = name_with_dims[1][:-1].split(',')
+    iter = 0
+    for size in sizes:
+        sizes[iter] = variables[size]
+        iter += 1
     sizes = tuple(map(int, sizes))
     return (array_name, sizes)
 
@@ -142,6 +145,7 @@ def parse_input():
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
         variables = data['variables']
+        print(variables)
         for arr in unparsed_arrays_write:
             unique_arrays_write['unused'].add(parse_string_array(arr))
         for arr in unparsed_arrays_read:
