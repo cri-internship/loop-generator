@@ -16,10 +16,10 @@ int main( int argc, const char* argv[] )
 	for (int b = 0; b < 50; b++)
 	  for (int a = 0; a < 100; a++)
 	  {
-	    A[a+1]=C[a][b][a]*A[a]/B[a][b]+A[a]*B[a][b]+C[a][b][a]/B[a][b]-A[a]-C[a][b][a];
-	    A[a]=A[a+1]*C[a][b][a]-B[a][b]/A[a]+B[a][b]-C[a][b][a]*A[a];
-	    B[a][b]=B[a][b-1]/C[a][b][a]+B[a][b]*A[a]-C[a][b][a];
-	    B[a][b-1]=B[a][b]+C[a][b][a]-A[a]/C[a][b][a]+B[a][b]-A[a]/C[a][b][a]*B[a][b]/A[a];
+	    A[a+1]=A[a]-C[a][b][a]/B[a][b]*A[a]-C[a][b][a]*B[a][b];
+	    A[a]=A[a+1]*B[a][b]/C[a][b][a]-A[a]+C[a][b][a]*0.54;
+	    B[a][b]=B[a][b-1]-A[a]/B[a][b]*C[a][b][a]+A[a]*C[a][b][a];
+	    B[a][b-1]=A[a]+B[a][b];
 	  }
 
     return 0;

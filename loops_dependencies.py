@@ -89,7 +89,6 @@ def generate_arrays_with_indexes(num_of_calculations):
         scalar_position_in_arr = random.randrange(0, len(gen_arr))
         gen_arr.append(gen_arr[scalar_position_in_arr])
         gen_arr[scalar_position_in_arr] = ('', round(random.random(), 2))
-
     res = []
     for el in gen_arr:
         curr = el[0]
@@ -153,6 +152,8 @@ def parse_input():
             unique_arrays_read['unused'].add(parse_string_array(arr))
         dependencies = data['dependencies']
         all_arrays = validate_array_sizes()
+        validate_dependencies()
+
 
 
 def generate_nested_loops(loop_nest_depth):
@@ -165,11 +166,11 @@ def generate_nested_loops(loop_nest_depth):
     loop_index = lgr.generate_loop_index(loop_nest_depth - 1)
     lower_bound = 0
     upper_bound = float("inf")
-    for array in all_arrays:
-        array_length = len(array[1])
+    for array_name, array_size in all_arrays.items():
+        array_length = len(array_size)
         for index in range(loop_nest_depth - 1, array_length, loop_nest_level):
-            if array[1][index] < upper_bound:
-                upper_bound = array[1][index]
+            if array_size[index] < upper_bound:
+                upper_bound = array_size[index]
     if loop_nest_depth == 1:
         return print_loop_structure(loop_index, lower_bound, upper_bound,
                                     run_dependencies())
@@ -196,8 +197,8 @@ def create_nested_loop():
 
 def init_arrays(file=result_c_file):
     """Init all arrays"""
-    for arr in all_arrays:
-        lgr.write_init_array(arr[0], arr[1], file)
+    for array_name, array_size in all_arrays.items():
+        lgr.write_init_array(array_name, array_size, file)
 
 
 def run_dependencies():
@@ -209,10 +210,10 @@ def run_dependencies():
         if arrays:
             for array_name, distances in arrays.items():  # {"A": "(1)"}
                 distances = ast.literal_eval(distances)
-                for each_array in all_arrays:  # {('B', (100, 66)), ('C', (55, 46, 100)), ('A', (10,))}
-                    if array_name == each_array[0]:
+                for arr_name, arr_size in all_arrays.items():  # {('B', (100, 66)), ('C', (55, 46, 100)), ('A', (10,))}
+                    if array_name == arr_name:
                         array = array_name
-                        for index in range(len(each_array[1])):
+                        for index in range(len(arr_size)):
                             distance = distances[index]
                             if distance == 0:
                                 distance = ''
@@ -230,8 +231,7 @@ def validate_array_sizes():
     if not raise an error
     :return set with all arrays
     """
-    uni = unique_arrays_write['unused'] \
-        .union(unique_arrays_read['unused'])
+    uni = unique_arrays_write['unused'].union(unique_arrays_read['unused'])
     hash_dict = {}
     for el in uni:
         if el[0] in hash_dict and el[1] != hash_dict[el[0]]:
@@ -239,4 +239,21 @@ def validate_array_sizes():
             raise TypeError(error)
         else:
             hash_dict[el[0]] = el[1]
-    return uni
+    return hash_dict
+
+
+def validate_dependencies():
+    for _, arrays in dependencies.items():
+        for array_name, distance in arrays.items():
+            distance = ast.literal_eval(distance)
+            if len(all_arrays[array_name]) == len(distance):
+                pass
+            else:
+                error = f'Array {array_name} has wrong dependency'
+                raise TypeError(error)
+
+
+
+
+if __name__ == '__main__':
+    pass
