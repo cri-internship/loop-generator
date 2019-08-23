@@ -1,5 +1,6 @@
 import ast
 import json
+import math
 import random
 
 import cgen as c
@@ -88,7 +89,7 @@ def generate_arrays_with_indexes(num_of_calculations):
     if coin_flip > 0.5:
         scalar_position_in_arr = random.randrange(0, len(gen_arr))
         gen_arr.append(gen_arr[scalar_position_in_arr])
-        gen_arr[scalar_position_in_arr] = ('', round(random.random(), 2))
+        gen_arr[scalar_position_in_arr] = ('', round(random.random(), 5))
     res = []
     for el in gen_arr:
         curr = el[0]
@@ -156,7 +157,7 @@ def parse_input():
 
 
 
-def generate_nested_loops(loop_nest_depth):
+def generate_nested_loops(loop_nest_depth, affine):
     """:arg loop_nest_depth: the loop nest depth
        recursively function to create for loop with depth d.
        The most inner loop run dependencies.
@@ -172,17 +173,26 @@ def generate_nested_loops(loop_nest_depth):
             if array_size[index] < upper_bound:
                 upper_bound = array_size[index]
     if loop_nest_depth == 1:
-        return print_loop_structure(loop_index, lower_bound, upper_bound,
+        return print_loop_structure(loop_index, lower_bound, upper_bound, affine,
                                     run_dependencies())
     else:
-        return print_loop_structure(loop_index, lower_bound, upper_bound,
-                                    generate_nested_loops(loop_nest_depth - 1))
+        return print_loop_structure(loop_index, lower_bound, upper_bound, affine,
+                                    generate_nested_loops(loop_nest_depth - 1, affine[1:]))
 
 
-def print_loop_structure(loop_index, lower_bound, upper_bound, fun):
-    return c.For('int {} = {}'.format(loop_index, lower_bound),
+def print_loop_structure(loop_index, lower_bound, upper_bound, affine, fun):
+    scalar_part = None
+    curr_val = affine[0]
+    if curr_val > 0:
+        scalar_part = ' - '
+    elif curr_val < 0:
+        scalar_part = ' + '
+    scalar_part += str(abs(curr_val))
+
+    return c.For('int {} = {}'.format(loop_index, lower_bound + (-1) * affine[0]),
                  '{} < '.format(loop_index)
-                 + str(upper_bound),
+                 + str(upper_bound)
+                 + scalar_part,
                  '{}++'.format(loop_index),
                  fun)
 
@@ -191,7 +201,7 @@ def create_nested_loop():
     """Calls generate_nested_loops(d, i) and write it to file"""
     with open(result_c_file, 'a+') as file:
         file.write('\n\n')
-        for line in str(generate_nested_loops(loop_nest_level)).splitlines():
+        for line in str(generate_nested_loops(loop_nest_level, adjust_bounds(global_bounds()))).splitlines(): #todo: rewrite
             file.write('\t{}\n'.format(line))
 
 
@@ -257,3 +267,31 @@ def validate_dependencies():
 
 if __name__ == '__main__':
     pass
+
+
+def adjust_bounds(affine_fcts):
+    max_tuple_size = 0
+    for tupl in affine_fcts:
+        max_tuple_size = max(max_tuple_size, len(affine_fcts[tupl]))
+
+    upper_bounds = [-math.inf] * max_tuple_size
+    for tupl in affine_fcts:
+        index = 0
+        for t in affine_fcts[tupl]:
+            upper_bounds[index] = max(upper_bounds[index], int(t))
+            index += 1
+    return upper_bounds[::-1]
+
+
+def global_bounds():
+    global concat_depen
+    concat_depen = {}
+    for dependency, arrays in dependencies.items():
+        if arrays:
+            for array_name, distances in arrays.items():
+                distances = ast.literal_eval(distances)
+                concat_depen.update({array_name: distances})
+    return concat_depen
+
+
+

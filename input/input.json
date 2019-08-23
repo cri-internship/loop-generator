@@ -4,7 +4,7 @@
       "d": 100,
       "e": 50
     },
-    "loop_nest_level": 2,
+    "loop_nest_level": 3,
     "unique_arrays_write": [
       "A[d]",
       "B[d,e]"
@@ -16,7 +16,8 @@
     ],
     "dependencies": {
       "F": {
-        "A": "(1, )"
+        "A": "(1, )",
+        "C": "(0, 2, -2)"
       },
       "A": {
         "B": "(0, -1)"
