@@ -9,8 +9,10 @@ import loops_gen_random as lgr
 
 result_c_file = 'src/feature1.c'
 input_file = 'input/input.json'
-dependency_function = {'FLOW': (lambda name: flow_dependency(name)), 'ANTI': (lambda name: anti_dependency(name)),
-                       'OUTPUT': (lambda name: output_dependency(name)), 'INPUT': (lambda name: input_dependency(name))}
+dependency_function = {'FLOW': (lambda dest, source: flow_dependency(dest, source)),
+                       'ANTI': (lambda dest, source: anti_dependency(dest, source)),
+                       'OUTPUT': (lambda dest, source: output_dependency(dest, source)),
+                       'INPUT': (lambda dest, source: input_dependency(dest, source))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
@@ -19,27 +21,27 @@ rand_num_of_calculations = [2, 3, 4, 5, 6, 7, 8, 9]  # random.randint(2, 10)
 coin_flip_possibilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
 
 
-def flow_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  ' + \
-             f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+def flow_dependency(dest_array_name, source_array_name):
+    result = f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  ' + \
+             f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     return result
 
 
-def anti_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
-             loop_nest_level * '  ' + f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
+def anti_dependency(dest_array_name, source_array_name):
+    result = f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
+             loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
     return result
 
 
-def output_dependency(array_name):
-    result = f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + \
-             loop_nest_level * '  ' + f'{array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
+def output_dependency(dest_array_name, source_array_name):
+    result = f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + \
+             loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
     return result
 
 
-def input_dependency(array_name):
-    result = f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
-             loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+def input_dependency(dest_array_name, source_array_name):
+    result = f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
+             loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     return result
 
 
@@ -228,7 +230,8 @@ def run_dependencies():
             for array_name, distances in arrays.items():  # {"A": "(1, )"}
                 for arr_name, arr_size in all_arrays.items():  # {('B', (100, 66)), ('C', (55, 46, 100)), ('A', (10,))}
                     if array_name == arr_name:
-                        array = array_name
+                        dest_array = array_name
+                        src_array = array_name
                         for index in range(len(arr_size)):
                             distance = distances[index]
                             if distance == 0:
@@ -237,8 +240,8 @@ def run_dependencies():
                                 pass
                             else:
                                 distance = '+' + str(distance)
-                            array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{distance}]'
-                        block_with_dependencies.append(c.Statement(dependency_function[dependency](array)))
+                            src_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{distance}]'
+                        block_with_dependencies.append(c.Statement(dependency_function[dependency](dest_array, src_array)))
     return c.Block(block_with_dependencies)
 
 
@@ -272,7 +275,6 @@ def adjust_bounds(affine_fcts):
     max_tuple_size = 0
     for tupl in affine_fcts:
         max_tuple_size = max(max_tuple_size, len(affine_fcts[tupl]))
-    print(affine_fcts[tupl])
 
     lower_bounds = [-math.inf] * max_tuple_size
     upper_bounds = [math.inf] * max_tuple_size
@@ -281,10 +283,7 @@ def adjust_bounds(affine_fcts):
         index = -1
         for t in affine_fcts[tupl]:
             index += 1
-            lower_bounds[index] = max(lower_bounds[index], -1*int(t))
-            # print("upper_bounds[index] " + str(upper_bounds[index]))
-            # print("all_arrays[tupl][index] " + str(all_arrays[tupl][index]))
-            # print("int(t) " + str(int(t)))
+            lower_bounds[index] = max(lower_bounds[index], -1 * int(t))
             upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index] - int(t))
         upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index])
     return [lower_bounds[::-1], upper_bounds[::-1]]

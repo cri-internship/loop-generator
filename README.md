@@ -1,6 +1,6 @@
 # loop-generator
 
-#### To connect library _init.h:
+#### To connect library init_dyn_array.h:
 cd init_array_lib </br>
 gcc -fPIC -c init_dyn_array.c </br>
 ar rcs lib_init_dyn_array.a init_dyn_array.o 
