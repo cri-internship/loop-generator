@@ -9,8 +9,8 @@ import loops_gen_random as lgr
 
 result_c_file = 'src/feature1.c'
 input_file = 'input/input.json'
-dependency_function = {'F': (lambda name: flow_dependency(name)), 'A': (lambda name: anti_dependency(name)),
-                       'O': (lambda name: output_dependency(name)), 'I': (lambda name: input_dependency(name))}
+dependency_function = {'FLOW': (lambda name: flow_dependency(name)), 'ANTI': (lambda name: anti_dependency(name)),
+                       'OUTPUT': (lambda name: output_dependency(name)), 'INPUT': (lambda name: input_dependency(name))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
@@ -151,10 +151,16 @@ def parse_input():
             unique_arrays_write['unused'].add(parse_string_array(arr))
         for arr in unparsed_arrays_read:
             unique_arrays_read['unused'].add(parse_string_array(arr))
-        dependencies = data['dependencies']
+        dependencies = parse_dependencies(data['dependencies'])
         all_arrays = validate_array_sizes()
         validate_dependencies()
 
+
+def parse_dependencies(dependencies):
+    for dependency_name, dependency in dependencies.items():
+        for array_name, distance in dependency.items():
+            dependency[array_name] = ast.literal_eval(distance)
+    return dependencies
 
 
 def generate_nested_loops(loop_nest_depth, affine):
@@ -188,7 +194,6 @@ def print_loop_structure(loop_index, lower_bound, upper_bound, affine, fun):
     elif curr_val < 0:
         scalar_part = ' + '
     scalar_part += str(abs(curr_val))
-
     return c.For('int {} = {}'.format(loop_index, lower_bound + (-1) * affine[0]),
                  '{} < '.format(loop_index)
                  + str(upper_bound)
@@ -201,7 +206,8 @@ def create_nested_loop():
     """Calls generate_nested_loops(d, i) and write it to file"""
     with open(result_c_file, 'a+') as file:
         file.write('\n\n')
-        for line in str(generate_nested_loops(loop_nest_level, adjust_bounds(global_bounds()))).splitlines(): #todo: rewrite
+        for line in str(
+                generate_nested_loops(loop_nest_level, adjust_bounds(global_bounds()))).splitlines():  # todo: rewrite
             file.write('\t{}\n'.format(line))
 
 
@@ -218,8 +224,7 @@ def run_dependencies():
     block_with_dependencies = []
     for dependency, arrays in dependencies.items():  # {"F": {"A": "(1)"},"A": {"B": "(0, 1)"}, "O": [],"I": []}
         if arrays:
-            for array_name, distances in arrays.items():  # {"A": "(1)"}
-                distances = ast.literal_eval(distances)
+            for array_name, distances in arrays.items():  # {"A": "(1, )"}
                 for arr_name, arr_size in all_arrays.items():  # {('B', (100, 66)), ('C', (55, 46, 100)), ('A', (10,))}
                     if array_name == arr_name:
                         array = array_name
@@ -255,18 +260,11 @@ def validate_array_sizes():
 def validate_dependencies():
     for _, arrays in dependencies.items():
         for array_name, distance in arrays.items():
-            distance = ast.literal_eval(distance)
             if len(all_arrays[array_name]) == len(distance):
                 pass
             else:
                 error = f'Array {array_name} has wrong dependency'
                 raise TypeError(error)
-
-
-
-
-if __name__ == '__main__':
-    pass
 
 
 def adjust_bounds(affine_fcts):
@@ -289,9 +287,9 @@ def global_bounds():
     for dependency, arrays in dependencies.items():
         if arrays:
             for array_name, distances in arrays.items():
-                distances = ast.literal_eval(distances)
                 concat_depen.update({array_name: distances})
     return concat_depen
 
 
-
+if __name__ == '__main__':
+    pass

@@ -17,12 +17,12 @@ int main( int argc, const char* argv[] )
 	  for (int b = -2; b < 50 - 2; b++)
 	    for (int a = -1; a < 100 - 1; a++)
 	    {
-	      A[a+1]=C[a][b][c]-A[a]*B[a][b]+A[a]-C[a][b][c]*B[a][b]+C[a][b][c];
-	      A[a]=A[a+1]-C[a][b][c]*A[a]+B[a][b]/A[a]*C[a][b][c]/B[a][b]+A[a];
-	      C[a][b+2][c-2]=A[a]+B[a][b]/C[a][b][c]-B[a][b]-C[a][b][c]+A[a];
-	      B[a][b]=C[a][b+2][c-2]/C[a][b][c]*B[a][b]+A[a]-C[a][b][c]*B[a][b]/A[a];
-	      B[a][b]=B[a][b-1]*C[a][b][c]-0.1+B[a][b]/C[a][b][c];
-	      B[a][b-1]=C[a][b][c]/A[a]+B[a][b]-B[a][b]+0.44;
+	      A[a+1]=A[a]*C[a][b][c]-B[a][b]+B[a][b];
+	      A[a]=A[a+1]*C[a][b][c]/B[a][b]-A[a]+A[a]-B[a][b]*C[a][b][c];
+	      C[a][b+2][c-2]=C[a][b][c]+A[a]-B[a][b]*0.75354/B[a][b]*A[a]-C[a][b][c]+A[a]/B[a][b];
+	      B[a][b]=C[a][b+2][c-2]-B[a][b]*C[a][b][c];
+	      A[a]=B[a][b-1]-A[a]*C[a][b][c]/B[a][b]+B[a][b]*A[a]/C[a][b][c]+A[a]-B[a][b]/C[a][b][c];
+	      B[a][b-1]=C[a][b][c]-B[a][b]/A[a]+B[a][b]/A[a]+0.18737*C[a][b][c];
 	    }
 
     return 0;
