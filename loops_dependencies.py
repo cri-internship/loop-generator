@@ -272,19 +272,21 @@ def adjust_bounds(affine_fcts):
     max_tuple_size = 0
     for tupl in affine_fcts:
         max_tuple_size = max(max_tuple_size, len(affine_fcts[tupl]))
+    print(affine_fcts[tupl])
 
     lower_bounds = [-math.inf] * max_tuple_size
     upper_bounds = [math.inf] * max_tuple_size
 
     for tupl in affine_fcts:
-        index = 0
+        index = -1
         for t in affine_fcts[tupl]:
+            index += 1
             lower_bounds[index] = max(lower_bounds[index], -1*int(t))
             # print("upper_bounds[index] " + str(upper_bounds[index]))
             # print("all_arrays[tupl][index] " + str(all_arrays[tupl][index]))
             # print("int(t) " + str(int(t)))
             upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index] - int(t))
-            index += 1
+        upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index])
     return [lower_bounds[::-1], upper_bounds[::-1]]
 
 
@@ -304,4 +306,4 @@ if __name__ == '__main__':
     global_bounds()
     print(validate_array_sizes())
     print(global_bounds())
-    print(adjust_bounds(global_bounds()))
+    # print(adjust_bounds(global_bounds()))
