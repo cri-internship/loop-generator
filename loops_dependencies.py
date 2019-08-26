@@ -152,6 +152,7 @@ def parse_input():
         for arr in unparsed_arrays_read:
             unique_arrays_read['unused'].add(parse_string_array(arr))
         dependencies = parse_dependencies(data['dependencies'])
+        global all_arrays
         all_arrays = validate_array_sizes()
         validate_dependencies()
 
@@ -183,21 +184,21 @@ def generate_nested_loops(loop_nest_depth, affine):
                                     run_dependencies())
     else:
         return print_loop_structure(loop_index, lower_bound, upper_bound, affine,
-                                    generate_nested_loops(loop_nest_depth - 1, affine[1:]))
+                                    generate_nested_loops(loop_nest_depth - 1, [affine[0][1:], affine[1][1:]]))
 
 
 def print_loop_structure(loop_index, lower_bound, upper_bound, affine, fun):
-    scalar_part = None
-    curr_val = affine[0]
+    scalar_part = ''
+    curr_val = affine[1][0]
     if curr_val > 0:
         scalar_part = ' - '
     elif curr_val < 0:
         scalar_part = ' + '
     scalar_part += str(abs(curr_val))
-    return c.For('int {} = {}'.format(loop_index, lower_bound + (-1) * affine[0]),
+    return c.For('int {} = {}'.format(loop_index, affine[0][0]),
                  '{} < '.format(loop_index)
-                 + str(upper_bound)
-                 + scalar_part,
+                 # + str(upper_bound)
+                 + str(affine[1][0]),
                  '{}++'.format(loop_index),
                  fun)
 
@@ -272,13 +273,19 @@ def adjust_bounds(affine_fcts):
     for tupl in affine_fcts:
         max_tuple_size = max(max_tuple_size, len(affine_fcts[tupl]))
 
-    upper_bounds = [-math.inf] * max_tuple_size
+    lower_bounds = [-math.inf] * max_tuple_size
+    upper_bounds = [math.inf] * max_tuple_size
+
     for tupl in affine_fcts:
         index = 0
         for t in affine_fcts[tupl]:
-            upper_bounds[index] = max(upper_bounds[index], int(t))
+            lower_bounds[index] = max(lower_bounds[index], -1*int(t))
+            # print("upper_bounds[index] " + str(upper_bounds[index]))
+            # print("all_arrays[tupl][index] " + str(all_arrays[tupl][index]))
+            # print("int(t) " + str(int(t)))
+            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index] - int(t))
             index += 1
-    return upper_bounds[::-1]
+    return [lower_bounds[::-1], upper_bounds[::-1]]
 
 
 def global_bounds():
@@ -292,4 +299,9 @@ def global_bounds():
 
 
 if __name__ == '__main__':
-    pass
+    parse_input()
+    init_arrays()
+    global_bounds()
+    print(validate_array_sizes())
+    print(global_bounds())
+    print(adjust_bounds(global_bounds()))
