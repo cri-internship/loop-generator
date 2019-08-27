@@ -5,11 +5,11 @@
       "e": 50
     },
     "distances": {
-      "xA": 1,
+      "xA": -1,
       "xB": 2,
-      "yB": 3,
+      "yB": -3,
       "xC": 4,
-      "yC": 5,
+      "yC": 0,
       "zC": 6
     },
     "loop_nest_level": 3,

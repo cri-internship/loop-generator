@@ -144,12 +144,12 @@ def parse_input():
     with open(input_file, 'r') as file:
         data = json.load(file)
         data = data[0]
-        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, distances
+        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista
         loop_nest_level = data['loop_nest_level']
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
         array_sizes = data['array_sizes']
-        distances = data['distances']
+        dista = data['distances']
         for arr in unparsed_arrays_write:
             unique_arrays_write['unused'].add(parse_string_array(arr))
         for arr in unparsed_arrays_read:
@@ -161,10 +161,25 @@ def parse_input():
 
 
 def parse_dependencies(dependencies):
+    """
+    CHANGE FROM STRING TO ARRAY OF DISTANCES
+    """
+    for dependency_name, dependency in dependencies.items():
+        for array_name, distance in dependency.items():
+            ret = []
+            distance.replace(" ", "")
+            distance = distance[1:-1]
+            new_dist = ""
+            for d in distance:
+                if d is ',':
+                    ret.append(dista[new_dist])
+                    new_dist = ""
+                else:
+                    new_dist += d
+            dependency[array_name] = tuple(ret) # todo a change was made here
+
     for dependency_name, dependency in dependencies.items():
         for array_name, distances in dependency.items():
-            distances = ast.literal_eval(distances)
-
             for index in range(len(distances)):
                 distance = distances[index]
                 if distance == 0:
@@ -180,18 +195,7 @@ def parse_dependencies(dependencies):
                 distances[index] = distance
                 distances = tuple(distances)
             dependency[array_name] = distances
-        for array_name, distance in dependency.items():
-            ret = []
-            distance.replace(" ", "")
-            distance = distance[1:-1]
-            append = ""
-            for d in distance:
-                if d is ',':
-                    ret.append(distances[append])
-                    append = ""
-                else:
-                    append += d
-            dependency[array_name] = ret #todo a change was made here
+
     return dependencies
 
 
@@ -279,7 +283,6 @@ def run_dependencies():
                             src_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{src_dist}]'
                         block_with_dependencies.append(
                             c.Statement(dependency_function[dependency](dest_array, src_array)))
-    print(c.Block(block_with_dependencies))
     return c.Block(block_with_dependencies)
 
 
@@ -321,8 +324,11 @@ def adjust_bounds(affine_fcts):
         index = -1
         for t in affine_fcts[tupl]:
             index += 1
-            lower_bounds[index] = max(lower_bounds[index], -1 * int(t))
-            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index] - int(t))
+            lower_bounds[index] = max(lower_bounds[index], -1 * int(t[0]))
+            lower_bounds[index] = max(lower_bounds[index], -1 * int(t[1]))
+            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index] - int(t[0]))
+            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index] - int(t[1]))
+
         lower_bounds[index] = max(lower_bounds[index], 0) #todo in most cases 0, but try to find a way to calculate it
         upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index])
     return [lower_bounds[::-1], upper_bounds[::-1]]
@@ -339,4 +345,4 @@ def global_bounds():
 
 
 if __name__ == '__main__':
-    pass
+    parse_input()
