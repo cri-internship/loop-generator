@@ -195,7 +195,6 @@ def parse_dependencies(dependencies):
                 distances[index] = distance
                 distances = tuple(distances)
             dependency[array_name] = distances
-    print(dependencies)
     return dependencies
 
 
