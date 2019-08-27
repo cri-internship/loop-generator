@@ -187,15 +187,15 @@ def parse_dependencies(dependencies):
                 else:
                     if distance < 0:
                         dest_dist = random.randrange(abs(distance))
-                        distance = tuple(map(lambda x: x * -1, (dest_dist, abs(distance) - dest_dist)))
+                        distance = tuple(map(lambda x: x * -1, -(dest_dist, (abs(distance) - dest_dist))))
                     else:
                         dest_dist = random.randrange(abs(distance))
-                        distance = (dest_dist, abs(distance) - dest_dist)
+                        distance = (dest_dist, -(abs(distance) - dest_dist))
                 distances = list(distances)
                 distances[index] = distance
                 distances = tuple(distances)
             dependency[array_name] = distances
-
+    print(dependencies)
     return dependencies
 
 
