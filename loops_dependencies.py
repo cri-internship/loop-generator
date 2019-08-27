@@ -68,7 +68,7 @@ def parse_string_array(name_with_dims):
     sizes = name_with_dims[1][:-1].split(',')
     iter = 0
     for size in sizes:
-        sizes[iter] = variables[size]
+        sizes[iter] = array_sizes[size]
         iter += 1
     sizes = tuple(map(int, sizes))
     return (array_name, sizes)
@@ -144,11 +144,12 @@ def parse_input():
     with open(input_file, 'r') as file:
         data = json.load(file)
         data = data[0]
-        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, variables
+        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, distances
         loop_nest_level = data['loop_nest_level']
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
-        variables = data['variables']
+        array_sizes = data['array_sizes']
+        distances = data['distances']
         for arr in unparsed_arrays_write:
             unique_arrays_write['unused'].add(parse_string_array(arr))
         for arr in unparsed_arrays_read:
@@ -162,7 +163,17 @@ def parse_input():
 def parse_dependencies(dependencies):
     for dependency_name, dependency in dependencies.items():
         for array_name, distance in dependency.items():
-            dependency[array_name] = ast.literal_eval(distance)
+            ret = []
+            distance.replace(" ", "")
+            distance = distance[1:-1]
+            append = ""
+            for d in distance:
+                if d is ',':
+                    ret.append(distances[append])
+                    append = ""
+                else:
+                    append += d
+            dependency[array_name] = ret #todo a change was made here
     return dependencies
 
 
@@ -285,6 +296,7 @@ def adjust_bounds(affine_fcts):
             index += 1
             lower_bounds[index] = max(lower_bounds[index], -1 * int(t))
             upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index] - int(t))
+        lower_bounds[index] = max(lower_bounds[index], 0) #todo in most cases 0, but try to find a way to calculate it
         upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index])
     return [lower_bounds[::-1], upper_bounds[::-1]]
 
@@ -300,9 +312,4 @@ def global_bounds():
 
 
 if __name__ == '__main__':
-    parse_input()
-    init_arrays()
-    global_bounds()
-    print(validate_array_sizes())
-    print(global_bounds())
-    # print(adjust_bounds(global_bounds()))
+    pass

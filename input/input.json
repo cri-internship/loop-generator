@@ -1,26 +1,34 @@
 [
   {
-    "variables": {
+    "array_sizes": {
       "d": 100,
       "e": 50
+    },
+    "distances": {
+      "xA": 1,
+      "xB": 2,
+      "yB": 3,
+      "xC": 4,
+      "yC": 5,
+      "zC": 6
     },
     "loop_nest_level": 3,
     "unique_arrays_write": [
       "A[d]",
-      "B[d,e]"
+      "B[e,e]"
     ],
     "unique_arrays_read": [
       "A[d]",
-      "B[d,e]",
-      "C[d,d,d]"
+      "B[e,e]",
+      "C[e,e,e]"
     ],
     "dependencies": {
       "FLOW": {
-        "A": "(1, )",
-        "C": "(0, 2, -2)"
+        "A": "(xA,)",
+        "C": "(xC,yC,zC,)"
       },
       "ANTI": {
-        "B": "(0, -1)"
+        "B": "(xB,yB,)"
       },
       "OUTPUT": {},
       "INPUT": {}
