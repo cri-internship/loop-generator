@@ -154,15 +154,30 @@ def parse_input():
         for arr in unparsed_arrays_read:
             unique_arrays_read['unused'].add(parse_string_array(arr))
         dependencies = parse_dependencies(data['dependencies'])
-        global all_arrays
         all_arrays = validate_array_sizes()
         validate_dependencies()
 
 
 def parse_dependencies(dependencies):
     for dependency_name, dependency in dependencies.items():
-        for array_name, distance in dependency.items():
-            dependency[array_name] = ast.literal_eval(distance)
+        for array_name, distances in dependency.items():
+            distances = ast.literal_eval(distances)
+
+            for index in range(len(distances)):
+                distance = distances[index]
+                if distance == 0:
+                    distance = (0, 0)
+                else:
+                    if distance < 0:
+                        dest_dist = random.randrange(abs(distance))
+                        distance = tuple(map(lambda x: x * -1, (dest_dist, abs(distance) - dest_dist)))
+                    else:
+                        dest_dist = random.randrange(abs(distance))
+                        distance = (dest_dist, abs(distance) - dest_dist)
+                distances = list(distances)
+                distances[index] = distance
+                distances = tuple(distances)
+            dependency[array_name] = distances
     return dependencies
 
 
@@ -225,9 +240,9 @@ def run_dependencies():
     :return c.Block containing all dependencies with c.Statement
     """
     block_with_dependencies = []
-    for dependency, arrays in dependencies.items():  # {"F": {"A": "(1)"},"A": {"B": "(0, 1)"}, "O": [],"I": []}
+    for dependency, arrays in dependencies.items():  # {'FLOW': {'A': ((0, 1),), 'C': ((0, 0), (1, 1), (-1, -1))}, 'ANTI': {'B': ((0, 0), (0, -1))}, 'OUTPUT': {}, 'INPUT': {}}
         if arrays:
-            for array_name, distances in arrays.items():  # {"A": "(1, )"}
+            for array_name, distances in arrays.items():  # {'A': ((0, 1),)}
                 for arr_name, arr_size in all_arrays.items():  # {('B', (100, 66)), ('C', (55, 46, 100)), ('A', (10,))}
                     if array_name == arr_name:
                         dest_array = array_name
@@ -241,7 +256,8 @@ def run_dependencies():
                             else:
                                 distance = '+' + str(distance)
                             src_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{distance}]'
-                        block_with_dependencies.append(c.Statement(dependency_function[dependency](dest_array, src_array)))
+                        block_with_dependencies.append(
+                            c.Statement(dependency_function[dependency](dest_array, src_array)))
     return c.Block(block_with_dependencies)
 
 
