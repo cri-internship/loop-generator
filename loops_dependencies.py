@@ -249,15 +249,23 @@ def run_dependencies():
                         src_array = array_name
                         for index in range(len(arr_size)):
                             distance = distances[index]
-                            if distance == 0:
-                                distance = ''
-                            elif str(distance)[0] == '-':
-                                pass
+                            if distance[0] == 0:
+                                dest_dist = ''
+                            elif str(distance[0])[0] == '-':
+                                dest_dist = str(distance[0])
                             else:
-                                distance = '+' + str(distance)
-                            src_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{distance}]'
+                                dest_dist = '+' + str(distance[0])
+                            if distance[1] == 0:
+                                src_dist = ''
+                            elif str(distance[1])[0] == '-':
+                                src_dist = str(distance[1])
+                            else:
+                                src_dist = '+' + str(distance[1])
+                            dest_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{dest_dist}]'
+                            src_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{src_dist}]'
                         block_with_dependencies.append(
                             c.Statement(dependency_function[dependency](dest_array, src_array)))
+    print(c.Block(block_with_dependencies))
     return c.Block(block_with_dependencies)
 
 
@@ -318,7 +326,4 @@ def global_bounds():
 if __name__ == '__main__':
     parse_input()
     init_arrays()
-    global_bounds()
-    print(validate_array_sizes())
-    print(global_bounds())
-    # print(adjust_bounds(global_bounds()))
+    run_dependencies()
