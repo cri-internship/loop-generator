@@ -24,14 +24,12 @@
     ],
     "dependencies": {
       "FLOW": {
-        "A": "(xA,)",
-        "C": "(xC,yC,zC,)"
+        "A": "(0, )",
+        "C": "(xC,yC,zC, )"
       },
-      "ANTI": {
-        "B": "(xB,yB,)"
-      },
-      "OUTPUT": {},
-      "INPUT": {}
+      "ANTI": {"B": "(xB,yB,)"},
+      "OUTPUT": {"C": "(xC,yC,zC, )"},
+      "INPUT": {"A": "(0, )"}
     }
   }
 ]
