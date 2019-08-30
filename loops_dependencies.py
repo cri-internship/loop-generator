@@ -1,3 +1,4 @@
+import ast
 import json
 import math
 import random
@@ -9,10 +10,10 @@ import loops_gen_random as lgr
 
 result_c_file = 'src/feature1.c'
 input_file = 'input/input.json'
-dependency_function = {'FLOW': (lambda dest, source, optimize: flow_dependency(dest, source, optimize)),
-                       'ANTI': (lambda dest, source, optimize: anti_dependency(dest, source, optimize)),
-                       'OUTPUT': (lambda dest, source, optimize: output_dependency(dest, source, optimize)),
-                       'INPUT': (lambda dest, source, optimize: input_dependency(dest, source, optimize))}
+dependency_function = {'FLOW': (lambda dest, source, optimize, extra: flow_dependency(dest, source, optimize, extra)),
+                       'ANTI': (lambda dest, source, optimize, extra : anti_dependency(dest, source, optimize,extra)),
+                       'OUTPUT': (lambda dest, source, optimize, extra: output_dependency(dest, source, optimize,extra)),
+                       'INPUT': (lambda dest, source, optimize,extra: input_dependency(dest, source, optimize,extra))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
@@ -21,7 +22,11 @@ rand_num_of_calculations = [2, 3, 4, 5, 6, 7, 8, 9]  # random.randint(2, 10)
 coin_flip_possibilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
 
 
-def flow_dependency(dest_array_name, source_array_name, optimize):
+def flow_dependency(dest_array_name, source_array_name, optimize, extra):
+    if extra == 'random':
+        pass
+    else:
+        pass
     if optimize:
         result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     else:
@@ -30,7 +35,7 @@ def flow_dependency(dest_array_name, source_array_name, optimize):
     return result
 
 
-def anti_dependency(dest_array_name, source_array_name, optimize):
+def anti_dependency(dest_array_name, source_array_name, optimize, extra):
     if optimize:
         result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     else:
@@ -39,13 +44,13 @@ def anti_dependency(dest_array_name, source_array_name, optimize):
     return result
 
 
-def output_dependency(dest_array_name, _, __):
+def output_dependency(dest_array_name, _, __, extra):
     result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + \
              loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
     return result
 
 
-def input_dependency(_, source_array_name, __):
+def input_dependency(_, source_array_name, __, extra):
     result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
              loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     return result
@@ -163,23 +168,21 @@ def parse_input():
         dependencies = parse_dependencies(data['dependencies'])
         global all_arrays
         all_arrays = validate_array_sizes()
-        validate_dependencies()
+        #validate_dependencies()
 
 
-def parse_dependencies(dependencies):
+def parse_dependencies(all_dependencies):
     """
     CHANGE FROM STRING TO ARRAY OF DISTANCES
     """
-    print(dependencies)
-    for dependency_name, dependency in dependencies.items():
-        print(dependency)
-        for item
-        for array_name, distance in dependency.items():
+    for dependency_name, deps in all_dependencies.items():
+        for dependency in deps:
+            distances = dependency['distance']
             ret = []
-            distance.replace(" ", "")
-            distance = distance[1:-1]
+            distances.replace(" ", "")
+            distances = distances[1:-1]
             new_dist = ""
-            for d in distance:
+            for d in distances:
                 if d is ',':
                     if new_dist in string.digits:
                         ret.append(int(new_dist))
@@ -188,10 +191,7 @@ def parse_dependencies(dependencies):
                     new_dist = ""
                 else:
                     new_dist += d
-            dependency[array_name] = tuple(ret)  # todo a change was made here
-
-    for dependency_name, dependency in dependencies.items():
-        for array_name, distances in dependency.items():
+            distances = tuple(ret)
             for index in range(len(distances)):
                 distance = distances[index]
                 if distance == 0:
@@ -208,8 +208,33 @@ def parse_dependencies(dependencies):
                 distances = list(distances)
                 distances[index] = distance
                 distances = tuple(distances)
-            dependency[array_name] = distances
-    return dependencies
+            dependency['distance'] = distances
+    return all_dependencies
+
+    #         dependency['distance'] = distance  # todo a change was made here
+    # print('dep=')
+    # print(all_dependencies)
+    #
+    # for dependency_name, dependency in dependencies.items():
+    #     for array_name, distances in dependency.items():
+    #         for index in range(len(distances)):
+    #             distance = distances[index]
+    #             if distance == 0:
+    #                 distance = (0, 0)
+    #             else:
+    #                 dest_dist = random.randrange(distance)
+    #                 if dependency_name == 'FLOW':
+    #                     distance = (dest_dist, -distance + dest_dist)
+    #                 elif dependency_name == 'ANTI':
+    #                     distance = (dest_dist, distance + dest_dist)
+    #                 else:
+    #                     flip = random.choice(('-1', '+1'))
+    #                     distance = (dest_dist, eval(flip) * distance + dest_dist)
+    #             distances = list(distances)
+    #             distances[index] = distance
+    #             distances = tuple(distances)
+    #         dependency[array_name] = distances
+    # return all_dependencies
 
 
 def generate_nested_loops(loop_nest_depth, affine):
@@ -271,10 +296,13 @@ def run_dependencies():
     :return c.Block containing all dependencies with c.Statement
     """
     block_with_dependencies = []
-    for dependency, arrays in dependencies.items():  # {'FLOW': {'A': ((0, 1),), 'C': ((0, 0), (1, 1), (-1, -1))}, 'ANTI': {'B': ((0, 0), (0, -1))}, 'OUTPUT': {}, 'INPUT': {}}
+    for dependency, arrays in dependencies.items():
         if arrays:
-            for array_name, distances in arrays.items():  # {'A': ((0, 1),)}
-                for arr_name, arr_size in all_arrays.items():  # {('B', (100, 66)), ('C', (55, 46, 100)), ('A', (10,))}
+            for array in arrays:
+                array_name = array['array_name']
+                distances = array['distance']
+                extra = array['extra']
+                for arr_name, arr_size in all_arrays.items():
                     if array_name == arr_name:
                         dest_array = array_name
                         src_array = array_name
@@ -299,7 +327,7 @@ def run_dependencies():
                         else:
                             optimize = True
                         block_with_dependencies.append(
-                            c.Statement(dependency_function[dependency](dest_array, src_array, optimize)))
+                            c.Statement(dependency_function[dependency](dest_array, src_array, optimize, extra)))
     return c.Block(block_with_dependencies)
 
 
@@ -354,10 +382,13 @@ def adjust_bounds(affine_fcts):
 def global_bounds():
     global concat_depen
     concat_depen = {}
-    for dependency, arrays in dependencies.items():
+    for dependency_name, arrays in dependencies.items():
         if arrays:
-            for array_name, distances in arrays.items():
-                concat_depen.update({array_name: distances})
+            for array in arrays:
+                concat_depen.update({array['array_name']: array['distance']})
+
+            # for array_name, distances in arrays.items():
+            #     concat_depen.update({array_name: distances})
     return concat_depen
 
 

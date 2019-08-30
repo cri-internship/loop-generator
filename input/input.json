@@ -12,7 +12,7 @@
       "yC": 0,
       "zC": 6
     },
-    "loop_nest_level": 3,
+    "loop_nest_level": 2,
     "unique_arrays_write": [
       "A[da]",
       "B[e,e]"
@@ -23,7 +23,18 @@
       "C[e,e,e]"
     ],
     "dependencies": {
-      "FLOW": ["{array_name:C, distance:(xC,yC,zC,), type:scalar}", "{array_name:A, distance:(xA), type:random}"],
+      "FLOW": [
+        {
+          "array_name": "C",
+          "distance": "(1,yC,zC,)",
+          "extra": "scalar"
+        },
+        {
+          "array_name": "A",
+          "distance": "(xA,)",
+          "extra": "random"
+        }
+      ],
       "ANTI": {},
       "OUTPUT": {},
       "INPUT": {}
