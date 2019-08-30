@@ -170,7 +170,10 @@ def parse_dependencies(dependencies):
     """
     CHANGE FROM STRING TO ARRAY OF DISTANCES
     """
+    print(dependencies)
     for dependency_name, dependency in dependencies.items():
+        print(dependency)
+        for item
         for array_name, distance in dependency.items():
             ret = []
             distance.replace(" ", "")
@@ -297,7 +300,6 @@ def run_dependencies():
                             optimize = True
                         block_with_dependencies.append(
                             c.Statement(dependency_function[dependency](dest_array, src_array, optimize)))
-
     return c.Block(block_with_dependencies)
 
 

@@ -1,7 +1,7 @@
 [
   {
     "array_sizes": {
-      "d": 100,
+      "da": 100,
       "e": 50
     },
     "distances": {
@@ -14,22 +14,19 @@
     },
     "loop_nest_level": 3,
     "unique_arrays_write": [
-      "A[d]",
+      "A[da]",
       "B[e,e]"
     ],
     "unique_arrays_read": [
-      "A[d]",
+      "A[da]",
       "B[e,e]",
       "C[e,e,e]"
     ],
     "dependencies": {
-      "FLOW": {
-        "A": "(0, )",
-        "C": "(xC,yC,zC, )"
-      },
-      "ANTI": {"B": "(xB,yB,)"},
-      "OUTPUT": {"C": "(xC,yC,zC, )"},
-      "INPUT": {"A": "(0, )"}
+      "FLOW": ["{array_name:C, distance:(xC,yC,zC,), type:scalar}", "{array_name:A, distance:(xA), type:random}"],
+      "ANTI": {},
+      "OUTPUT": {},
+      "INPUT": {}
     }
   }
 ]
