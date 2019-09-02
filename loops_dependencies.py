@@ -1,4 +1,3 @@
-import ast
 import json
 import math
 import random
@@ -11,48 +10,69 @@ import loops_gen_random as lgr
 result_c_file = 'src/feature1.c'
 input_file = 'input/input.json'
 dependency_function = {'FLOW': (lambda dest, source, optimize, extra: flow_dependency(dest, source, optimize, extra)),
-                       'ANTI': (lambda dest, source, optimize, extra : anti_dependency(dest, source, optimize,extra)),
-                       'OUTPUT': (lambda dest, source, optimize, extra: output_dependency(dest, source, optimize,extra)),
-                       'INPUT': (lambda dest, source, optimize,extra: input_dependency(dest, source, optimize,extra))}
+                       'ANTI': (lambda dest, source, optimize, extra: anti_dependency(dest, source, optimize, extra)),
+                       'OUTPUT': (
+                           lambda dest, source, optimize, extra: output_dependency(dest, source, optimize, extra)),
+                       'INPUT': (lambda dest, source, optimize, extra: input_dependency(dest, source, optimize, extra))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
 rand_num_of_calculations = [2, 3, 4, 5, 6, 7, 8, 9]  # random.randint(2, 10)
 coin_flip_possibilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+maths_operations = ['+', '-', '*', '/']
 
 
 def flow_dependency(dest_array_name, source_array_name, optimize, extra):
     if extra == 'random':
-        pass
+        if optimize:
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+        else:
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  ' + \
+                     f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     else:
-        pass
-    if optimize:
-        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
-    else:
-        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  ' + \
-                 f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+        if optimize:
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+        else:
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)};\n' + loop_nest_level * '  ' + \
+                     f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+
     return result
 
 
 def anti_dependency(dest_array_name, source_array_name, optimize, extra):
-    if optimize:
-        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+    if extra == 'random':
+        if optimize:
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+        else:
+            result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
+                     loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
     else:
-        result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
-             loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
+        if optimize:
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+        else:
+            result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
+                     loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)}'
     return result
 
 
 def output_dependency(dest_array_name, _, __, extra):
-    result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + \
-             loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
+    if extra == 'random':
+        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + \
+                 loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
+    else:
+        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)};\n' + \
+                 loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)}'
     return result
 
 
 def input_dependency(_, source_array_name, __, extra):
-    result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
-             loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+    if extra == 'random':
+        result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
+                 loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+    else:
+        result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
+                 loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
     return result
 
 
@@ -133,8 +153,7 @@ def generate_arrays_helper(arrays_drew_by_lot, num_of_calculations):
 
 
 def generate_operators(num_of_calculations):
-    global maths_operations, maths_operations_size
-    maths_operations = ['+', '-', '*', '/']
+    global maths_operations_size
     maths_operations_size = len(maths_operations)
     if coin_flip > 0.5:
         num_of_calculations += 1
@@ -168,7 +187,7 @@ def parse_input():
         dependencies = parse_dependencies(data['dependencies'])
         global all_arrays
         all_arrays = validate_array_sizes()
-        #validate_dependencies()
+        # validate_dependencies()
 
 
 def parse_dependencies(all_dependencies):
@@ -179,7 +198,7 @@ def parse_dependencies(all_dependencies):
         for dependency in deps:
             distances = dependency['distance']
             ret = []
-            distances.replace(" ", "")
+            distances = distances.replace(" ", "")
             distances = distances[1:-1]
             new_dist = ""
             for d in distances:

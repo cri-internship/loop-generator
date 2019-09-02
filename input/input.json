@@ -26,7 +26,7 @@
       "FLOW": [
         {
           "array_name": "C",
-          "distance": "(1,yC,zC,)",
+          "distance": "(0,0, 0,  )",
           "extra": "scalar"
         },
         {
@@ -35,9 +35,38 @@
           "extra": "random"
         }
       ],
-      "ANTI": {},
-      "OUTPUT": {},
-      "INPUT": {}
+      "ANTI": [
+        {
+          "array_name": "C",
+          "distance": "(0,0, 0,  )",
+          "extra": "scalar"
+        },
+        {
+          "array_name": "A",
+          "distance": "(xA,)",
+          "extra": "random"
+        }
+      ],
+      "OUTPUT": [ {
+          "array_name": "C",
+          "distance": "(0,0, 0,  )",
+          "extra": "scalar"
+        },
+        {
+          "array_name": "A",
+          "distance": "(xA,)",
+          "extra": "random"
+        }],
+      "INPUT": [ {
+          "array_name": "C",
+          "distance": "(0,0, 0,  )",
+          "extra": "scalar"
+        },
+        {
+          "array_name": "A",
+          "distance": "(xA,)",
+          "extra": "random"
+        }]
     }
   }
 ]
