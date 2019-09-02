@@ -35,8 +35,7 @@ def flow_dependency(dest_array_name, source_array_name, optimize, extra):
             result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
         else:
             result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)};\n' + loop_nest_level * '  ' + \
-                     f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
-
+                     f'{generate_random_var("float ")}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
     return result
 
 
@@ -51,7 +50,7 @@ def anti_dependency(dest_array_name, source_array_name, optimize, extra):
         if optimize:
             result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
         else:
-            result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
+            result = '\n' + loop_nest_level * '  ' + f'{generate_random_var("float ")}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
                      loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)}'
     return result
 
@@ -71,9 +70,13 @@ def input_dependency(_, source_array_name, __, extra):
         result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
                  loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     else:
-        result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
-                 loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+        result = '\n' + loop_nest_level * '  ' + f'{generate_random_var("float ")}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
+                 loop_nest_level * '  ' + f'{generate_random_var("float ")}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
     return result
+
+def generate_random_var(type):
+    random_var = type+random.choice(string.ascii_letters)
+    return random_var
 
 
 def gen_random_stmt(unique_arrays):
@@ -323,6 +326,7 @@ def run_dependencies():
                 extra = array['extra']
                 for arr_name, arr_size in all_arrays.items():
                     if array_name == arr_name:
+                        optimize = False
                         dest_array = array_name
                         src_array = array_name
                         for index in range(len(arr_size)):
@@ -330,21 +334,22 @@ def run_dependencies():
                             if distance[0] == 0:
                                 dest_dist = ''
                             elif str(distance[0])[0] == '-':
+                                optimize = True
                                 dest_dist = str(distance[0])
                             else:
+                                optimize = True
                                 dest_dist = '+' + str(distance[0])
                             if distance[1] == 0:
                                 src_dist = ''
                             elif str(distance[1])[0] == '-':
+                                optimize = True
                                 src_dist = str(distance[1])
                             else:
+                                optimize = True
                                 src_dist = '+' + str(distance[1])
-                        dest_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{dest_dist}]'
-                        src_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{src_dist}]'
-                        if dest_dist == '' and src_dist == '':
-                            optimize = False
-                        else:
-                            optimize = True
+                            dest_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{dest_dist}]'
+                            src_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{src_dist}]'
+
                         block_with_dependencies.append(
                             c.Statement(dependency_function[dependency](dest_array, src_array, optimize, extra)))
     return c.Block(block_with_dependencies)
@@ -413,3 +418,4 @@ def global_bounds():
 
 if __name__ == '__main__':
     parse_input()
+

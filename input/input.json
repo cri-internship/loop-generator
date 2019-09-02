@@ -12,7 +12,7 @@
       "yC": 0,
       "zC": 6
     },
-    "loop_nest_level": 2,
+    "loop_nest_level": 3,
     "unique_arrays_write": [
       "A[da]",
       "B[e,e]"
@@ -26,13 +26,13 @@
       "FLOW": [
         {
           "array_name": "C",
-          "distance": "(0,0, 0,  )",
+          "distance": "(0,0,0,  )",
           "extra": "scalar"
         },
         {
           "array_name": "A",
           "distance": "(xA,)",
-          "extra": "random"
+          "extra": "scalar"
         }
       ],
       "ANTI": [
@@ -44,7 +44,7 @@
         {
           "array_name": "A",
           "distance": "(xA,)",
-          "extra": "random"
+          "extra": "scalar"
         }
       ],
       "OUTPUT": [ {
@@ -53,9 +53,9 @@
           "extra": "scalar"
         },
         {
-          "array_name": "A",
-          "distance": "(xA,)",
-          "extra": "random"
+          "array_name": "B",
+          "distance": "(xB,yB, )",
+          "extra": "scalar"
         }],
       "INPUT": [ {
           "array_name": "C",
@@ -65,7 +65,7 @@
         {
           "array_name": "A",
           "distance": "(xA,)",
-          "extra": "random"
+          "extra": "scalar"
         }]
     }
   }
