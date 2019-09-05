@@ -110,7 +110,7 @@ int *create_one_dim_int(int size_dim1)
 
     // Accessing one dimensional array
     for (int i = 0; i<size_dim1; i++)
-	    *(array+i) = rand();
+	    *(array+i) = rand() % 20 + 1;
 
 	return array;
 }
@@ -126,7 +126,7 @@ int **create_two_dim_int(int size_dim1, int size_dim2)
     // Accessing two dimensional array
 	for (int i = 0; i<size_dim1; i++)
 		for (int j = 0; j<size_dim2; j++)
-	         array[i][j] =  rand();
+	         array[i][j] =  rand() % 20 + 1;
 
 	return array;
 }
@@ -146,7 +146,7 @@ int ***create_three_dim_int(int size_dim1, int size_dim2, int size_dim3)
 	for(int k=0;  k<size_dim1;  k++)
 		for(int i=0;  i<size_dim2;  i++)
 			for(int j=0;  j<size_dim3;  j++)
-				array[k][i][j] = rand();
+				array[k][i][j] = rand() % 20 + 1;
 
 	return array;
 }

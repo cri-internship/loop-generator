@@ -14,31 +14,31 @@ int main( int argc, const char* argv[] )
 	int *A = create_one_dim_int(100);
 
 	for (int c = 0; c < 50; c++)
-	  for (int b = 2; b < 49; b++)
-	    for (int a = 2; a < 50; a++)
+	  for (int b = 0; b < 46; b++)
+	    for (int a = 0; a < 47; a++)
 	    {
 	      
-	      C[a][b][c]=0.16279;
-	      int var_a=C[a][b][c]-0.06304;
+	      C[a][b][c]=0.27919;
+	      int var_a=C[a][b][c]*0.54861;
 	      
-	      A[a]=A[a-1]*0.08525;
+	      A[a]=A[a-1]-0.18898;
 	      
-	      int var_b=C[a][b][c]+0.20045;
-	      C[a][b][c]=0.35637;
+	      int var_b=C[a][b][c]+0.60715;
+	      C[a][b][c]=0.98126;
 	      
-	      A[a]=A[a+1]-0.39014;
+	      A[a]=A[a+1]/0.57958;
 	      
-	      C[a][b][c]=0.51078;
-	      C[a][b][c]=0.52095;
+	      C[a][b][c]=0.35166;
+	      C[a][b][c]=0.38061;
 	      
-	      B[a][b+1]=0.81802;
-	      B[a][b+1]=0.77997;
+	      B[a+1][b+1]=0.1655;
+	      B[a+1][b+1]=0.55766;
 	      
-	      int var_c=C[a][b][c]-0.45005;
-	      int var_d=C[a][b][c]*0.89562;
+	      int var_c=C[a][b][c]+0.31367;
+	      int var_d=C[a][b][c]/0.06117;
 	      
-	      int var_e=A[a-1]+0.82421;
-	      int var_f=A[a-1]/0.46079;
+	      int var_e=A[a+1]-0.23238;
+	      int var_f=A[a+1]*0.24557;
 	    }
 
     return 0;
