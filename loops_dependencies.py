@@ -2,6 +2,8 @@ import json
 import math
 import random
 import string
+import re
+
 
 import cgen as c
 
@@ -9,43 +11,92 @@ import loops_gen_random as lgr
 
 result_c_file = 'src/feature1.c'
 input_file = 'input/input.json'
-dependency_function = {'FLOW': (lambda dest, source, optimize, extra: flow_dependency(dest, source, optimize, extra)),
-                       'ANTI': (lambda dest, source, optimize, extra: anti_dependency(dest, source, optimize, extra)),
+dependency_function = {'FLOW': (lambda dest, destination, optimize, extra: flow_dependency(dest, destination, optimize, extra)),
+                       'ANTI': (lambda dest, destination, optimize, extra: anti_dependency(dest, destination, optimize, extra)),
                        'OUTPUT': (
-                           lambda dest, source, optimize, extra: output_dependency(dest, source, optimize, extra)),
-                       'INPUT': (lambda dest, source, optimize, extra: input_dependency(dest, source, optimize, extra))}
+                           lambda dest, destination, optimize, extra: output_dependency(dest, destination, optimize, extra)),
+                       'INPUT': (lambda dest, destination, optimize, extra: input_dependency(dest, destination, optimize, extra))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
-rand_num_of_calculations = [2, 3, 4, 5, 6, 7, 8, 9]  # random.randint(2, 10)
-coin_flip_possibilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+literal_values_source = set()
+literal_values_destination = set()
+
 maths_operations = ['+', '-', '*', '/']
 
 
 def flow_dependency(dest_array_name, source_array_name, optimize, extra):
+    """
+    """
+    arr_name = dest_array_name.partition('[')[0]
+    arr_def = (arr_name, all_arrays[arr_name])
     if extra == 'random':
-        if optimize:
-            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
-        else:
-            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + loop_nest_level * '  ' + \
-                     f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+        result = gen_random_part(dest_array_name, source_array_name, optimize, arr_def)
     else:
-        if optimize:
-            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
-        else:
-            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)};\n' + loop_nest_level * '  ' + \
-                     f'{generate_random_var("float ")}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+        result = gen_scalar_part(dest_array_name, source_array_name, optimize)
+    return result
+
+
+def gen_random_part(dest_array_name, source_array_name, optimize, arr_def):
+    if optimize:
+        source = f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}'
+        result = gen_one_stmt(dest_array_name, source)
+    else:
+        source = f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]};\n' + loop_nest_level * '  '
+        destination1 = f'{gen_random_stmt(unique_arrays_write)}'
+        source1 = f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}'
+        result = gen_full_stmt(dest_array_name, source, source1, destination1)
+    return result
+
+
+def gen_scalar_part(dest_array_name, source_array_name, optimize):
+    if optimize:
+        source = f'{source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+        result = gen_one_stmt(dest_array_name, source)
+    else:
+        source = f'{round(random.random(), 5)};\n' + loop_nest_level * '  '
+        destination1 = f'{generate_random_var("float ")}'
+        source1 = f'{source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+        result = gen_full_stmt(dest_array_name, source, source1, destination1)
+    return result
+
+
+def gen_one_stmt(dest_array_name, source):
+    destination = loop_nest_level * '  ' + f'{dest_array_name}'
+    literal_values_destination.add(destination)
+    populate_literal_values(literal_values_source, source)
+    result = '\n' + destination + '=' + source
+    return result
+
+
+def gen_full_stmt(dest_array_name, source, source1, destination1):
+    result = ""
+    destination = '\n' + loop_nest_level * '  ' + f'{dest_array_name}'
+    destination = "".join(destination.split())  # remove all whitespaces
+    if destination not in literal_values_source:
+        literal_values_destination.add(destination)
+        populate_literal_values(literal_values_source, source)
+        result += '\n' + destination + '=' + source
+    destination = destination1
+
+    literal_values_destination.add(destination)
+    source = source1
+    populate_literal_values(literal_values_source, source)
+    result += '\n' + destination + '=' + source
+
     return result
 
 
 def anti_dependency(dest_array_name, source_array_name, optimize, extra):
+    arr_name = dest_array_name.partition('[')[0]
+    arr_def = (arr_name, all_arrays[arr_name])
     if extra == 'random':
         if optimize:
-            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}'
         else:
-            result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
-                     loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
+            result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)};\n' + \
+                     loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]}'
     else:
         if optimize:
             result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
@@ -56,9 +107,11 @@ def anti_dependency(dest_array_name, source_array_name, optimize, extra):
 
 
 def output_dependency(dest_array_name, _, __, extra):
+    arr_name = dest_array_name.partition('[')[0]
+    arr_def = (arr_name, all_arrays[arr_name])
     if extra == 'random':
-        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + \
-                 loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
+        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]};\n' + \
+                 loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]}'
     else:
         result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)};\n' + \
                  loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)}'
@@ -66,16 +119,19 @@ def output_dependency(dest_array_name, _, __, extra):
 
 
 def input_dependency(_, source_array_name, __, extra):
+    arr_name = source_array_name.partition('[')[0]
+    arr_def = (arr_name, all_arrays[arr_name])
     if extra == 'random':
-        result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
-                 loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
+        result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)};\n' + \
+                 loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}'
     else:
         result = '\n' + loop_nest_level * '  ' + f'{generate_random_var("float ")}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
                  loop_nest_level * '  ' + f'{generate_random_var("float ")}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
     return result
 
+
 def generate_random_var(type):
-    random_var = type+random.choice(string.ascii_letters)
+    random_var = type + random.choice(string.ascii_letters)
     return random_var
 
 
@@ -108,9 +164,9 @@ def parse_string_array(name_with_dims):
     return (array_name, sizes)
 
 
-def gen_calc_for_read(num_of_calculations):
+def gen_calc_for_read(num_of_calculations, arr_def):
     stmt = ""
-    arrays = generate_arrays_with_indexes(num_of_calculations)
+    arrays = generate_arrays_with_indexes1(num_of_calculations, arr_def)
     operators = generate_operators(num_of_calculations)
     for i in range(num_of_calculations):
         stmt += operators[i]
@@ -118,11 +174,26 @@ def gen_calc_for_read(num_of_calculations):
     return stmt
 
 
-def generate_arrays_with_indexes(num_of_calculations):
-    gen_arr = generate_arrays_helper([], num_of_calculations)
+def generate_arrays_with_indexes1(num_of_calculations, arr_def):
+    #temporarily remove the array on which we do dependencies
+    tmp_used, tmp_unused = False, False
+    if arr_def in unique_arrays_read['unused']:
+        tmp_unused = True
+        unique_arrays_read['unused'].remove(arr_def)
+    if arr_def in unique_arrays_read['used']:
+        tmp_used = True
+        unique_arrays_read['used'].remove(arr_def)
+
+    gen_arr = generate_arrays_helper1([], num_of_calculations, arr_def)
+
+    if tmp_unused:
+        unique_arrays_read['unused'].add(arr_def)
+    if tmp_used:
+        unique_arrays_read['used'].add(arr_def)
+
     global coin_flip
-    coin_flip = random.choice(coin_flip_possibilities)
-    if coin_flip > 0.5:
+    coin_flip = random.random()
+    if coin_flip > 0.75:
         scalar_position_in_arr = random.randrange(0, len(gen_arr))
         gen_arr.append(gen_arr[scalar_position_in_arr])
         gen_arr[scalar_position_in_arr] = ('', round(random.random(), 5))
@@ -138,7 +209,7 @@ def generate_arrays_with_indexes(num_of_calculations):
     return res
 
 
-def generate_arrays_helper(arrays_drew_by_lot, num_of_calculations):
+def generate_arrays_helper1(arrays_drew_by_lot, num_of_calculations, arr_def):
     if num_of_calculations > 0:
         unused_arr_size = len(unique_arrays_read['unused'])
         if unused_arr_size > 0:
@@ -151,7 +222,7 @@ def generate_arrays_helper(arrays_drew_by_lot, num_of_calculations):
                                           min(num_of_calculations, len(unique_arrays_read['used'])))
         num_of_calculations -= len(random_sample)
         arrays_drew_by_lot += random_sample
-        generate_arrays_helper(arrays_drew_by_lot, num_of_calculations)
+        generate_arrays_helper1(arrays_drew_by_lot, num_of_calculations, arr_def)
     return arrays_drew_by_lot
 
 
@@ -177,7 +248,7 @@ def parse_input():
     with open(input_file, 'r') as file:
         data = json.load(file)
         data = data[0]
-        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista
+        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, rand_num_of_calculations
         loop_nest_level = data['loop_nest_level']
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
@@ -188,9 +259,11 @@ def parse_input():
         for arr in unparsed_arrays_read:
             unique_arrays_read['unused'].add(parse_string_array(arr))
         dependencies = parse_dependencies(data['dependencies'])
-        global all_arrays
         all_arrays = validate_array_sizes()
         # validate_dependencies()
+        rand_num_of_calculations = []
+    for i in range(len(unique_arrays_read["unused"]) - 1):
+        rand_num_of_calculations.append(i + 1)
 
 
 def parse_dependencies(all_dependencies):
@@ -233,31 +306,6 @@ def parse_dependencies(all_dependencies):
             dependency['distance'] = distances
     return all_dependencies
 
-    #         dependency['distance'] = distance  # todo a change was made here
-    # print('dep=')
-    # print(all_dependencies)
-    #
-    # for dependency_name, dependency in dependencies.items():
-    #     for array_name, distances in dependency.items():
-    #         for index in range(len(distances)):
-    #             distance = distances[index]
-    #             if distance == 0:
-    #                 distance = (0, 0)
-    #             else:
-    #                 dest_dist = random.randrange(distance)
-    #                 if dependency_name == 'FLOW':
-    #                     distance = (dest_dist, -distance + dest_dist)
-    #                 elif dependency_name == 'ANTI':
-    #                     distance = (dest_dist, distance + dest_dist)
-    #                 else:
-    #                     flip = random.choice(('-1', '+1'))
-    #                     distance = (dest_dist, eval(flip) * distance + dest_dist)
-    #             distances = list(distances)
-    #             distances[index] = distance
-    #             distances = tuple(distances)
-    #         dependency[array_name] = distances
-    # return all_dependencies
-
 
 def generate_nested_loops(loop_nest_depth, affine):
     """:arg loop_nest_depth: the loop nest depth
@@ -283,13 +331,13 @@ def generate_nested_loops(loop_nest_depth, affine):
 
 
 def print_loop_structure(loop_index, lower_bound, upper_bound, affine, fun):
-    scalar_part = ''
+    gen_scalar_part = ''
     curr_val = affine[1][0]
     if curr_val > 0:
-        scalar_part = ' - '
+        gen_scalar_part = ' - '
     elif curr_val < 0:
-        scalar_part = ' + '
-    scalar_part += str(abs(curr_val))
+        gen_scalar_part = ' + '
+    gen_scalar_part += str(abs(curr_val))
     return c.For('int {} = {}'.format(loop_index, affine[0][0]),
                  '{} < '.format(loop_index)
                  # + str(upper_bound)
@@ -416,6 +464,16 @@ def global_bounds():
     return concat_depen
 
 
+def populate_literal_values(literal_values_set, source): #todo check if there are better functions to process a string
+    source = "".join(source.split()) #remove all whitespaces
+    if source[-1] == ";": #if source ends with ; just remove it
+        source = source[:-1]
+    expresion_as_stringg = re.split('[+\-*/]+', source)
+    result = [arr for arr in expresion_as_stringg if arr[0].isalpha()]
+    literal_values_set.update(result)
+
+
 if __name__ == '__main__':
     parse_input()
+
 
