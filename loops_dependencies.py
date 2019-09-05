@@ -11,11 +11,11 @@ import loops_gen_random as lgr
 
 result_c_file = 'src/feature1.c'
 input_file = 'input/input.json'
-dependency_function = {'FLOW': (lambda dest, destination, optimize, extra: flow_dependency(dest, destination, optimize, extra)),
-                       'ANTI': (lambda dest, destination, optimize, extra: anti_dependency(dest, destination, optimize, extra)),
+dependency_function = {'FLOW': (lambda dest, source, optimize, extra: flow_dependency(dest, source, optimize, extra)),
+                       'ANTI': (lambda dest, source, optimize, extra: anti_dependency(dest, source, optimize, extra)),
                        'OUTPUT': (
-                           lambda dest, destination, optimize, extra: output_dependency(dest, destination, optimize, extra)),
-                       'INPUT': (lambda dest, destination, optimize, extra: input_dependency(dest, destination, optimize, extra))}
+                           lambda dest, source, optimize, extra: output_dependency(dest, source, optimize, extra)),
+                       'INPUT': (lambda dest, source, optimize, extra: input_dependency(dest, source, optimize, extra))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
@@ -24,6 +24,14 @@ literal_values_source = set()
 literal_values_destination = set()
 
 maths_operations = ['+', '-', '*', '/']
+amount_of_vars = 0
+
+def gen_random_scalar():
+    if typ=='int':
+        return random.randint(0, 50)
+    else:
+        return round(random.random(), 5)
+
 
 
 def flow_dependency(dest_array_name, source_array_name, optimize, extra):
@@ -99,10 +107,10 @@ def anti_dependency(dest_array_name, source_array_name, optimize, extra):
                      loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]}'
     else:
         if optimize:
-            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
         else:
-            result = '\n' + loop_nest_level * '  ' + f'{generate_random_var("float ")}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
-                     loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)}'
+            result = '\n' + loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()};\n' + \
+                     loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()}'
     return result
 
 
@@ -113,8 +121,8 @@ def output_dependency(dest_array_name, _, __, extra):
         result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]};\n' + \
                  loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]}'
     else:
-        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)};\n' + \
-                 loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)}'
+        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()};\n' + \
+                 loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()}'
     return result
 
 
@@ -125,13 +133,20 @@ def input_dependency(_, source_array_name, __, extra):
         result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)};\n' + \
                  loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}'
     else:
-        result = '\n' + loop_nest_level * '  ' + f'{generate_random_var("float ")}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
-                 loop_nest_level * '  ' + f'{generate_random_var("float ")}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+        result = '\n' + loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()};\n' + \
+                 loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
     return result
 
 
 def generate_random_var(type):
     random_var = type + random.choice(string.ascii_letters)
+
+def generate_var(type):
+    global amount_of_vars
+    first_iterator = 'a'
+    calculated_iterator = chr(ord(first_iterator) + amount_of_vars % 26)
+    random_var = type + " var_" + calculated_iterator
+    amount_of_vars += 1
     return random_var
 
 
@@ -248,8 +263,9 @@ def parse_input():
     with open(input_file, 'r') as file:
         data = json.load(file)
         data = data[0]
-        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, rand_num_of_calculations
+        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, typ, rand_num_of_calculations
         loop_nest_level = data['loop_nest_level']
+        typ = data['type']
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
         array_sizes = data['array_sizes']
@@ -259,6 +275,7 @@ def parse_input():
         for arr in unparsed_arrays_read:
             unique_arrays_read['unused'].add(parse_string_array(arr))
         dependencies = parse_dependencies(data['dependencies'])
+        global all_arrays
         all_arrays = validate_array_sizes()
         # validate_dependencies()
         rand_num_of_calculations = []
@@ -305,6 +322,31 @@ def parse_dependencies(all_dependencies):
                 distances = tuple(distances)
             dependency['distance'] = distances
     return all_dependencies
+
+    #         dependency['distance'] = distance  # todo a change was made here
+    # print('dep=')
+    # print(all_dependencies)
+    #
+    # for dependency_name, dependency in dependencies.items():
+    #     for array_name, distances in dependency.items():
+    #         for index in range(len(distances)):
+    #             distance = distances[index]
+    #             if distance == 0:
+    #                 distance = (0, 0)
+    #             else:
+    #                 dest_dist = random.randrange(distance)
+    #                 if dependency_name == 'FLOW':
+    #                     distance = (dest_dist, -distance + dest_dist)
+    #                 elif dependency_name == 'ANTI':
+    #                     distance = (dest_dist, distance + dest_dist)
+    #                 else:
+    #                     flip = random.choice(('-1', '+1'))
+    #                     distance = (dest_dist, eval(flip) * distance + dest_dist)
+    #             distances = list(distances)
+    #             distances[index] = distance
+    #             distances = tuple(distances)
+    #         dependency[array_name] = distances
+    # return all_dependencies
 
 
 def generate_nested_loops(loop_nest_depth, affine):
@@ -358,7 +400,7 @@ def create_nested_loop():
 def init_arrays(file=result_c_file):
     """Init all arrays"""
     for array_name, array_size in all_arrays.items():
-        lgr.write_init_array(array_name, array_size, file)
+        lgr.write_init_array(array_name, array_size, file, typ)
 
 
 def run_dependencies():
@@ -475,5 +517,4 @@ def populate_literal_values(literal_values_set, source): #todo check if there ar
 
 if __name__ == '__main__':
     parse_input()
-
 
