@@ -9,36 +9,36 @@ int main( int argc, const char* argv[] )
     srand(time(NULL));
 
     
-	int **B = create_two_dim_int(50, 50);
-	int ***C = create_three_dim_int(50, 50, 50);
-	int *A = create_one_dim_int(100);
+	float ***C = create_three_dim_float(50, 50, 50);
+	float *A = create_one_dim_float(100);
+	float **B = create_two_dim_float(50, 50);
 
 	for (int c = 0; c < 50; c++)
-	  for (int b = 0; b < 46; b++)
-	    for (int a = 0; a < 47; a++)
+	  for (int b = 0; b < 47; b++)
+	    for (int a = 2; a < 50; a++)
 	    {
 	      
-	      C[a][b][c]=0.27919;
-	      int var_a=C[a][b][c]*0.54861;
+	      C[a][b][c]=0.30497;
+	      float var_a=C[a][b][c]/0.93061;
 	      
-	      A[a]=A[a-1]-0.18898;
+	      A[a]=A[a-1]/0.60126;
 	      
-	      int var_b=C[a][b][c]+0.60715;
-	      C[a][b][c]=0.98126;
+	      float var_b=C[a][b][c]*0.52151;
+	      C[a][b][c]=0.50086;
 	      
-	      A[a]=A[a+1]/0.57958;
+	      A[a]=A[a+1]*0.52077;
 	      
-	      C[a][b][c]=0.35166;
-	      C[a][b][c]=0.38061;
+	      C[a][b][c]=0.0801;
+	      C[a][b][c]=0.30819;
 	      
-	      B[a+1][b+1]=0.1655;
-	      B[a+1][b+1]=0.55766;
+	      B[a][b]=0.59751;
+	      B[a][b]=0.21043;
 	      
-	      int var_c=C[a][b][c]+0.31367;
-	      int var_d=C[a][b][c]/0.06117;
+	      float var_c=C[a][b][c]-0.66422;
+	      float var_d=C[a][b][c]-0.3673;
 	      
-	      int var_e=A[a+1]-0.23238;
-	      int var_f=A[a+1]*0.24557;
+	      float var_e=A[a-1]/0.14139;
+	      float var_f=A[a-1]+0.55355;
 	    }
 
     return 0;

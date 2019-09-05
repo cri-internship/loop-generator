@@ -15,6 +15,7 @@ dependency_function = {'FLOW': (lambda dest, source, optimize, extra: flow_depen
                            lambda dest, source, optimize, extra: output_dependency(dest, source, optimize, extra)),
                        'INPUT': (lambda dest, source, optimize, extra: input_dependency(dest, source, optimize, extra))}
 
+
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
@@ -22,6 +23,13 @@ rand_num_of_calculations = [2, 3, 4, 5, 6, 7, 8, 9]  # random.randint(2, 10)
 coin_flip_possibilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
 maths_operations = ['+', '-', '*', '/']
 amount_of_vars = 0
+
+def gen_random_scalar():
+    if typ=='int':
+        return random.randint(0, 50)
+    else:
+        return round(random.random(), 5)
+
 
 
 def flow_dependency(dest_array_name, source_array_name, optimize, extra):
@@ -33,10 +41,10 @@ def flow_dependency(dest_array_name, source_array_name, optimize, extra):
                      f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     else:
         if optimize:
-            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
         else:
-            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)};\n' + loop_nest_level * '  ' + \
-                     f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()};\n' + loop_nest_level * '  ' + \
+                     f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
     return result
 
 
@@ -49,10 +57,10 @@ def anti_dependency(dest_array_name, source_array_name, optimize, extra):
                      loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
     else:
         if optimize:
-            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
         else:
-            result = '\n' + loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
-                     loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)}'
+            result = '\n' + loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()};\n' + \
+                     loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()}'
     return result
 
 
@@ -61,8 +69,8 @@ def output_dependency(dest_array_name, _, __, extra):
         result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]};\n' + \
                  loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations))[1:]}'
     else:
-        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)};\n' + \
-                 loop_nest_level * '  ' + f'{dest_array_name}={round(random.random(), 5)}'
+        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()};\n' + \
+                 loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()}'
     return result
 
 
@@ -71,8 +79,8 @@ def input_dependency(_, source_array_name, __, extra):
         result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))};\n' + \
                  loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations))}'
     else:
-        result = '\n' + loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)};\n' + \
-                 loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
+        result = '\n' + loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()};\n' + \
+                 loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
     return result
 
 
