@@ -8,7 +8,7 @@ MAX_DIMS = 3
 MAX_DEPTH = 3
 
 maths_operations = ['+', '-', '*', '/']
-array_init_functions = {1: 'create_one_dim', 2: 'create_two_dim', 3: 'create_three_dim'}
+array_init_functions = {1: 'create_one_dim_', 2: 'create_two_dim_', 3: 'create_three_dim_'}
 dim_size = random.randint(1, MAX_DIM_SIZE)
 loop_nest_depth = random.randint(1, MAX_DEPTH)
 file_name = 'src/feature1.c'
@@ -81,15 +81,15 @@ def init_arrays(file=file_name):
     return dict_of_arrays
 
 
-def write_init_array(array_name, array_sizes, file):
+def write_init_array(array_name, array_sizes, file, typ='float'):
     """Write declaration and calling functions to init arrays to file"""
     if type(array_sizes) == tuple and len(array_sizes) == 1:
-        init_array = c.Statement('\n\tfloat {}{} = {}({})'.format('*' * len(array_sizes), array_name,
-                                                                  array_init_functions[len(array_sizes)],
+        init_array = c.Statement('\n\t{} {}{} = {}{}({})'.format(typ,  '*' * len(array_sizes), array_name,
+                                                                  array_init_functions[len(array_sizes)],typ,
                                                                   str(array_sizes)[1:-2]))
     else:
-        init_array = c.Statement('\n\tfloat {}{} = {}({})'.format('*' * len(array_sizes), array_name,
-                                                                  array_init_functions[len(array_sizes)],
+        init_array = c.Statement('\n\t{} {}{} = {}{}({})'.format(typ, '*' * len(array_sizes), array_name,
+                                                                  array_init_functions[len(array_sizes)],typ,
                                                                   str(array_sizes)[1:-1]))
     with open(file, 'a+') as file:
         file.write(str(init_array))

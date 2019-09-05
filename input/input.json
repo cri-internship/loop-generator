@@ -4,6 +4,7 @@
       "da": 100,
       "e": 50
     },
+    "type": "int",
     "distances": {
       "xA": 1,
       "xB": 2,
@@ -47,7 +48,8 @@
           "extra": "scalar"
         }
       ],
-      "OUTPUT": [ {
+      "OUTPUT": [
+        {
           "array_name": "C",
           "distance": "(0,0, 0,  )",
           "extra": "scalar"
@@ -56,8 +58,10 @@
           "array_name": "B",
           "distance": "(xB,yB, )",
           "extra": "scalar"
-        }],
-      "INPUT": [ {
+        }
+      ],
+      "INPUT": [
+        {
           "array_name": "C",
           "distance": "(0,0, 0,  )",
           "extra": "scalar"
@@ -66,7 +70,8 @@
           "array_name": "A",
           "distance": "(xA,)",
           "extra": "scalar"
-        }]
+        }
+      ]
     }
   }
 ]
