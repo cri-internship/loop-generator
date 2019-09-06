@@ -4,7 +4,6 @@ import random
 import string
 import re
 
-
 import cgen as c
 
 import loops_gen_random as lgr
@@ -26,12 +25,12 @@ literal_values_destination = set()
 maths_operations = ['+', '-', '*', '/']
 amount_of_vars = 0
 
+
 def gen_random_scalar():
-    if typ=='int':
+    if typ == 'int':
         return random.randint(0, 50)
     else:
         return round(random.random(), 5)
-
 
 
 def flow_dependency(dest_array_name, source_array_name, optimize, extra):
@@ -101,10 +100,10 @@ def anti_dependency(dest_array_name, source_array_name, optimize, extra):
     arr_def = (arr_name, all_arrays[arr_name])
     if extra == 'random':
         if optimize:
-            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}'
+            result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}'
         else:
-            result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)};\n' + \
-                     loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]}'
+            result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)};\n' + \
+                     loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}'
     else:
         if optimize:
             result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
@@ -118,8 +117,8 @@ def output_dependency(dest_array_name, _, __, extra):
     arr_name = dest_array_name.partition('[')[0]
     arr_def = (arr_name, all_arrays[arr_name])
     if extra == 'random':
-        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]};\n' + \
-                 loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]}'
+        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]};\n' + \
+                 loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}'
     else:
         result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()};\n' + \
                  loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()}'
@@ -131,7 +130,7 @@ def input_dependency(_, source_array_name, __, extra):
     arr_def = (arr_name, all_arrays[arr_name])
     if extra == 'random':
         result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)};\n' + \
-                 loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}'
+                 loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}'
     else:
         result = '\n' + loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()};\n' + \
                  loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
@@ -187,7 +186,7 @@ def gen_calc_for_read(num_of_calculations, arr_def):
 
 
 def generate_arrays_with_indexes1(num_of_calculations, arr_def):
-    #temporarily remove the array on which we do dependencies
+    # temporarily remove the array on which we do dependencies
     tmp_used, tmp_unused = False, False
     if arr_def in unique_arrays_read['unused']:
         tmp_unused = True
@@ -260,9 +259,10 @@ def parse_input():
     with open(input_file, 'r') as file:
         data = json.load(file)
         data = data[0]
-        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, typ, rand_num_of_calculations
+        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, typ, rand_num_of_calculations, init_with
         loop_nest_level = data['loop_nest_level']
         typ = data['type']
+        init_with = validate_init_with(data['init_with'])
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
         array_sizes = data['array_sizes']
@@ -278,6 +278,13 @@ def parse_input():
         rand_num_of_calculations = []
     for i in range(len(unique_arrays_read["unused"]) - 1):
         rand_num_of_calculations.append(i + 1)
+
+
+def validate_init_with(init_with):
+    if not init_with == 'ones' and not init_with == 'zeros' and not init_with == 'random':
+        raise TypeError("Init with can be 'random', 'ones' or 'zeros'")
+    else:
+        return init_with
 
 
 def parse_dependencies(all_dependencies):
@@ -372,7 +379,7 @@ def create_nested_loop():
 def init_arrays(file=result_c_file):
     """Init all arrays"""
     for array_name, array_size in all_arrays.items():
-        lgr.write_init_array(array_name, array_size, file, typ)
+        lgr.write_init_array(array_name, array_size, file, typ, init_with)
 
 
 def run_dependencies():
@@ -478,9 +485,9 @@ def global_bounds():
     return concat_depen
 
 
-def populate_literal_values(literal_values_set, source): #todo check if there are better functions to process a string
-    source = "".join(source.split()) #remove all whitespaces
-    if source[-1] == ";": #if source ends with ; just remove it
+def populate_literal_values(literal_values_set, source):  # todo check if there are better functions to process a string
+    source = "".join(source.split())  # remove all whitespaces
+    if source[-1] == ";":  # if source ends with ; just remove it
         source = source[:-1]
     expresion_as_stringg = re.split('[+\-*/]+', source)
     result = [arr for arr in expresion_as_stringg if arr[0].isalpha()]
@@ -489,4 +496,3 @@ def populate_literal_values(literal_values_set, source): #todo check if there ar
 
 if __name__ == '__main__':
     parse_input()
-

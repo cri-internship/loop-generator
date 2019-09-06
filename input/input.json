@@ -5,6 +5,7 @@
       "e": 50
     },
     "type": "float",
+    "init_with": "ones",
     "distances": {
       "xA": 1,
       "xB": 2,

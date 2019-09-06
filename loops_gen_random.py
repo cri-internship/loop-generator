@@ -81,16 +81,16 @@ def init_arrays(file=file_name):
     return dict_of_arrays
 
 
-def write_init_array(array_name, array_sizes, file, typ='float'):
+def write_init_array(array_name, array_sizes, file, typ='float', init_with='random'):
     """Write declaration and calling functions to init arrays to file"""
     if type(array_sizes) == tuple and len(array_sizes) == 1:
-        init_array = c.Statement('\n\t{} {}{} = {}{}({})'.format(typ,  '*' * len(array_sizes), array_name,
-                                                                  array_init_functions[len(array_sizes)],typ,
-                                                                  str(array_sizes)[1:-2]))
+        init_array = c.Statement('\n\t{} {}{} = {}{}({}, "{}")'.format(typ, '*' * len(array_sizes), array_name,
+                                                                       array_init_functions[len(array_sizes)], typ,
+                                                                       str(array_sizes)[1:-2], init_with))
     else:
-        init_array = c.Statement('\n\t{} {}{} = {}{}({})'.format(typ, '*' * len(array_sizes), array_name,
-                                                                  array_init_functions[len(array_sizes)],typ,
-                                                                  str(array_sizes)[1:-1]))
+        init_array = c.Statement('\n\t{} {}{} = {}{}({}, "{}")'.format(typ, '*' * len(array_sizes), array_name,
+                                                                       array_init_functions[len(array_sizes)], typ,
+                                                                       str(array_sizes)[1:-1], init_with))
     with open(file, 'a+') as file:
         file.write(str(init_array))
 
