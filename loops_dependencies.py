@@ -64,7 +64,7 @@ def gen_scalar_part(dest_array_name, source_array_name, optimize):
         result = gen_one_stmt(dest_array_name, source)
     else:
         source = f'{round(random.random(), 5)};\n' + loop_nest_level * '  '
-        destination1 = f'{generate_random_var("float ")}'
+        destination1 = f'{generate_var("float ")}'
         source1 = f'{source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}'
         result = gen_full_stmt(dest_array_name, source, source1, destination1)
     return result
@@ -137,9 +137,6 @@ def input_dependency(_, source_array_name, __, extra):
                  loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
     return result
 
-
-def generate_random_var(type):
-    random_var = type + random.choice(string.ascii_letters)
 
 def generate_var(type):
     global amount_of_vars
@@ -322,31 +319,6 @@ def parse_dependencies(all_dependencies):
                 distances = tuple(distances)
             dependency['distance'] = distances
     return all_dependencies
-
-    #         dependency['distance'] = distance  # todo a change was made here
-    # print('dep=')
-    # print(all_dependencies)
-    #
-    # for dependency_name, dependency in dependencies.items():
-    #     for array_name, distances in dependency.items():
-    #         for index in range(len(distances)):
-    #             distance = distances[index]
-    #             if distance == 0:
-    #                 distance = (0, 0)
-    #             else:
-    #                 dest_dist = random.randrange(distance)
-    #                 if dependency_name == 'FLOW':
-    #                     distance = (dest_dist, -distance + dest_dist)
-    #                 elif dependency_name == 'ANTI':
-    #                     distance = (dest_dist, distance + dest_dist)
-    #                 else:
-    #                     flip = random.choice(('-1', '+1'))
-    #                     distance = (dest_dist, eval(flip) * distance + dest_dist)
-    #             distances = list(distances)
-    #             distances[index] = distance
-    #             distances = tuple(distances)
-    #         dependency[array_name] = distances
-    # return all_dependencies
 
 
 def generate_nested_loops(loop_nest_depth, affine):
