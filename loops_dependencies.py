@@ -3,10 +3,8 @@ import math
 import random
 import string
 import re
-
-
 import cgen as c
-
+import collections
 import loops_gen_random as lgr
 
 result_c_file = 'src/feature1.c'
@@ -20,8 +18,10 @@ dependency_function = {'FLOW': (lambda dest, source, optimize, extra: flow_depen
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
-literal_values_source = set()
-literal_values_destination = set()
+literal_values_source = {}
+literal_values_destination = {}
+
+stmt_counter = 0
 
 maths_operations = ['+', '-', '*', '/']
 amount_of_vars = 0
@@ -31,7 +31,6 @@ def gen_random_scalar():
         return random.randint(0, 50)
     else:
         return round(random.random(), 5)
-
 
 
 def flow_dependency(dest_array_name, source_array_name, optimize, extra):
@@ -71,28 +70,58 @@ def gen_scalar_part(dest_array_name, source_array_name, optimize):
 
 
 def gen_one_stmt(dest_array_name, source):
+    global stmt_counter
     destination = loop_nest_level * '  ' + f'{dest_array_name}'
-    literal_values_destination.add(destination)
+    destination = "".join(destination.split())  # remove all whitespaces
+    if destination not in literal_values_destination.keys():
+        literal_values_destination[destination] = [1, stmt_counter]
+    else: #todo use the fucntion that we have, and then give "0" above as a first parameter
+        literal_values_destination[destination][0] += 1
     populate_literal_values(literal_values_source, source)
     result = '\n' + destination + '=' + source
+    stmt_counter += 1
     return result
 
 
 def gen_full_stmt(dest_array_name, source, source1, destination1):
+    global stmt_counter
     result = ""
     destination = '\n' + loop_nest_level * '  ' + f'{dest_array_name}'
-    destination = "".join(destination.split())  # remove all whitespaces
-    if destination not in literal_values_source:
-        literal_values_destination.add(destination)
+    destination = "".join(destination.split())  # remove all whitespaces todo doesn't make sense with the line above
+
+    generate_stmt = True # todo not so good solution, because the flow is weird, do it in a better way!
+    if destination in literal_values_destination.keys() and destination in literal_values_source.keys(): #if both were used
+        dest_usage = literal_values_destination[destination][1]
+        source_usage = literal_values_source[destination][1] #check if dest has been used as a sorce
+        if dest_usage < source_usage:
+            generate_stmt = False
+    elif destination in literal_values_destination.keys():
+        destination = destination1
+        literal_values_destination[destination][0] += 1
+        source = source1
         populate_literal_values(literal_values_source, source)
         result += '\n' + destination + '=' + source
-    destination = destination1
+        stmt_counter += 1
+        generate_stmt = False
 
-    literal_values_destination.add(destination)
-    source = source1
-    populate_literal_values(literal_values_source, source)
-    result += '\n' + destination + '=' + source
+    if generate_stmt:
+        if destination not in literal_values_destination.keys(): #todo fot this moment ALWAYS true
+            literal_values_destination[destination] = [1, stmt_counter]
+        else:
+            literal_values_destination[destination][0] += 1
+        populate_literal_values(literal_values_source, source)
+        result += '\n' + destination + '=' + source
+        stmt_counter += 1
 
+        destination = destination1
+        if destination not in literal_values_destination.keys():
+            literal_values_destination[destination] = [1, stmt_counter]
+        else:
+            literal_values_destination[destination][0] += 1
+        source = source1
+        populate_literal_values(literal_values_source, source)
+        result += '\n' + destination + '=' + source
+        stmt_counter += 1
     return result
 
 
@@ -478,15 +507,26 @@ def global_bounds():
     return concat_depen
 
 
-def populate_literal_values(literal_values_set, source): #todo check if there are better functions to process a string
-    source = "".join(source.split()) #remove all whitespaces
-    if source[-1] == ";": #if source ends with ; just remove it
-        source = source[:-1]
-    expresion_as_stringg = re.split('[+\-*/]+', source)
-    result = [arr for arr in expresion_as_stringg if arr[0].isalpha()]
-    literal_values_set.update(result)
+def populate_literal_values(literal_values_set, data): #todo check if there are better functions to process a string
+    data = "".join(data.split()) #remove all whitespaces
+    # print("DATA #"+ str(data) + "#")
+    if data[-1] == ";": #if data ends with ; just remove it
+        data = data[:-1]
+    expresion_as_string = re.split('[+\-*/]+', data)
+    # print("EAS *"+ str(expresion_as_string) + "*")
+
+    result = [arr for arr in expresion_as_string if arr[0].isalpha()] #filter only not-scalar values
+
+    # print("RESULT *"+ str(result) + "*")
+
+    for res in result:
+        # print("RES *" + str(res) + "*")
+
+        if res not in literal_values_set.keys():
+            literal_values_set[res] = [0, stmt_counter] #todo this shouldn't change the stmt_counter
+        literal_values_set[res][0] += 1
+        # print(">>> " + str(literal_values_set) + " " + str(res) + " " + str(stmt_counter))
 
 
 if __name__ == '__main__':
     parse_input()
-
