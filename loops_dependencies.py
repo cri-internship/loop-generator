@@ -495,7 +495,7 @@ def populate_literal_values(literal_values_set, source):  # todo check if there 
 
 
 def get_arrays_from_srting(string):
-    string = re.findall(r'\w+\[.*?\]', string)
+    return re.findall(r'\w+\[.*?\]', string)
 
 
 if __name__ == '__main__':
