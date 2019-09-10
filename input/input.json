@@ -26,21 +26,72 @@
     ],
     "dependencies": {
       "FLOW": [
-      ],
-      "ANTI": [
-      ],
-      "OUTPUT": [
+
+        {
+          "array_name": "A",
+          "distance": "(0,)",
+          "extra": "random"
+        },
         {
           "array_name": "C",
           "distance": "(1,0,0,)",
           "extra": "random"
+        },
+        {
+          "array_name": "C",
+          "distance": "(1,0,0,)",
+          "extra": "scalar"
+        }
+      ],
+      "ANTI": [
+        {
+          "array_name": "A",
+          "distance": "(0,)",
+          "extra": "random"
+        },
+        {
+          "array_name": "C",
+          "distance": "(1,0,0,)",
+          "extra": "random"
+        },
+        {
+          "array_name": "C",
+          "distance": "(1,0,0,)",
+          "extra": "scalar"
+        }
+      ],
+      "OUTPUT": [
+        {
+          "array_name": "A",
+          "distance": "(0,)",
+          "extra": "random"
+        },
+        {
+          "array_name": "C",
+          "distance": "(1,0,0,)",
+          "extra": "random"
+        },
+        {
+          "array_name": "C",
+          "distance": "(1,0,0,)",
+          "extra": "scalar"
         }
       ],
       "INPUT": [
         {
+          "array_name": "A",
+          "distance": "(0,)",
+          "extra": "scalar"
+        },
+        {
           "array_name": "C",
           "distance": "(1,0,0,)",
           "extra": "random"
+        },
+        {
+          "array_name": "C",
+          "distance": "(1,0,0,)",
+          "extra": "scalar"
         }
       ]
     }

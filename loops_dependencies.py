@@ -55,7 +55,7 @@ def gen_random_part(dest_array_name, source_array_name, optimize, arr_def):
         if dest_array_name in literal_values_destination.keys() and source_array_name in literal_values_source.keys():
             result = ""
         else:
-            result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+            result = stmt_body['destination'][0] + '=' + stmt_body['source'][0]
             populate_values(dest_array_name, source_array_name)
     else:
         stmt_body['destination'] = [dest_array_name,
@@ -72,12 +72,11 @@ def gen_scalar_part(dest_array_name, source_array_name, optimize):
         stmt_body['destination'] = [dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}']
         # result = gen_one_line_flow(stmt_body)
-        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][
-            0] in literal_values_source.keys():
+        if dest_array_name in literal_values_destination.keys() and source_array_name in literal_values_source.keys():
             result = ""
         else:
-            result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
-            populate_values(stmt_body['destination'][0], stmt_body['source'][0])
+            result = stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+            populate_values(dest_array_name, source_array_name)
     else:
         stmt_body['destination'] = [dest_array_name, f'{generate_var("float ")}']
         stmt_body['source'] = [f'{round(random.random(), 5)}',
@@ -111,12 +110,12 @@ def gen_one_line_flow(stmt_body, element):
     source = stmt_body['source'][element]
     populate_values(destination, source)
     inc_stmt_counter()
-    result = add_indent() + destination + '=' + source
+    result = destination + '=' + source
     return result
 
 
 def gen_full_stmt_flow(stmt_body):
-    result = add_indent() + gen_one_line_flow(stmt_body, 0) #+ ';\n'
+    result = gen_one_line_flow(stmt_body, 0) + ';\n'
     result += add_indent() + gen_one_line_flow(stmt_body, 1)
     return result
 
@@ -138,16 +137,11 @@ def gen_random_part_anti(dest_array_name, source_array_name, optimize, arr_def):
         stmt_body['source'] = [
             f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
         # result = gen_based_on_usage_flow(stmt_body,0)
-        print("Curr dest " + str(stmt_body['destination'][0]))
-        print("Curr sour " + str(stmt_body['source'][0]))
-        print("dest " + str(literal_values_destination.keys()))
-        print("sour" + str(literal_values_source.keys()))
-        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][
-            0] in literal_values_source.keys():
+        if dest_array_name in literal_values_destination.keys() and source_array_name in literal_values_source.keys():
             result = ""
         else:
-            result = add_indent() + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
-        populate_values(stmt_body['destination'][0],stmt_body['source'][0] )
+            result = stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+            populate_values(stmt_body['destination'][0], stmt_body['source'][0])
     else:
         stmt_body['destination'] = [f'{gen_random_stmt(unique_arrays_write)}',
                                     dest_array_name]
@@ -163,12 +157,12 @@ def gen_scalar_part_anti(dest_array_name, source_array_name, optimize):
     if optimize:
         stmt_body['destination'] = [dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}']
-        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][
-            0] in literal_values_source.keys():
+        if dest_array_name in literal_values_destination.keys() and source_array_name in literal_values_source.keys():
             result = ""
         # result = gen_one_line_flow(stmt_body, 0)
         else:
-            result = add_indent() + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+            result = stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+            populate_values(stmt_body['destination'][0], stmt_body['source'][0])
     else:
         stmt_body['destination'] = [f'{generate_var(typ)}', dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}',
@@ -202,12 +196,12 @@ def gen_one_line_anti(stmt_body, element):
     source = stmt_body['source'][element]
     populate_values(destination, source)
     inc_stmt_counter()
-    result = add_indent() + destination + '=' + source
+    result = destination + '=' + source
     return result
 
 
 def gen_full_stmt_anti(stmt_body):
-    result = add_indent() + gen_one_line_anti(stmt_body, 0) #+ ';\n'
+    result = gen_one_line_anti(stmt_body, 0) + ';\n'
     result += add_indent() + gen_one_line_anti(stmt_body, 1)
     return result
 
@@ -236,7 +230,7 @@ def gen_based_on_usage_output(dest_array_name, stmt_body):
         elif dest_usage == 1:
             result = gen_stmt_output(stmt_body, 0)
     else:
-        result = add_indent() + gen_stmt_output(stmt_body, 0) + ';'
+        result = gen_stmt_output(stmt_body, 0) + ';\n'
         result += add_indent() + gen_stmt_output(stmt_body, 1)
     return result
 
@@ -246,7 +240,7 @@ def gen_stmt_output(stmt_body, element):
     source = stmt_body['source'][element]
     populate_values(destination, source)
     inc_stmt_counter()
-    result = add_indent() + destination + '=' + source
+    result = destination + '=' + source
     return result
 
 
@@ -277,7 +271,7 @@ def gen_based_on_usage(source_array_name, arr_def, stmt_body):
         elif source_usage == 1:
             result = gen_stmt_input(stmt_body, 0)
     else:
-        result = add_indent() + gen_stmt_input(stmt_body, 0) + ';'
+        result = gen_stmt_input(stmt_body, 0) + ';\n'
         result += add_indent() + gen_stmt_input(stmt_body, 1)
     return result
 
@@ -286,9 +280,9 @@ def gen_stmt_input(stmt_body, element):
     destination = stmt_body['destination'][element]
     source = stmt_body['source'][element]
     populate_values(destination, source)
-    result = add_indent() + destination + '=' + source
+    result = destination + '=' + source
     inc_stmt_counter()
-    return add_indent() + result
+    return result
 
 
 def populate_values(destination, source):
@@ -485,6 +479,7 @@ def parse_dependencies(all_dependencies):
                     else:
                         flip = random.choice(('-1', '+1'))
                         distance = (dest_dist, eval(flip) * distance + dest_dist)
+
                 distances = list(distances)
                 distances[index] = distance
                 distances = tuple(distances)
@@ -662,7 +657,7 @@ def get_arrays_from_string(str):
 
 
 def add_indent():
-    return '\n' + " " * (loop_nest_level + 4)
+    return " " * (loop_nest_level + 3)
 
 
 if __name__ == '__main__':
