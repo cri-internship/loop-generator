@@ -1,5 +1,6 @@
 import loops_dependencies as ld
 
+
 def create_cfile_head():
     """Read C functions from functions_for_c.txt and write it to feature.c """
     start_c = """#include <stdio.h>
@@ -35,5 +36,3 @@ if __name__ == '__main__':
     create_cfile_tail()
     # print("SOUR " + str(ld.literal_values_source))
     # print("DEST " + str(ld.literal_values_destination))
-
-

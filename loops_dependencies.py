@@ -4,7 +4,6 @@ import random
 import string
 import re
 
-
 import cgen as c
 
 import loops_gen_random as lgr
@@ -27,6 +26,7 @@ stmt_counter = 0
 
 maths_operations = ['+', '-', '*', '/']
 amount_of_vars = 0
+
 
 def gen_random_scalar():
     if typ == 'int':
@@ -61,7 +61,7 @@ def gen_random_part(dest_array_name, source_array_name, optimize, arr_def):
         stmt_body['destination'] = [dest_array_name,
                                     f'{gen_random_stmt(unique_arrays_write)}']
         stmt_body['source'] = [f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}',
-                               f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}']
+                               f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
         result = gen_based_on_usage_flow(stmt_body)
     return result
 
@@ -72,11 +72,12 @@ def gen_scalar_part(dest_array_name, source_array_name, optimize):
         stmt_body['destination'] = [dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}']
         # result = gen_one_line_flow(stmt_body)
-        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][0] in literal_values_source.keys():
+        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][
+            0] in literal_values_source.keys():
             result = ""
         else:
             result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
-            populate_values(stmt_body['destination'][0],stmt_body['source'][0] )
+            populate_values(stmt_body['destination'][0], stmt_body['source'][0])
     else:
         stmt_body['destination'] = [dest_array_name, f'{generate_var("float ")}']
         stmt_body['source'] = [f'{round(random.random(), 5)}',
@@ -134,18 +135,20 @@ def gen_random_part_anti(dest_array_name, source_array_name, optimize, arr_def):
     stmt_body = {}
     if optimize:
         stmt_body['destination'] = [dest_array_name]
-        stmt_body['source'] = [f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
+        stmt_body['source'] = [
+            f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
         # result = gen_based_on_usage_flow(stmt_body,0)
         print("Curr dest " + str(stmt_body['destination'][0]))
         print("Curr sour " + str(stmt_body['source'][0]))
         print("dest " + str(literal_values_destination.keys()))
         print("sour" + str(literal_values_source.keys()))
-        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][0] in literal_values_source.keys():
+        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][
+            0] in literal_values_source.keys():
             result = ""
         else:
             print("ok")
             result = '\n' + ' ' * (loop_nest_level + 3) + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
-        populate_values(stmt_body['destination'][0],stmt_body['source'][0] )
+        populate_values(stmt_body['destination'][0], stmt_body['source'][0])
     else:
         stmt_body['destination'] = [f'{gen_random_stmt(unique_arrays_write)}',
                                     dest_array_name]
@@ -161,7 +164,8 @@ def gen_scalar_part_anti(dest_array_name, source_array_name, optimize):
     if optimize:
         stmt_body['destination'] = [dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}']
-        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][0] in literal_values_source.keys():
+        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][
+            0] in literal_values_source.keys():
             result = ""
         # result = gen_one_line_flow(stmt_body, 0)
         else:
@@ -209,17 +213,17 @@ def gen_full_stmt_anti(stmt_body):
     return result
 
 
-def output_dependency(dest_array_name, _, __, extra):
+def output_dependency(dest_array_name, source_array_name, __, extra):
     arr_name = dest_array_name.partition('[')[0]
     arr_def = (arr_name, all_arrays[arr_name])
     stmt_body = {}
     if extra == 'random':
-        stmt_body['destination'] = [f'{dest_array_name}', f'{dest_array_name}']
+        stmt_body['destination'] = [f'{dest_array_name}', f'{source_array_name}']
         stmt_body['source'] = [f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}',
                                f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}']
         result = gen_based_on_usage_output(dest_array_name, stmt_body)
     else:
-        stmt_body['destination'] = [f'{dest_array_name}', f'{dest_array_name}']
+        stmt_body['destination'] = [f'{dest_array_name}', f'{source_array_name}']
         stmt_body['source'] = [f'{gen_random_scalar()}', f'{gen_random_scalar()}']
         result = gen_based_on_usage_output(dest_array_name, stmt_body)
     return result
@@ -247,7 +251,7 @@ def gen_stmt_output(stmt_body, element):
     return result
 
 
-def input_dependency(_, source_array_name, __, extra):
+def input_dependency(dest_array_name, source_array_name, __, extra):
     arr_name = source_array_name.partition('[')[0]
     arr_def = (arr_name, all_arrays[arr_name])
     generate_stmt = True
@@ -257,12 +261,12 @@ def input_dependency(_, source_array_name, __, extra):
         stmt_body['destination'] = [f'{gen_random_stmt(unique_arrays_write)}',
                                     f'{gen_random_stmt(unique_arrays_write)}']
         stmt_body['source'] = [
-            f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}',
+            f'{dest_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}',
             f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
         result = gen_based_on_usage(source_array_name, arr_def, stmt_body)
     else:
         stmt_body['destination'] = [f'{generate_var(typ)}', f'{generate_var(typ)}']
-        stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}',
+        stmt_body['source'] = [f'{dest_array_name}{random.choice(maths_operations)}{gen_random_scalar()}',
                                f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}']
         result = gen_based_on_usage(source_array_name, arr_def, stmt_body)
     return result

@@ -26,31 +26,21 @@
     ],
     "dependencies": {
       "FLOW": [
-        {
-          "array_name": "C",
-          "distance": "(0,0,0,)",
-          "extra": "scalar"
-        }
       ],
       "ANTI": [
-        {
-          "array_name": "C",
-          "distance": "(0,0,0,)",
-          "extra": "scalar"
-        }
       ],
       "OUTPUT": [
         {
           "array_name": "C",
-          "distance": "(0,0,0,)",
-          "extra": "scalar"
+          "distance": "(1,0,0,)",
+          "extra": "random"
         }
       ],
       "INPUT": [
         {
           "array_name": "C",
-          "distance": "(0,0,0,)",
-          "extra": "scalar"
+          "distance": "(1,0,0,)",
+          "extra": "random"
         }
       ]
     }
