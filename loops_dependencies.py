@@ -26,11 +26,13 @@ stmt_counter = 0
 maths_operations = ['+', '-', '*', '/']
 amount_of_vars = 0
 
+
 def gen_random_scalar():
-    if typ=='int':
+    if typ == 'int':
         return random.randint(0, 50)
     else:
         return round(random.random(), 5)
+
 
 def flow_dependency(dest_array_name, source_array_name, optimize, extra):
     arr_name = dest_array_name.partition('[')[0]
@@ -46,14 +48,19 @@ def gen_random_part(dest_array_name, source_array_name, optimize, arr_def):
     stmt_body = {}
     if optimize:
         stmt_body['destination'] = [dest_array_name]
-        stmt_body['source'] = [f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
-        # result = gen_based_on_usage_flow(stmt_body,0)
-        result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+        stmt_body['source'] = [
+            f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
+        # result = gen_based_on_usage_flow(stmt_body)
+        if dest_array_name in literal_values_destination.keys() and source_array_name in literal_values_source.keys():
+            result = ""
+        else:
+            result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+            populate_values(dest_array_name, source_array_name)
     else:
         stmt_body['destination'] = [dest_array_name,
                                     f'{gen_random_stmt(unique_arrays_write)}']
         stmt_body['source'] = [f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}',
-                                f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
+                               f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}']
         result = gen_based_on_usage_flow(stmt_body)
     return result
 
@@ -63,8 +70,12 @@ def gen_scalar_part(dest_array_name, source_array_name, optimize):
     if optimize:
         stmt_body['destination'] = [dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}']
-        # result = gen_one_line_flow(stmt_body, 0)
-        result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+        # result = gen_one_line_flow(stmt_body)
+        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][0] in literal_values_source.keys():
+            result = ""
+        else:
+            result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+            populate_values(stmt_body['destination'][0],stmt_body['source'][0] )
     else:
         stmt_body['destination'] = [dest_array_name, f'{generate_var("float ")}']
         stmt_body['source'] = [f'{round(random.random(), 5)}',
@@ -76,12 +87,12 @@ def gen_scalar_part(dest_array_name, source_array_name, optimize):
 def gen_based_on_usage_flow(stmt_body):
     array = stmt_body['destination'][0]
     if satisfies_flow(array):
-            dest_usage = literal_values_destination[array][1]
-            source_usage = literal_values_source[array][1]
-            if dest_usage < source_usage:
-                result = ""
-            else:
-                result = gen_full_stmt_flow(stmt_body)
+        dest_usage = literal_values_destination[array][1]
+        source_usage = literal_values_source[array][1]
+        if dest_usage <= source_usage:
+            result = ""
+        else:
+            result = gen_full_stmt_flow(stmt_body)
     elif array in literal_values_destination.keys():
         result = gen_one_line_flow(stmt_body, 1)
     else:
@@ -98,15 +109,16 @@ def gen_one_line_flow(stmt_body, element):
     source = stmt_body['source'][element]
     populate_values(destination, source)
     inc_stmt_counter()
-    result = '\n' + destination + '=' + source
+    result = '\n' + ' ' * (loop_nest_level + 3) + destination + '=' + source
     return result
 
 
 def gen_full_stmt_flow(stmt_body):
-    result = gen_one_line_flow(stmt_body,0) + ';\n'
-    result += gen_one_line_flow(stmt_body,1)
+    result = '\n' + ' ' * (loop_nest_level + 3) + gen_one_line_flow(stmt_body, 0) + ';'
+    result += '\n' + ' ' * (loop_nest_level + 3) + gen_one_line_flow(stmt_body, 1)
     return result
-##############################################
+
+
 def anti_dependency(dest_array_name, source_array_name, optimize, extra):
     arr_name = dest_array_name.partition('[')[0]
     arr_def = (arr_name, all_arrays[arr_name])
@@ -121,10 +133,18 @@ def gen_random_part_anti(dest_array_name, source_array_name, optimize, arr_def):
     stmt_body = {}
     if optimize:
         stmt_body['destination'] = [dest_array_name]
-        stmt_body['source'] = [
-            f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
+        stmt_body['source'] = [f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
         # result = gen_based_on_usage_flow(stmt_body,0)
-        result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+        print("Curr dest " + str(stmt_body['destination'][0]))
+        print("Curr sour " + str(stmt_body['source'][0]))
+        print("dest " + str(literal_values_destination.keys()))
+        print("sour" + str(literal_values_source.keys()))
+        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][0] in literal_values_source.keys():
+            result = ""
+        else:
+            print("ok")
+            result = '\n' + ' ' * (loop_nest_level + 3) + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+        populate_values(stmt_body['destination'][0],stmt_body['source'][0] )
     else:
         stmt_body['destination'] = [f'{gen_random_stmt(unique_arrays_write)}',
                                     dest_array_name]
@@ -140,8 +160,11 @@ def gen_scalar_part_anti(dest_array_name, source_array_name, optimize):
     if optimize:
         stmt_body['destination'] = [dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}']
+        if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][0] in literal_values_source.keys():
+            result = ""
         # result = gen_one_line_flow(stmt_body, 0)
-        result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+        else:
+            result = '\n' + ' ' * (loop_nest_level + 3) + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
     else:
         stmt_body['destination'] = [f'{generate_var(typ)}', dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}',
@@ -152,7 +175,6 @@ def gen_scalar_part_anti(dest_array_name, source_array_name, optimize):
 
 def gen_based_on_usage_anti(stmt_body, source_array_name):
     array = source_array_name
-    print("ARR " + array)
     if satisfies_anti(array):
         dest_usage = literal_values_destination[array][1]
         source_usage = literal_values_source[array][1]
@@ -181,40 +203,8 @@ def gen_one_line_anti(stmt_body, element):
 
 
 def gen_full_stmt_anti(stmt_body):
-    result = gen_one_line_anti(stmt_body, 0) + ';\n'
-    result += gen_one_line_anti(stmt_body, 1)
-    return result
-
-# def anti_dependency(dest_array_name, source_array_name, optimize, extra):
-#     print("dest_array_name " + str(dest_array_name))
-#     print("source_array_name " + str(source_array_name))
-#
-#     arr_name = dest_array_name.partition('[')[0]
-#     arr_def = (arr_name, all_arrays[arr_name])
-#     if extra == 'random':
-#         if optimize:
-#             result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}'
-#         else:
-#             result = '\n' + loop_nest_level * '  ' + f'{gen_random_stmt(unique_arrays_write)}={source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)};\n' + \
-#                      loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]}'
-#     else:
-#         if optimize:
-#             result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
-#         else:
-#             result = '\n' + loop_nest_level * '  ' + f'{generate_var(typ)}={source_array_name}{random.choice(maths_operations)}{gen_random_scalar()};\n' + \
-#                      loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()}'
-#     return result
-
-
-def output_dependency1(dest_array_name, _, __, extra):
-    arr_name = dest_array_name.partition('[')[0]
-    arr_def = (arr_name, all_arrays[arr_name])
-    if extra == 'random':
-        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]};\n' + \
-                 loop_nest_level * '  ' + f'{dest_array_name}={gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]}'
-    else:
-        result = '\n' + loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()};\n' + \
-                 loop_nest_level * '  ' + f'{dest_array_name}={gen_random_scalar()}'
+    result = '\n' + ' ' * (loop_nest_level + 3) + gen_one_line_anti(stmt_body, 0) + ';'
+    result += '\n' + ' ' * (loop_nest_level + 3) + gen_one_line_anti(stmt_body, 1)
     return result
 
 
@@ -223,12 +213,12 @@ def output_dependency(dest_array_name, _, __, extra):
     arr_def = (arr_name, all_arrays[arr_name])
     stmt_body = {}
     if extra == 'random':
-        stmt_body['destination'] =[f'{dest_array_name}', f'{dest_array_name}']
+        stmt_body['destination'] = [f'{dest_array_name}', f'{dest_array_name}']
         stmt_body['source'] = [f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}',
-        f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}']
+                               f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}']
         result = gen_based_on_usage_output(dest_array_name, stmt_body)
     else:
-        stmt_body['destination'] =[f'{dest_array_name}', f'{dest_array_name}']
+        stmt_body['destination'] = [f'{dest_array_name}', f'{dest_array_name}']
         stmt_body['source'] = [f'{gen_random_scalar()}', f'{gen_random_scalar()}']
         result = gen_based_on_usage_output(dest_array_name, stmt_body)
     return result
@@ -252,7 +242,7 @@ def gen_stmt_output(stmt_body, element):
     source = stmt_body['source'][element]
     populate_values(destination, source)
     inc_stmt_counter()
-    result = '\n' + destination + '=' + source
+    result = '\n' + ' ' * (loop_nest_level + 3) + destination + '=' + source
     return result
 
 
@@ -263,9 +253,11 @@ def input_dependency(_, source_array_name, __, extra):
     result = ""
     stmt_body = {}
     if extra == 'random':
-        stmt_body['destination'] = [f'{gen_random_stmt(unique_arrays_write)}', f'{gen_random_stmt(unique_arrays_write)}']
-        stmt_body['source'] = [f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}',
-                               f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
+        stmt_body['destination'] = [f'{gen_random_stmt(unique_arrays_write)}',
+                                    f'{gen_random_stmt(unique_arrays_write)}']
+        stmt_body['source'] = [
+            f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}',
+            f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
         result = gen_based_on_usage(source_array_name, arr_def, stmt_body)
     else:
         stmt_body['destination'] = [f'{generate_var(typ)}', f'{generate_var(typ)}']
@@ -281,10 +273,10 @@ def gen_based_on_usage(source_array_name, arr_def, stmt_body):
         if source_usage >= 2:
             result = ""  # TODO maybe None???
         elif source_usage == 1:
-            result = gen_stmt_input(stmt_body,0)
+            result = gen_stmt_input(stmt_body, 0)
     else:
-        result = gen_stmt_input(stmt_body,0) + ';'
-        result += gen_stmt_input(stmt_body,1)
+        result = '\n' + ' ' * (loop_nest_level + 3) + gen_stmt_input(stmt_body, 0) + ';'
+        result += '\n' + ' ' * (loop_nest_level + 3) + gen_stmt_input(stmt_body, 1)
     return result
 
 
@@ -292,9 +284,9 @@ def gen_stmt_input(stmt_body, element):
     destination = stmt_body['destination'][element]
     source = stmt_body['source'][element]
     populate_values(destination, source)
-    result = '\n' + destination + '=' + source
+    result = '\n' + ' ' * (loop_nest_level + 3) + destination + '=' + source
     inc_stmt_counter()
-    return '\n' + result
+    return '\n' + ' ' * (loop_nest_level + 3) + result
 
 
 def populate_values(destination, source):
@@ -305,60 +297,6 @@ def populate_values(destination, source):
 def inc_stmt_counter():
     global stmt_counter
     stmt_counter += 1
-
-
-def input_dependency1(_, source_array_name, __, extra):
-    arr_name = source_array_name.partition('[')[0]
-    arr_def = (arr_name, all_arrays[arr_name])
-    generate_stmt = True
-    result = ""
-    global stmt_counter
-    if extra == 'random':
-        if source_array_name in literal_values_source.keys():
-            source_usage = literal_values_source[source_array_name][0]
-            if source_usage >= 2:
-                generate_stmt = False
-            elif source_usage == 1:
-                destination = f'{gen_random_stmt(unique_arrays_write)}'
-                source = f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}'
-                result = '\n' + destination + "=" + source
-                stmt_counter += 1
-                generate_stmt = False
-        if generate_stmt:
-            destination = f'{gen_random_stmt(unique_arrays_write)}'
-            populate_literal_values(literal_values_destination, destination)
-            stmt_counter += 1
-            source = f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}'
-            populate_literal_values(literal_values_source, source)
-            destination1 = f'{gen_random_stmt(unique_arrays_write)}'
-            populate_literal_values(literal_values_destination, destination1)
-            source1 = f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}'
-            populate_literal_values(literal_values_source, source1)
-            stmt_counter += 1
-            result = '\n' + destination + '=' + source + ';' + '\n' + destination1 + "=" + source1
-    else:
-        if source_array_name in literal_values_source.keys():
-            source_usage = literal_values_source[source_array_name][0]
-            if source_usage >= 2:
-                generate_stmt = False
-            elif source_usage == 1:
-                source = f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
-                destination = f'{generate_var(typ)}'
-                populate_literal_values(literal_values_destination, destination)
-                populate_literal_values(literal_values_source, source)
-                generate_stmt = False
-                stmt_counter += 1
-                result = '\n' + destination + '=' + source
-        if generate_stmt:
-            destination = f'{generate_var(typ)}'
-            source = f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
-            populate_literal_values(literal_values_source, source)
-            destination1 = f'{generate_var(typ)}'
-            source1 = f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
-            populate_literal_values(literal_values_source, source1)
-            stmt_counter += 2
-            result = '\n' + destination + '=' + source + ';' + destination1 + '=' + source1
-    return result
 
 
 def generate_var(type):
@@ -410,7 +348,7 @@ def gen_calc_for_read(num_of_calculations, arr_def):
 
 
 def generate_arrays_with_indexes1(num_of_calculations, arr_def):
-    #temporarily remove the array on which we do dependencies
+    # temporarily remove the array on which we do dependencies
     tmp_used, tmp_unused = False, False
     if arr_def in unique_arrays_read['unused']:
         tmp_unused = True
@@ -695,38 +633,22 @@ def global_bounds():
         if arrays:
             for array in arrays:
                 concat_depen.update({array['array_name']: array['distance']})
-
-            # for array_name, distances in arrays.items():
-            #     concat_depen.update({array_name: distances})
     return concat_depen
 
 
-def populate_literal_values(literal_values_set, data): #todo check if there are better functions to process a string
-    data = "".join(data.split()) #remove all whitespaces
-    # print("DATA #"+ str(data) + "#")
-    if data[-1] == ";": #if data ends with ; just remove it
-        data = data[:-1]
-    # expresion_as_string = get_arrays_from_srting(data)
-    expresion_as_string = re.split('[+\-*/]+', data)
-
-    # print("EAS *"+ str(expresion_as_string) + "*")
-
-    result = [arr for arr in expresion_as_string if arr[0].isalpha()] #filter only not-scalar values
-
-    # print("RESULT *"+ str(result) + "*")
-
-    for res in result:
-        # print("RES *" + str(res) + "*")
-
+def populate_literal_values(literal_values_set, data):
+    data = "".join(data.split())  # remove all whitespaces
+    expresion_as_string = get_arrays_from_string(data)
+    for res in expresion_as_string:
         if res not in literal_values_set.keys():
-            literal_values_set[res] = [0, stmt_counter] #todo this shouldn't change the stmt_counter
+            literal_values_set[res] = [0, stmt_counter]
         literal_values_set[res][0] += 1
-        # print(">>> " + str(literal_values_set) + " " + str(res) + " " + str(stmt_counter))
-
-def get_arrays_from_srting(string):
-    return re.findall(r'\w+\[.*?\]+', string)
 
 
+def get_arrays_from_string(str):
+    str = re.findall(r'(\w+(\[.*?\])+)', str)
+    str = [i[0] for i in str]
+    return str
 
 
 if __name__ == '__main__':
