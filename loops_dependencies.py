@@ -3,8 +3,10 @@ import math
 import random
 import string
 import re
+
+
 import cgen as c
-import collections
+
 import loops_gen_random as lgr
 
 result_c_file = 'src/feature1.c'
@@ -25,7 +27,6 @@ stmt_counter = 0
 
 maths_operations = ['+', '-', '*', '/']
 amount_of_vars = 0
-
 
 def gen_random_scalar():
     if typ == 'int':
@@ -421,9 +422,10 @@ def parse_input():
     with open(input_file, 'r') as file:
         data = json.load(file)
         data = data[0]
-        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, typ, rand_num_of_calculations
+        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, typ, rand_num_of_calculations, init_with
         loop_nest_level = data['loop_nest_level']
         typ = data['type']
+        init_with = validate_init_with(data['init_with'])
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
         array_sizes = data['array_sizes']
@@ -439,6 +441,13 @@ def parse_input():
         rand_num_of_calculations = []
     for i in range(len(unique_arrays_read["unused"]) - 1):
         rand_num_of_calculations.append(i + 1)
+
+
+def validate_init_with(init_with):
+    if not init_with == 'ones' and not init_with == 'zeros' and not init_with == 'random':
+        raise TypeError("Init with can be 'random', 'ones' or 'zeros'")
+    else:
+        return init_with
 
 
 def parse_dependencies(all_dependencies):
@@ -533,7 +542,7 @@ def create_nested_loop():
 def init_arrays(file=result_c_file):
     """Init all arrays"""
     for array_name, array_size in all_arrays.items():
-        lgr.write_init_array(array_name, array_size, file, typ)
+        lgr.write_init_array(array_name, array_size, file, typ, init_with)
 
 
 def run_dependencies():
