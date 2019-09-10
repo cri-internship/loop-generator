@@ -116,7 +116,7 @@ def gen_one_line_flow(stmt_body, element):
 
 
 def gen_full_stmt_flow(stmt_body):
-    result = add_indent() + gen_one_line_flow(stmt_body, 0) + ';'
+    result = add_indent() + gen_one_line_flow(stmt_body, 0) #+ ';\n'
     result += add_indent() + gen_one_line_flow(stmt_body, 1)
     return result
 
@@ -168,7 +168,7 @@ def gen_scalar_part_anti(dest_array_name, source_array_name, optimize):
             result = ""
         # result = gen_one_line_flow(stmt_body, 0)
         else:
-            result = '\n' + ' ' * (loop_nest_level + 3) + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+            result = add_indent() + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
     else:
         stmt_body['destination'] = [f'{generate_var(typ)}', dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}',
@@ -207,7 +207,7 @@ def gen_one_line_anti(stmt_body, element):
 
 
 def gen_full_stmt_anti(stmt_body):
-    result = add_indent() + gen_one_line_anti(stmt_body, 0) + ';'
+    result = add_indent() + gen_one_line_anti(stmt_body, 0) #+ ';\n'
     result += add_indent() + gen_one_line_anti(stmt_body, 1)
     return result
 
@@ -286,7 +286,7 @@ def gen_stmt_input(stmt_body, element):
     destination = stmt_body['destination'][element]
     source = stmt_body['source'][element]
     populate_values(destination, source)
-    result = '\n' + ' ' * (loop_nest_level + 3) + destination + '=' + source
+    result = add_indent() + destination + '=' + source
     inc_stmt_counter()
     return add_indent() + result
 
@@ -662,7 +662,7 @@ def get_arrays_from_string(str):
 
 
 def add_indent():
-    return '\n' + ' ' * (loop_nest_level + 4)
+    return '\n' + " " * (loop_nest_level + 4)
 
 
 if __name__ == '__main__':

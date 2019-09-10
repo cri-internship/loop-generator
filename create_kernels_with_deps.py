@@ -34,5 +34,3 @@ if __name__ == '__main__':
     ld.init_arrays()
     ld.create_nested_loop()
     create_cfile_tail()
-    # print("SOUR " + str(ld.literal_values_source))
-    # print("DEST " + str(ld.literal_values_destination))
