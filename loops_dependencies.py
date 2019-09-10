@@ -612,32 +612,33 @@ def validate_dependencies():
 def adjust_bounds(affine_fcts):
     max_tuple_size = 0
     for tupl in affine_fcts:
-        max_tuple_size = max(max_tuple_size, len(affine_fcts[tupl]))
+        max_tuple_size = max(max_tuple_size, len(tupl[1]))
 
     lower_bounds = [-math.inf] * max_tuple_size
     upper_bounds = [math.inf] * max_tuple_size
 
     for tupl in affine_fcts:
         index = -1
-        for t in affine_fcts[tupl]:
+        for t in tupl[1]:
             index += 1
             lower_bounds[index] = max(lower_bounds[index], -1 * int(t[0]))
             lower_bounds[index] = max(lower_bounds[index], -1 * int(t[1]))
-            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index] - int(t[0]))
-            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index] - int(t[1]))
+            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl[0]][index] - int(t[0]))
+            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl[0]][index] - int(t[1]))
 
-        lower_bounds[index] = max(lower_bounds[index], 0)  # todo in most cases 0, but try to find a way to calculate it
-        upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl][index])
+            lower_bounds[index] = max(lower_bounds[index], 0)  # todo 0 because of "random" part which is always without translation
+            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl[0]][index])
+
     return [lower_bounds[::-1], upper_bounds[::-1]]
 
 
 def global_bounds():
     global concat_depen
-    concat_depen = {}
+    concat_depen = []
     for dependency_name, arrays in dependencies.items():
         if arrays:
             for array in arrays:
-                concat_depen.update({array['array_name']: array['distance']})
+                concat_depen.append([array['array_name'],array['distance']])
     return concat_depen
 
 
