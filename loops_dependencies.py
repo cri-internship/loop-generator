@@ -32,7 +32,7 @@ def gen_random_scalar():
     if typ == 'int':
         return random.randint(0, 50)
     else:
-        return round(random.random(), 5)
+        return round(random.random(), 3)
 
 
 def flow_dependency(dest_array_name, source_array_name, optimize, extra):
@@ -70,7 +70,7 @@ def gen_scalar_part(dest_array_name, source_array_name, optimize):
     stmt_body = {}
     if optimize:
         stmt_body['destination'] = [dest_array_name]
-        stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}']
+        stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}']
         # result = gen_one_line_flow(stmt_body)
         if dest_array_name in literal_values_destination.keys() and source_array_name in literal_values_source.keys():
             result = ""
@@ -79,8 +79,8 @@ def gen_scalar_part(dest_array_name, source_array_name, optimize):
             populate_values(dest_array_name, source_array_name)
     else:
         stmt_body['destination'] = [dest_array_name, f'{generate_var("float ")}']
-        stmt_body['source'] = [f'{round(random.random(), 5)}',
-                               f'{source_array_name}{random.choice(maths_operations)}{round(random.random(), 5)}']
+        stmt_body['source'] = [f'{gen_random_scalar()}',
+                               f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}']
         result = gen_based_on_usage_flow(stmt_body)
     return result
 
@@ -365,7 +365,7 @@ def generate_arrays_with_indexes1(num_of_calculations, arr_def):
     if coin_flip > 0.75:
         scalar_position_in_arr = random.randrange(0, len(gen_arr))
         gen_arr.append(gen_arr[scalar_position_in_arr])
-        gen_arr[scalar_position_in_arr] = ('', round(random.random(), 5))
+        gen_arr[scalar_position_in_arr] = ('', gen_random_scalar())
     res = []
     for el in gen_arr:
         curr = el[0]
