@@ -500,4 +500,4 @@ def get_arrays_from_string(string_stmt):
 
 
 if __name__ == '__main__':
-   pass
+    pass
