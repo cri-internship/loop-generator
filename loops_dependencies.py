@@ -110,13 +110,13 @@ def gen_one_line_flow(stmt_body, element):
     source = stmt_body['source'][element]
     populate_values(destination, source)
     inc_stmt_counter()
-    result = '\n' + ' ' * (loop_nest_level + 3) + destination + '=' + source
+    result = add_indent() + destination + '=' + source
     return result
 
 
 def gen_full_stmt_flow(stmt_body):
-    result = '\n' + ' ' * (loop_nest_level + 3) + gen_one_line_flow(stmt_body, 0) + ';'
-    result += '\n' + ' ' * (loop_nest_level + 3) + gen_one_line_flow(stmt_body, 1)
+    result = add_indent() + gen_one_line_flow(stmt_body, 0) + ';'
+    result += add_indent() + gen_one_line_flow(stmt_body, 1)
     return result
 
 
@@ -143,8 +143,7 @@ def gen_random_part_anti(dest_array_name, source_array_name, optimize, arr_def):
         if stmt_body['destination'][0] in literal_values_destination.keys() and stmt_body['source'][0] in literal_values_source.keys():
             result = ""
         else:
-            print("ok")
-            result = '\n' + ' ' * (loop_nest_level + 3) + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+            result = add_indent() + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
         populate_values(stmt_body['destination'][0],stmt_body['source'][0] )
     else:
         stmt_body['destination'] = [f'{gen_random_stmt(unique_arrays_write)}',
@@ -199,13 +198,13 @@ def gen_one_line_anti(stmt_body, element):
     source = stmt_body['source'][element]
     populate_values(destination, source)
     inc_stmt_counter()
-    result = '\n' + destination + '=' + source
+    result = add_indent() + destination + '=' + source
     return result
 
 
 def gen_full_stmt_anti(stmt_body):
-    result = '\n' + ' ' * (loop_nest_level + 3) + gen_one_line_anti(stmt_body, 0) + ';'
-    result += '\n' + ' ' * (loop_nest_level + 3) + gen_one_line_anti(stmt_body, 1)
+    result = add_indent() + gen_one_line_anti(stmt_body, 0) + ';'
+    result += add_indent() + gen_one_line_anti(stmt_body, 1)
     return result
 
 
@@ -233,8 +232,8 @@ def gen_based_on_usage_output(dest_array_name, stmt_body):
         elif dest_usage == 1:
             result = gen_stmt_output(stmt_body, 0)
     else:
-        result = gen_stmt_output(stmt_body, 0) + ';'
-        result += gen_stmt_output(stmt_body, 1)
+        result = add_indent() + gen_stmt_output(stmt_body, 0) + ';'
+        result += add_indent() + gen_stmt_output(stmt_body, 1)
     return result
 
 
@@ -243,15 +242,13 @@ def gen_stmt_output(stmt_body, element):
     source = stmt_body['source'][element]
     populate_values(destination, source)
     inc_stmt_counter()
-    result = '\n' + ' ' * (loop_nest_level + 3) + destination + '=' + source
+    result = add_indent() + destination + '=' + source
     return result
 
 
 def input_dependency(_, source_array_name, __, extra):
     arr_name = source_array_name.partition('[')[0]
     arr_def = (arr_name, all_arrays[arr_name])
-    generate_stmt = True
-    result = ""
     stmt_body = {}
     if extra == 'random':
         stmt_body['destination'] = [f'{gen_random_stmt(unique_arrays_write)}',
@@ -276,8 +273,8 @@ def gen_based_on_usage(source_array_name, arr_def, stmt_body):
         elif source_usage == 1:
             result = gen_stmt_input(stmt_body, 0)
     else:
-        result = '\n' + ' ' * (loop_nest_level + 3) + gen_stmt_input(stmt_body, 0) + ';'
-        result += '\n' + ' ' * (loop_nest_level + 3) + gen_stmt_input(stmt_body, 1)
+        result = add_indent() + gen_stmt_input(stmt_body, 0) + ';'
+        result += add_indent() + gen_stmt_input(stmt_body, 1)
     return result
 
 
@@ -287,7 +284,7 @@ def gen_stmt_input(stmt_body, element):
     populate_values(destination, source)
     result = '\n' + ' ' * (loop_nest_level + 3) + destination + '=' + source
     inc_stmt_counter()
-    return '\n' + ' ' * (loop_nest_level + 3) + result
+    return add_indent() + result
 
 
 def populate_values(destination, source):
@@ -658,6 +655,10 @@ def get_arrays_from_string(str):
     str = re.findall(r'(\w+(\[.*?\])+)', str)
     str = [i[0] for i in str]
     return str
+
+
+def add_indent():
+    return '\n' + ' ' * (loop_nest_level + 4)
 
 
 if __name__ == '__main__':
