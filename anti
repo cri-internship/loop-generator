@@ -1,0 +1,126 @@
+def anti_dependency(dest_array_name, source_array_name, optimize, extra):
+    print("dest_array_name " + str(dest_array_name))
+    print("source_array_name " + str(source_array_name))
+
+    arr_name = dest_array_name.partition('[')[0]
+    arr_def = (arr_name, all_arrays[arr_name])
+    if extra == 'random':
+        if optimize:
+            result =
+                     f'{dest_array_name}
+                     =
+                     {source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}'
+        else:
+            result = f'{gen_random_stmt(unique_arrays_write)}
+                     =
+                     {source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)}
+                     +
+                     f'{dest_array_name}
+                     =
+                     {gen_calc_for_read(random.choice(rand_num_of_calculations),arr_def)[1:]}'
+    else:
+        if optimize:
+            result =
+                     f'{dest_array_name}
+                     =
+                     {source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
+        else:
+            result = f'{generate_var(typ)}
+                     =
+                     {source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
+                     +
+                     f'{dest_array_name}
+                     =
+                     {gen_random_scalar()}'
+    return result
+
+
+def anti_dependency(dest_array_name, source_array_name, optimize, extra):
+    arr_name = dest_array_name.partition('[')[0]
+    arr_def = (arr_name, all_arrays[arr_name])
+    if extra == 'random':
+        result = gen_random_part_anti(dest_array_name, source_array_name, optimize, arr_def)
+    else:
+        result = gen_scalar_part_anti(dest_array_name, source_array_name, optimize)
+    return result
+
+
+def gen_random_part_anti(dest_array_name, source_array_name, optimize, arr_def):
+    stmt_body = {}
+    if optimize:
+        stmt_body['destination'] = [dest_array_name]
+        stmt_body['source'] = [f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
+        # result = gen_based_on_usage_flow(stmt_body,0)
+        result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+    else:
+        stmt_body['destination'] = [f'{gen_random_stmt(unique_arrays_write)}',
+                                    dest_array_name]
+        stmt_body['source'] = [f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}',
+                               f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}']
+        result = gen_based_on_usage_flow(stmt_body)
+    return result
+
+        if optimize:
+            result =
+                     f'{dest_array_name}
+                     =
+                     {source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
+        else:
+            result = f'{generate_var(typ)}
+                     =
+                     {source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}'
+                     +
+                     f'{dest_array_name}
+                     =
+                     {gen_random_scalar()}'
+
+def gen_scalar_part(dest_array_name, source_array_name, optimize):
+    stmt_body = {}
+    if optimize:
+        stmt_body['destination'] = [dest_array_name]
+        stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}']
+        # result = gen_one_line_flow(stmt_body, 0)
+        result = '\n' + stmt_body['destination'][0] + '=' + stmt_body['source'][0]
+    else:
+        stmt_body['destination'] = [f'{generate_var(typ)}', dest_array_name]
+        stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}',
+                               f'{gen_random_scalar()}']
+        result = gen_based_on_usage_anti(stmt_body)
+    return result
+
+
+def gen_based_on_usage_flow(stmt_body):
+    array = stmt_body['destination'][0]
+    if satisfies_anti(array):
+            dest_usage = literal_values_destination[array][1]
+            source_usage = literal_values_source[array][1]
+            if source_usage < dest_usage:
+                result = ""
+            else:
+                result = gen_full_stmt_anti(stmt_body)
+    elif array in literal_values_destination.keys():
+        result = gen_one_line_anti(stmt_body, 1)
+    else:
+        result = gen_full_stmt_anti(stmt_body)
+    return result
+
+
+def satisfies_anti(array):
+    return array in literal_values_destination.keys() and array in literal_values_source.keys()
+
+
+def gen_one_line_anti(stmt_body, element):
+    destination = stmt_body['destination'][element]
+    source = stmt_body['source'][element]
+    populate_values(destination, source)
+    inc_stmt_counter()
+    result = '\n' + destination + '=' + source
+    return result
+
+
+def gen_full_stmt_flow(stmt_body):
+    result = gen_one_line_anti(stmt_body,0) + ';\n'
+    result += gen_one_line_anti(stmt_body,1)
+    return result
+
+
