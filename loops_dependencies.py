@@ -577,9 +577,9 @@ def run_dependencies():
                                 src_dist = '+' + str(distance[1])
                             dest_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{dest_dist}]'
                             src_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{src_dist}]'
-
-                        block_with_dependencies.append(
-                            c.Statement(dependency_function[dependency](dest_array, src_array, optimize, extra)))
+                        stmt = dependency_function[dependency](dest_array, src_array, optimize, extra)
+                        if stmt:
+                            block_with_dependencies.append(c.Statement('\n' + add_indent() + stmt))
     return c.Block(block_with_dependencies)
 
 
