@@ -610,24 +610,28 @@ def validate_dependencies():
 
 
 def adjust_bounds(affine_fcts):
+    print("AF " + str(affine_fcts))
     max_tuple_size = 0
     for tupl in affine_fcts:
         max_tuple_size = max(max_tuple_size, len(tupl[1]))
+
+    max_tuple_size = min(max_tuple_size, loop_nest_level) # in case of arrays with bigger dimensions than the loop nest size
 
     lower_bounds = [-math.inf] * max_tuple_size
     upper_bounds = [math.inf] * max_tuple_size
 
     for tupl in affine_fcts:
-        index = -1
+        index = 0
         for t in tupl[1]:
-            index += 1
+            index = index % loop_nest_level
             lower_bounds[index] = max(lower_bounds[index], -1 * int(t[0]))
             lower_bounds[index] = max(lower_bounds[index], -1 * int(t[1]))
             upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl[0]][index] - int(t[0]))
             upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl[0]][index] - int(t[1]))
 
-            lower_bounds[index] = max(lower_bounds[index], 0)  # todo 0 because of "random" part which is always without translation
-            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl[0]][index])
+            lower_bounds[index] = max(lower_bounds[index], 0)  # 0 because of "random" part which is always without a translation
+            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl[0]][index]) # don't exceed the size of an array
+            index += 1
 
     return [lower_bounds[::-1], upper_bounds[::-1]]
 
