@@ -14,84 +14,53 @@
       "yC": 0,
       "zC": 6
     },
-    "loop_nest_level": 3,
+    "loop_nest_level": 1,
     "unique_arrays_write": [
       "A[da]",
-      "B[e,e]"
+      "B[e,da]"
     ],
     "unique_arrays_read": [
       "A[da]",
-      "B[e,e]",
+      "B[e,da]",
       "C[e,e,e]"
     ],
     "dependencies": {
       "FLOW": [
-
         {
           "array_name": "A",
           "distance": "(0,)",
-          "extra": "random"
+          "mix_in": "random"
         },
         {
-          "array_name": "C",
-          "distance": "(1,0,0,)",
-          "extra": "random"
-        },
-        {
-          "array_name": "C",
-          "distance": "(1,0,0,)",
-          "extra": "scalar"
+          "array_name": "A",
+          "distance": "(2,)",
+          "mix_in": "random"
         }
       ],
       "ANTI": [
         {
-          "array_name": "A",
-          "distance": "(0,)",
-          "extra": "random"
-        },
-        {
-          "array_name": "C",
-          "distance": "(1,0,0,)",
-          "extra": "random"
-        },
-        {
-          "array_name": "C",
-          "distance": "(1,0,0,)",
-          "extra": "scalar"
+          "array_name": "B",
+          "distance": "(3,5,)",
+          "mix_in": "random"
         }
       ],
       "OUTPUT": [
         {
-          "array_name": "A",
-          "distance": "(0,)",
-          "extra": "random"
-        },
-        {
           "array_name": "C",
-          "distance": "(1,0,0,)",
-          "extra": "random"
-        },
-        {
-          "array_name": "C",
-          "distance": "(1,0,0,)",
-          "extra": "scalar"
+          "distance": "(xC,4,5,)",
+          "mix_in": "random"
         }
       ],
       "INPUT": [
         {
+          "array_name": "C",
+          "distance": "(2,3,4,)",
+          "mix_in": "random"
+        },
+        {
           "array_name": "A",
-          "distance": "(0,)",
-          "extra": "scalar"
-        },
-        {
-          "array_name": "C",
-          "distance": "(1,0,0,)",
-          "extra": "random"
-        },
-        {
-          "array_name": "C",
-          "distance": "(1,0,0,)",
-          "extra": "scalar"
+          "distance": "(1,)",
+          "mix_in": "random"
         }
       ]
     }

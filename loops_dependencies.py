@@ -19,11 +19,11 @@ def create_file_name():
 
 result_c_file = create_file_name()
 input_file = 'input/input.json'
-dependency_function = {'FLOW': (lambda dest, source, optimize, extra: flow_dependency(dest, source, optimize, extra)),
-                       'ANTI': (lambda dest, source, optimize, extra: anti_dependency(dest, source, optimize, extra)),
+dependency_function = {'FLOW': (lambda dest, source, optimize, mix_in: flow_dependency(dest, source, optimize, mix_in)),
+                       'ANTI': (lambda dest, source, optimize, mix_in: anti_dependency(dest, source, optimize, mix_in)),
                        'OUTPUT': (
-                           lambda dest, source, optimize, extra: output_dependency(dest, source, optimize, extra)),
-                       'INPUT': (lambda dest, source, optimize, extra: input_dependency(dest, source, optimize, extra))}
+                           lambda dest, source, optimize, mix_in: output_dependency(dest, source, optimize, mix_in)),
+                       'INPUT': (lambda dest, source, optimize, mix_in: input_dependency(dest, source, optimize, mix_in))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
@@ -44,10 +44,10 @@ def gen_random_scalar():
         return round(random.random(), 3)
 
 
-def flow_dependency(dest_array_name, source_array_name, optimize, extra):
+def flow_dependency(dest_array_name, source_array_name, optimize, mix_in):
     arr_name = dest_array_name.partition('[')[0]
     arr_def = (arr_name, all_arrays[arr_name])
-    if extra == 'random':
+    if mix_in == 'random':
         result = gen_random_part(dest_array_name, source_array_name, optimize, arr_def)
     else:
         result = gen_scalar_part(dest_array_name, source_array_name, optimize)
@@ -129,10 +129,10 @@ def gen_full_stmt_flow(stmt_body):
     return result
 
 
-def anti_dependency(dest_array_name, source_array_name, optimize, extra):
+def anti_dependency(dest_array_name, source_array_name, optimize, mix_in):
     arr_name = dest_array_name.partition('[')[0]
     arr_def = (arr_name, all_arrays[arr_name])
-    if extra == 'random':
+    if mix_in == 'random':
         result = gen_random_part_anti(dest_array_name, source_array_name, optimize, arr_def)
     else:
         result = gen_scalar_part_anti(dest_array_name, source_array_name, optimize)
@@ -215,11 +215,11 @@ def gen_full_stmt_anti(stmt_body):
     return result
 
 
-def output_dependency(dest_array_name, source_array_name, __, extra):
+def output_dependency(dest_array_name, source_array_name, __, mix_in):
     arr_name = dest_array_name.partition('[')[0]
     arr_def = (arr_name, all_arrays[arr_name])
     stmt_body = {}
-    if extra == 'random':
+    if mix_in == 'random':
         stmt_body['destination'] = [f'{dest_array_name}', f'{source_array_name}']
         stmt_body['source'] = [f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}',
                                f'{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)[1:]}']
@@ -253,11 +253,11 @@ def gen_stmt_output(stmt_body, element):
     return result
 
 
-def input_dependency(dest_array_name, source_array_name, __, extra):
+def input_dependency(dest_array_name, source_array_name, __, mix_in):
     arr_name = source_array_name.partition('[')[0]
     arr_def = (arr_name, all_arrays[arr_name])
     stmt_body = {}
-    if extra == 'random':
+    if mix_in == 'random':
         stmt_body['destination'] = [f'{gen_random_stmt(unique_arrays_write)}',
                                     f'{gen_random_stmt(unique_arrays_write)}']
         stmt_body['source'] = [
@@ -560,7 +560,7 @@ def run_dependencies():
             for array in arrays:
                 array_name = array['array_name']
                 distances = array['distance']
-                extra = array['extra']
+                mix_in = array['mix_in']
                 for arr_name, arr_size in all_arrays.items():
                     if array_name == arr_name:
                         optimize = False
@@ -586,7 +586,7 @@ def run_dependencies():
                                 src_dist = '+' + str(distance[1])
                             dest_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{dest_dist}]'
                             src_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{src_dist}]'
-                        stmt = dependency_function[dependency](dest_array, src_array, optimize, extra)
+                        stmt = dependency_function[dependency](dest_array, src_array, optimize, mix_in)
                         if stmt:
                             block_with_dependencies.append(c.Statement('\n' + add_indent() + stmt))
     return c.Block(block_with_dependencies)
