@@ -3,12 +3,21 @@ import math
 import random
 import string
 import re
-
 import cgen as c
+import datetime
 
 import loops_gen_random as lgr
 
-result_c_file = 'src/feature1.c'
+
+def create_file_name():
+    now = datetime.datetime.now()
+    str_date = f'{now.year}{now.month}{now.day}'
+    str_time = f'{now.hour}{now.minute}{now.second}{now.microsecond}'
+    name = 'src/kern' + '_' + str_date + '_' + str_time + '.c'
+    return name
+
+
+result_c_file = create_file_name()
 input_file = 'input/input.json'
 dependency_function = {'FLOW': (lambda dest, source, optimize, extra: flow_dependency(dest, source, optimize, extra)),
                        'ANTI': (lambda dest, source, optimize, extra: anti_dependency(dest, source, optimize, extra)),
@@ -610,7 +619,6 @@ def validate_dependencies():
 
 
 def adjust_bounds(affine_fcts):
-    print("AF " + str(affine_fcts))
     max_tuple_size = 0
     for tupl in affine_fcts:
         max_tuple_size = max(max_tuple_size, len(tupl[1]))
