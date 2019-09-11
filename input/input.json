@@ -4,8 +4,8 @@
       "da": 100,
       "e": 50
     },
-    "type": "float",
-    "init_with": "ones",
+    "type": "int",
+    "init_with": "random",
     "distances": {
       "xA": 1,
       "xB": 2,
@@ -26,16 +26,17 @@
     ],
     "dependencies": {
       "FLOW": [
-
         {
           "array_name": "A",
-          "distance": "(0,)",
-          "extra": "random"
+          "distance": "(5,), (3,), (2,)",
+          "extra": "scalar",
+          "left_side_index": "(-2,)"
         },
         {
           "array_name": "C",
-          "distance": "(1,0,0,)",
-          "extra": "random"
+          "distance": "(5,0,0,)",
+          "extra": "random",
+          "left_side_index": "(2, 0,0,)"
         },
         {
           "array_name": "C",
@@ -47,11 +48,12 @@
         {
           "array_name": "A",
           "distance": "(0,)",
-          "extra": "random"
+          "extra": "scalar",
+          "left_side_index": "(2,)"
         },
         {
           "array_name": "C",
-          "distance": "(1,0,0,)",
+          "distance": "(1,0,8,)",
           "extra": "random"
         },
         {
@@ -64,7 +66,8 @@
         {
           "array_name": "A",
           "distance": "(0,)",
-          "extra": "random"
+          "extra": "random",
+          "left_side_index": "(-3, )"
         },
         {
           "array_name": "C",
@@ -80,8 +83,9 @@
       "INPUT": [
         {
           "array_name": "A",
-          "distance": "(0,)",
-          "extra": "scalar"
+          "distance": "(2,)",
+          "extra": "scalar",
+          "left_side_index": "(-3, )"
         },
         {
           "array_name": "C",

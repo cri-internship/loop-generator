@@ -451,40 +451,54 @@ def parse_dependencies(all_dependencies):
     """
     for dependency_name, deps in all_dependencies.items():
         for dependency in deps:
-            distances = dependency['distance']
-            ret = []
-            distances = distances.replace(" ", "")
-            distances = distances[1:-1]
-            new_dist = ""
-            for d in distances:
-                if d is ',':
-                    if new_dist in string.digits:
-                        ret.append(int(new_dist))
-                    else:
-                        ret.append(dista[new_dist])
-                    new_dist = ""
-                else:
-                    new_dist += d
-            distances = tuple(ret)
+            flip = random.choice(('-1', '+1'))
+            print(dependency)
+            distances = parse_json_tuple(dependency['distance'])
+            print("DIST= " + str(distances))
+            if 'left_side_index' in dependency:
+                left_side_index = parse_json_tuple(dependency['left_side_index'])
+            else:
+                left_side_index = tuple(0 for i in range(0, len(distances)))
+            print("LEFT= " + str(left_side_index))
             for index in range(len(distances)):
                 distance = distances[index]
-                if distance == 0:
-                    distance = (0, 0)
+                dest_dist = left_side_index[index]
+                if dependency_name == 'FLOW':
+                    distance = (dest_dist, -distance + dest_dist)
+                elif dependency_name == 'ANTI':
+                    distance = (dest_dist, distance + dest_dist)
                 else:
-                    dest_dist = random.randrange(distance)
-                    if dependency_name == 'FLOW':
-                        distance = (dest_dist, -distance + dest_dist)
-                    elif dependency_name == 'ANTI':
-                        distance = (dest_dist, distance + dest_dist)
-                    else:
-                        flip = random.choice(('-1', '+1'))
-                        distance = (dest_dist, eval(flip) * distance + dest_dist)
-
+                    distance = (dest_dist, eval(flip) * distance + dest_dist)
                 distances = list(distances)
                 distances[index] = distance
                 distances = tuple(distances)
+            print(distances)
             dependency['distance'] = distances
+    print(all_dependencies)
     return all_dependencies
+
+
+def parse_json_tuple(string_to_parse):
+    string_to_parse = re.findall(r'\(.*?\)',string_to_parse)
+    result = []
+    for one_el in string_to_parse:
+        ret = []
+        string_to_parse = string_to_parse.replace(" ", "")
+        string_to_parse = string_to_parse[1:-1]
+        new_dist = ""
+        for d in string_to_parse:
+            if d is ',':
+                try:
+                    new_dist = int(new_dist)
+                except ValueError:
+                    new_dist = dista[new_dist]
+                ret.append(new_dist)
+                new_dist = ""
+            else:
+                new_dist += d
+        result.append(tuple(ret))
+    print(result)
+    return result
 
 
 def generate_nested_loops(loop_nest_depth, affine):
@@ -610,12 +624,12 @@ def validate_dependencies():
 
 
 def adjust_bounds(affine_fcts):
-    print("AF " + str(affine_fcts))
     max_tuple_size = 0
     for tupl in affine_fcts:
         max_tuple_size = max(max_tuple_size, len(tupl[1]))
 
-    max_tuple_size = min(max_tuple_size, loop_nest_level) # in case of arrays with bigger dimensions than the loop nest size
+    max_tuple_size = min(max_tuple_size,
+                         loop_nest_level)  # in case of arrays with bigger dimensions than the loop nest size
 
     lower_bounds = [-math.inf] * max_tuple_size
     upper_bounds = [math.inf] * max_tuple_size
@@ -629,8 +643,10 @@ def adjust_bounds(affine_fcts):
             upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl[0]][index] - int(t[0]))
             upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl[0]][index] - int(t[1]))
 
-            lower_bounds[index] = max(lower_bounds[index], 0)  # 0 because of "random" part which is always without a translation
-            upper_bounds[index] = min(upper_bounds[index], all_arrays[tupl[0]][index]) # don't exceed the size of an array
+            lower_bounds[index] = max(lower_bounds[index],
+                                      0)  # 0 because of "random" part which is always without a translation
+            upper_bounds[index] = min(upper_bounds[index],
+                                      all_arrays[tupl[0]][index])  # don't exceed the size of an array
             index += 1
 
     return [lower_bounds[::-1], upper_bounds[::-1]]
@@ -642,7 +658,7 @@ def global_bounds():
     for dependency_name, arrays in dependencies.items():
         if arrays:
             for array in arrays:
-                concat_depen.append([array['array_name'],array['distance']])
+                concat_depen.append([array['array_name'], array['distance']])
     return concat_depen
 
 
@@ -666,4 +682,4 @@ def add_indent():
 
 
 if __name__ == '__main__':
-    parse_input()
+    pass
