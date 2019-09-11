@@ -28,7 +28,7 @@
       "FLOW": [
         {
           "array_name": "A",
-          "distance": "(5,), (3,), (2,)",
+          "distance": "(5,)",
           "extra": "scalar",
           "left_side_index": "(-2,)"
         },

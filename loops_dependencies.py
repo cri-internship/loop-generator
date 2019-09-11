@@ -487,7 +487,7 @@ def parse_dependencies(all_dependencies):
     return all_dependencies
 
 
-def parse_json_tuple(string_to_parse):
+def parse_json_tuple_2(string_to_parse):
     string_to_parse = re.findall(r'\(.*?\)',string_to_parse)
     result = []
     for one_el in string_to_parse:
@@ -508,6 +508,25 @@ def parse_json_tuple(string_to_parse):
         result.append(tuple(ret))
     print(result)
     return result
+
+
+def parse_json_tuple(string_to_parse):
+
+    ret = []
+    string_to_parse = string_to_parse.replace(" ", "")
+    string_to_parse = string_to_parse[1:-1]
+    new_dist = ""
+    for d in string_to_parse:
+        if d is ',':
+            try:
+                new_dist = int(new_dist)
+            except ValueError:
+                new_dist = dista[new_dist]
+            ret.append(new_dist)
+            new_dist = ""
+        else:
+            new_dist += d
+    return tuple(ret)
 
 
 def generate_nested_loops(loop_nest_depth, affine):
