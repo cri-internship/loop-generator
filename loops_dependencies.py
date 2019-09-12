@@ -23,7 +23,8 @@ dependency_function = {'FLOW': (lambda dest, source, optimize, mix_in: flow_depe
                        'ANTI': (lambda dest, source, optimize, mix_in: anti_dependency(dest, source, optimize, mix_in)),
                        'OUTPUT': (
                            lambda dest, source, optimize, mix_in: output_dependency(dest, source, optimize, mix_in)),
-                       'INPUT': (lambda dest, source, optimize, mix_in: input_dependency(dest, source, optimize, mix_in))}
+                       'INPUT': (
+                           lambda dest, source, optimize, mix_in: input_dependency(dest, source, optimize, mix_in))}
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
@@ -460,62 +461,43 @@ def parse_dependencies(all_dependencies):
     """
     for dependency_name, deps in all_dependencies.items():
         for dependency in deps:
+
             flip = random.choice(('-1', '+1'))
             tmp = []
-            #print(dependency)
-            distances = parse_json_tuple_2(dependency['distance'])
-           # print("DIST= " + str(distances))
+
+            deps_to_parse = re.findall(r'\(.*?\)', dependency['distance'])
+            distances = []
+            for one_el in deps_to_parse:
+                distances.append(parse_json_tuple(one_el))
+
+            optimize = True
+            for dist in distances:
+                filtered_dist = list(filter(lambda x: x == 0, dist))
+                if len(filtered_dist) == len(dist):
+                    optimize = False
+            dependency['optimize'] = optimize
+
             if 'left_side_index' in dependency:
                 left_side_index = parse_json_tuple(dependency['left_side_index'])
             else:
-                left_side_index = tuple(0 for i in range(0, len(distances)))
-            #print("LEFT= " + str(left_side_index))
+                left_side_index = tuple(0 for _ in range(0, len(distances[0])))
+
             for index in range(len(distances[0])):
-               # print(index)
-                #distance = distances[index]
                 dest_dist = left_side_index[index]
                 if dependency_name == 'FLOW':
                     distance = [-d[index] + dest_dist for d in distances]
-                    #distance = (dest_dist, -distance + dest_dist)
                 elif dependency_name == 'ANTI':
-                    distance = (dest_dist, distance + dest_dist)
+                    distance = [d[index] + dest_dist for d in distances]
                 else:
-                    distance = (dest_dist, eval(flip) * distance + dest_dist)
+                    distance = [eval(flip) * d[index] + dest_dist for d in distances]
                 distance.insert(0, dest_dist)
                 distance = tuple(distance)
-                #print(distance)
                 tmp.append(distance)
-                #distances = tuple(distances)
-               # print("DISTI:"+str(tmp))
             dependency['distance'] = tuple(tmp)
-    print(all_dependencies)
     return all_dependencies
 
 
-def parse_json_tuple_2(string_to_parse):
-    string_to_parse = re.findall(r'\(.*?\)',string_to_parse)
-    result = []
-    for one_el in string_to_parse:
-        ret = []
-        one_el = one_el.replace(" ", "")
-        one_el = one_el[1:-1]
-        new_dist = ""
-        for d in one_el:
-            if d is ',':
-                try:
-                    new_dist = int(new_dist)
-                except ValueError:
-                    new_dist = dista[new_dist]
-                ret.append(new_dist)
-                new_dist = ""
-            else:
-                new_dist += d
-        result.append(tuple(ret))
-    return result
-
-
 def parse_json_tuple(string_to_parse):
-
     ret = []
     string_to_parse = string_to_parse.replace(" ", "")
     string_to_parse = string_to_parse[1:-1]
@@ -597,41 +579,28 @@ def run_dependencies():
             for array in arrays:
                 array_name = array['array_name']
                 distances = array['distance']
-                print(distances)
+                optimize = array['optimize']
                 mix_in = array['mix_in']
                 for arr_name, arr_size in all_arrays.items():
                     if array_name == arr_name:
-                        optimize = False
                         dest_array = array_name
-                        src_array = [array_name for _ in range(len(distances[0])-1)]
+                        src_array = [array_name for _ in range(len(distances[0]) - 1)]
                         for index in range(len(arr_size)):
                             distance = distances[index]
                             if distance[0] == 0:
                                 dest_dist = ''
                             elif str(distance[0])[0] == '-':
-
                                 dest_dist = str(distance[0])
                             else:
-
                                 dest_dist = '+' + str(distance[0])
                             for i in range(1, len(distances[0])):
-                                for ind in range(len(arr_size)):
-                                    if not distances[ind][0]==distances[ind][i]:
-                                        optimize = True
-                                print(optimize)
-                                if not optimize:
-                                    break
-                            for i in range(1, len(distances[0])):
-                                #TO DO
                                 if distance[i] == 0:
                                     src_dist = ''
                                 elif str(distance[i])[0] == '-':
-
                                     src_dist = str(distance[i])
                                 else:
-
                                     src_dist = '+' + str(distance[i])
-                                src_array[i-1] += f'[{lgr.generate_loop_index(index % loop_nest_level)}{src_dist}]'
+                                src_array[i - 1] += f'[{lgr.generate_loop_index(index % loop_nest_level)}{src_dist}]'
                             dest_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{dest_dist}]'
                             src_array_str = ''
                             for src in src_array:

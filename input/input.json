@@ -25,26 +25,47 @@
       "C[e,e,e]"
     ],
     "dependencies": {
-      "FLOW": [
 
-        {
-          "array_name": "C",
-          "distance": "(0,0,0,), (6,0,0,)",
-          "mix_in": "random",
-          "left_side_index": "(2, 1,0,)"
-        }
-
-      ],
+      "FLOW":  [],
       "ANTI": [
-
 
       ],
       "OUTPUT": [
-
+        {
+          "array_name": "A",
+          "distance": "(0,)",
+          "mix_in": "random",
+          "left_side_index": "(-3, )"
+        },
+        {
+          "array_name": "C",
+          "distance": "(1,0,0,)",
+          "mix_in": "random"
+        },
+        {
+          "array_name": "C",
+          "distance": "(1,0,0,)",
+          "mix_in": "scalar"
+        }
       ],
       "INPUT": [
-
+        {
+          "array_name": "A",
+          "distance": "(2,)",
+          "mix_in": "scalar",
+          "left_side_index": "(-3, )"
+        },
+        {
+          "array_name": "C",
+          "distance": "(1,0,0,)",
+          "mix_in": "random"
+        },
+        {
+          "array_name": "C",
+          "distance": "(1,0,0,)",
+          "mix_in": "scalar"
+        }
       ]
     }
-  }
+    }
 ]
