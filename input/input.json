@@ -27,9 +27,7 @@
     "dependencies": {
 
       "FLOW":  [],
-      "ANTI": [
-
-      ],
+      "ANTI": [],
       "OUTPUT": [
         {
           "array_name": "A",
@@ -45,14 +43,14 @@
         {
           "array_name": "C",
           "distance": "(1,0,0,)",
-          "mix_in": "scalar"
+          "mix_in": "num_vals"
         }
       ],
       "INPUT": [
         {
           "array_name": "A",
           "distance": "(2,)",
-          "mix_in": "scalar",
+          "mix_in": "num_vals",
           "left_side_index": "(-3, )"
         },
         {
@@ -63,7 +61,7 @@
         {
           "array_name": "C",
           "distance": "(1,0,0,)",
-          "mix_in": "scalar"
+          "mix_in": "num_vals"
         }
       ]
     }
