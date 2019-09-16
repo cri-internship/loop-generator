@@ -1,39 +1,34 @@
 [
   {
     "array_sizes": {
-      "da": 100,
-      "e": 50
+      "xA": 100,
+      "xB": 50,
+      "xC": 40,
+      "yC": 150,
+      "zC": 80
     },
-    "type": "int",
+    "type": "float",
     "init_with": "random",
     "distances": {
-      "xA": 1,
-      "xB": 2,
-      "yB": 3,
-      "xC": 4,
-      "yC": 0,
-      "zC": 6
+      "xA": 0
     },
     "loop_nest_level": 3,
     "unique_arrays_write": [
-      "A[da]",
-      "B[e,e]"
+      "A[xA]",
+      "B[xB,xB]"
     ],
     "unique_arrays_read": [
-      "A[da]",
-      "B[e,e]",
-      "C[e,e,e]"
+      "A[xA]",
+      "B[xB,xB]",
+      "C[xC,yC,zC]"
     ],
     "dependencies": {
-
-      "FLOW":  [],
-      "ANTI": [],
-      "OUTPUT": [
+      "FLOW": [
         {
           "array_name": "A",
-          "distance": "(0,)",
+          "distance": "(xA,)",
           "mix_in": "random",
-          "left_side_index": "(-3, )"
+          "left_side_index": "(-3,)"
         },
         {
           "array_name": "C",
@@ -46,24 +41,40 @@
           "mix_in": "num_vals"
         }
       ],
-      "INPUT": [
+      "ANTI": [
         {
           "array_name": "A",
-          "distance": "(2,)",
-          "mix_in": "num_vals",
-          "left_side_index": "(-3, )"
+          "distance": "(0,)",
+          "mix_in": "random",
+          "left_side_index": "(-3,)"
         },
+        {
+          "array_name": "B",
+          "distance": "(1,2,)",
+          "mix_in": "num_vals"
+        }
+      ],
+      "OUTPUT": [
+        {
+          "array_name": "B",
+          "distance": "(0,0,)",
+          "mix_in": "random",
+          "left_side_index": "(-1, 1,)"
+        }
+      ],
+      "INPUT": [
         {
           "array_name": "C",
           "distance": "(1,0,0,)",
           "mix_in": "random"
         },
         {
-          "array_name": "C",
-          "distance": "(1,0,0,)",
-          "mix_in": "num_vals"
+          "array_name": "A",
+          "distance": "(4,)",
+          "mix_in": "num_vals",
+          "left_side_index": "(3,)"
         }
       ]
     }
-    }
+  }
 ]
