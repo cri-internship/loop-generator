@@ -337,6 +337,7 @@ def parse_string_array(name_with_dims):
     sizes = name_with_dims[1][:-1].split(',')
     iter = 0
     for size in sizes:
+        size.replace(" ", "")
         sizes[iter] = array_sizes[size]
         iter += 1
     sizes = tuple(map(int, sizes))
@@ -530,9 +531,12 @@ def generate_nested_loops(loop_nest_depth, affine):
         for index in range(loop_nest_depth - 1, array_length, loop_nest_level):
             if array_size[index] < upper_bound:
                 upper_bound = array_size[index]
-    if loop_nest_depth == 1:
+
+    if loop_nest_depth > 1 and not affine[0][1:]:
         return print_loop_structure(loop_index, lower_bound, upper_bound, affine,
-                                    run_dependencies())
+                                    generate_nested_loops(loop_nest_depth - 1, affine))
+    elif loop_nest_depth == 1:
+        return print_loop_structure(loop_index, lower_bound, upper_bound, affine, run_dependencies())
     else:
         return print_loop_structure(loop_index, lower_bound, upper_bound, affine,
                                     generate_nested_loops(loop_nest_depth - 1, [affine[0][1:], affine[1][1:]]))
