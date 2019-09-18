@@ -446,8 +446,6 @@ def parse_input():
             unique_arrays_read['unused'].add(parse_string_array(arr))
         all_arrays = validate_array_sizes()
         dependencies = parse_dependencies(data['dependencies'])
-
-        validate_dependencies()
         rand_num_of_calculations = []
     for i in range(len(unique_arrays_read["unused"]) - 1):
         rand_num_of_calculations.append(i + 1)
@@ -467,9 +465,10 @@ def parse_dependencies(all_dependencies):
     for dependency_name, deps in all_dependencies.items():
         for dependency in deps:
 
-
+            array_name = dependency['array_name']
             flip = random.choice(('-1', '+1'))
             tmp = []
+
 
             deps_to_parse = re.findall(r'\(.*?\)', dependency['distance'])
             distances = []
@@ -488,11 +487,10 @@ def parse_dependencies(all_dependencies):
             else:
                 left_side_index = tuple(0 for _ in range(0, len(distances[0])))
             dependency['left_side_index'] = left_side_index
-            array_name = dependency['array_name']
+
             if not len(all_arrays[array_name]) == len(left_side_index):
                 error = f'Array {array_name} has wrong left side index'
                 raise TypeError(error)
-
 
             for index in range(len(distances[0])):
                 dest_dist = left_side_index[index]
@@ -505,7 +503,11 @@ def parse_dependencies(all_dependencies):
                 distance.insert(0, dest_dist)
                 distance = tuple(distance)
                 tmp.append(distance)
-            dependency['distance'] = tuple(tmp)
+            distance = tuple(tmp)
+            dependency['distance'] = distance
+            if not len(all_arrays[array_name]) == len(distance):
+                error = f'Array {array_name} has wrong distance size in dependency'
+                raise TypeError(error)
     return all_dependencies
 
 
@@ -642,15 +644,7 @@ def validate_array_sizes():
     return hash_dict
 
 
-def validate_dependencies():
-    for _, arrays in dependencies.items():
-        for array in arrays:
-            array_name = array['array_name']
-            distance = array['distance']
-            left_side_index = array['left_side_index']
-            if not len(all_arrays[array_name]) == len(distance):
-                error = f'Array {array_name} has wrong dependency'
-                raise TypeError(error)
+
 
 def adjust_bounds(affine_fcts):
     max_tuple_size = 0
