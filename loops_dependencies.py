@@ -338,7 +338,11 @@ def parse_string_array(name_with_dims):
     iter = 0
     for size in sizes:
         size.replace(" ", "")
-        sizes[iter] = array_sizes[size]
+        try:
+            sizes[iter] = int(size)
+        except ValueError:
+            sizes[iter] = array_sizes[size]
+
         iter += 1
     sizes = tuple(map(int, sizes))
     return (array_name, sizes)
@@ -443,7 +447,7 @@ def parse_input():
         dependencies = parse_dependencies(data['dependencies'])
         global all_arrays
         all_arrays = validate_array_sizes()
-        # validate_dependencies()
+        validate_dependencies()
         rand_num_of_calculations = []
     for i in range(len(unique_arrays_read["unused"]) - 1):
         rand_num_of_calculations.append(i + 1)
@@ -633,10 +637,10 @@ def validate_array_sizes():
 
 def validate_dependencies():
     for _, arrays in dependencies.items():
-        for array_name, distance in arrays.items():
-            if len(all_arrays[array_name]) == len(distance):
-                pass
-            else:
+        for array in arrays:
+            array_name = array['array_name']
+            distance = array['distance']
+            if not len(all_arrays[array_name]) == len(distance):
                 error = f'Array {array_name} has wrong dependency'
                 raise TypeError(error)
 
