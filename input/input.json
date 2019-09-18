@@ -26,9 +26,9 @@
       "FLOW": [
         {
           "array_name": "B",
-          "distance": "(0,)",
+          "distance": "(0,0,)",
           "mix_in": "num_val",
-          "left_side_index": "(-3,-2,)"
+          "left_side_index": "(0, -2,)"
         },
         {
           "array_name": "B",

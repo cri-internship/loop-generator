@@ -444,9 +444,9 @@ def parse_input():
             unique_arrays_write['unused'].add(parse_string_array(arr))
         for arr in unparsed_arrays_read:
             unique_arrays_read['unused'].add(parse_string_array(arr))
-        dependencies = parse_dependencies(data['dependencies'])
-        global all_arrays
         all_arrays = validate_array_sizes()
+        dependencies = parse_dependencies(data['dependencies'])
+
         validate_dependencies()
         rand_num_of_calculations = []
     for i in range(len(unique_arrays_read["unused"]) - 1):
@@ -467,6 +467,7 @@ def parse_dependencies(all_dependencies):
     for dependency_name, deps in all_dependencies.items():
         for dependency in deps:
 
+
             flip = random.choice(('-1', '+1'))
             tmp = []
 
@@ -486,6 +487,12 @@ def parse_dependencies(all_dependencies):
                 left_side_index = parse_json_tuple(dependency['left_side_index'])
             else:
                 left_side_index = tuple(0 for _ in range(0, len(distances[0])))
+            dependency['left_side_index'] = left_side_index
+            array_name = dependency['array_name']
+            if not len(all_arrays[array_name]) == len(left_side_index):
+                error = f'Array {array_name} has wrong left side index'
+                raise TypeError(error)
+
 
             for index in range(len(distances[0])):
                 dest_dist = left_side_index[index]
@@ -640,10 +647,10 @@ def validate_dependencies():
         for array in arrays:
             array_name = array['array_name']
             distance = array['distance']
+            left_side_index = array['left_side_index']
             if not len(all_arrays[array_name]) == len(distance):
                 error = f'Array {array_name} has wrong dependency'
                 raise TypeError(error)
-
 
 def adjust_bounds(affine_fcts):
     max_tuple_size = 0
