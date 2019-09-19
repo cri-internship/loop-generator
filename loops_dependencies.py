@@ -492,6 +492,11 @@ def parse_dependencies(all_dependencies):
                 error = f'Array {array_name} has wrong left side index'
                 raise TypeError(error)
 
+            if not len(list(filter(lambda x: len(x) == len(all_arrays[array_name]),distances))) == len(distances):
+                error = f'Array {array_name} has wrong distance size in dependency'
+                raise TypeError(error)
+
+
             for index in range(len(distances[0])):
                 dest_dist = left_side_index[index]
                 if dependency_name == 'FLOW':
@@ -505,9 +510,6 @@ def parse_dependencies(all_dependencies):
                 tmp.append(distance)
             distance = tuple(tmp)
             dependency['distance'] = distance
-            if not len(all_arrays[array_name]) == len(distance):
-                error = f'Array {array_name} has wrong distance size in dependency'
-                raise TypeError(error)
     return all_dependencies
 
 
