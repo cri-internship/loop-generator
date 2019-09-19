@@ -36,6 +36,7 @@ stmt_counter = 0
 
 maths_operations = ['+', '-', '*', '/']
 amount_of_vars = 0
+type_to_init = ['int', 'float', 'double']
 
 
 def gen_random_scalar():
@@ -434,7 +435,7 @@ def parse_input():
         data = data[0]
         global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, typ, rand_num_of_calculations, init_with
         loop_nest_level = data['loop_nest_level']
-        typ = data['type']
+        typ = validate_type(data['type'])
         init_with = validate_init_with(data['init_with'])
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
@@ -449,6 +450,14 @@ def parse_input():
         rand_num_of_calculations = []
     for i in range(len(unique_arrays_read["unused"]) - 1):
         rand_num_of_calculations.append(i + 1)
+
+
+def validate_type(type_to_validate):
+    if type_to_validate in type_to_init:
+        return type_to_validate
+    else:
+        error = f'Possible types are: {type_to_init}'
+        raise TypeError(error)
 
 
 def validate_init_with(init_with):
@@ -466,6 +475,12 @@ def parse_dependencies(all_dependencies):
         for dependency in deps:
 
             array_name = dependency['array_name']
+            try:
+                all_arrays[array_name]
+            except KeyError:
+                error = f'Array {array_name} does not exist'
+                raise TypeError(error)
+
             flip = random.choice(('-1', '+1'))
             tmp = []
 
