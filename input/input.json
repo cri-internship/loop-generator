@@ -7,7 +7,7 @@
       "yC": 150,
       "zC": 80
     },
-    "type": "flot",
+    "type": "float",
     "init_with": "random",
     "distances": {
       "xA": 0

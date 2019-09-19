@@ -37,6 +37,7 @@ stmt_counter = 0
 maths_operations = ['+', '-', '*', '/']
 amount_of_vars = 0
 type_to_init = ['int', 'float', 'double']
+init_with = ['ones', 'zeros', 'random']
 
 
 def gen_random_scalar():
@@ -436,7 +437,7 @@ def parse_input():
         global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, typ, rand_num_of_calculations, init_with
         loop_nest_level = data['loop_nest_level']
         typ = validate_type(data['type'])
-        init_with = validate_init_with(data['init_with'])
+        init_with = validate_init_value(data['init_with'])
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
         array_sizes = data['array_sizes']
@@ -460,11 +461,12 @@ def validate_type(type_to_validate):
         raise TypeError(error)
 
 
-def validate_init_with(init_with):
-    if not init_with == 'ones' and not init_with == 'zeros' and not init_with == 'random':
-        raise TypeError("Init with can be 'random', 'ones' or 'zeros'")
+def validate_init_value(init_to_validate):
+    if init_to_validate in init_with:
+        return init_to_validate
     else:
-        return init_with
+        error = f'Possible values to validate arrays with are: {init_with}'
+        raise TypeError(error)
 
 
 def parse_dependencies(all_dependencies):
