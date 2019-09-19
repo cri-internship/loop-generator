@@ -26,7 +26,7 @@
       "FLOW": [
         {
           "array_name": "B",
-          "distance": "(0,0,), (1,1,)",
+          "distance": "(0,50,), (1,1,)",
           "mix_in": "num_val",
           "left_side_index": "(0, -2,)"
         },

@@ -469,7 +469,6 @@ def parse_dependencies(all_dependencies):
             flip = random.choice(('-1', '+1'))
             tmp = []
 
-
             deps_to_parse = re.findall(r'\(.*?\)', dependency['distance'])
             distances = []
             for one_el in deps_to_parse:
@@ -492,13 +491,16 @@ def parse_dependencies(all_dependencies):
                 error = f'Array {array_name} has wrong left side index'
                 raise TypeError(error)
 
-            if not len(list(filter(lambda x: len(x) == len(all_arrays[array_name]),distances))) == len(distances):
+            if not len(list(filter(lambda x: len(x) == len(all_arrays[array_name]), distances))) == len(distances):
                 error = f'Array {array_name} has wrong distance size in dependency'
                 raise TypeError(error)
 
-
             for index in range(len(distances[0])):
                 dest_dist = left_side_index[index]
+                for d in distances:
+                    if d[index] < 0 or d[index] > all_arrays[array_name][index]:
+                        error = f'Array {array_name} has wrong distance in dependency'
+                        raise TypeError(error)
                 if dependency_name == 'FLOW':
                     distance = [-d[index] + dest_dist for d in distances]
                 elif dependency_name == 'ANTI':
@@ -644,8 +646,6 @@ def validate_array_sizes():
         else:
             hash_dict[el[0]] = el[1]
     return hash_dict
-
-
 
 
 def adjust_bounds(affine_fcts):
