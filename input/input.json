@@ -10,9 +10,9 @@
     "type": "float",
     "init_with": "random",
     "distances": {
-      "xA": 0
+      "x": 50
     },
-    "loop_nest_level": 3,
+    "loop_nest_level": 5,
     "unique_arrays_write": [
       "A[100]",
       "B[xB,xB]"
@@ -26,15 +26,15 @@
       "FLOW": [
         {
           "array_name": "A",
-          "distance": "(0,), (1,)",
+          "distance": "(2,), (1,)",
           "mix_in": "num_val",
-          "left_side_index": "(0, )"
+          "left_side_index": "(x, )"
         },
         {
           "array_name": "B",
-          "distance": "(0,2,)",
+          "distance": "(0,x,)",
           "mix_in": "num_val",
-          "left_side_index": "(-3,-2,)"
+          "left_side_index": "(3,2,)"
         }
 
       ],

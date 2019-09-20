@@ -340,11 +340,18 @@ def parse_string_array(name_with_dims):
     iter = 0
     for size in sizes:
         size.replace(" ", "")
-        try:
+        if re.match(r'(\d+)', size):
             sizes[iter] = int(size)
-        except ValueError:
-            sizes[iter] = array_sizes[size]
-
+        elif re.match(r'((-\d+)|(\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?)', size):
+            raise TypeError("Allowed sizes for arrays are only positive integer")
+        elif size in array_sizes:
+            if array_sizes[size] > 0:
+                sizes[iter] = array_sizes[size]
+            else:
+                raise TypeError("Allowed array size is only positive integer")
+        else:
+            error = f'There is no variable for array size named "{size}"'
+            raise TypeError(error)
         iter += 1
     sizes = tuple(map(int, sizes))
     return (array_name, sizes)
@@ -435,7 +442,7 @@ def parse_input():
         data = json.load(file)
         data = data[0]
         global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, typ, rand_num_of_calculations, init_with
-        loop_nest_level = data['loop_nest_level']
+        loop_nest_level = validate_loop_nest_lvl(data['loop_nest_level'])
         typ = validate_type(data['type'])
         init_with = validate_init_value(data['init_with'])
         unparsed_arrays_write = data['unique_arrays_write']
@@ -451,6 +458,13 @@ def parse_input():
         rand_num_of_calculations = []
     for i in range(len(unique_arrays_read["unused"]) - 1):
         rand_num_of_calculations.append(i + 1)
+
+
+def validate_loop_nest_lvl(lvl_to_validate):
+    if type(lvl_to_validate) == int:
+        return lvl_to_validate
+    else:
+        raise TypeError("Wrong loop nest level")
 
 
 def validate_type(type_to_validate):
@@ -480,7 +494,7 @@ def parse_dependencies(all_dependencies):
             try:
                 all_arrays[array_name]
             except KeyError:
-                error = f'Array {array_name} does not exist'
+                error = f'Array "{array_name}" does not exist'
                 raise TypeError(error)
 
             flip = random.choice(('-1', '+1'))
@@ -539,10 +553,18 @@ def parse_json_tuple(string_to_parse):
     new_dist = ""
     for d in string_to_parse:
         if d is ',':
-            try:
+            if re.match(r'(\d+)', new_dist):
                 new_dist = int(new_dist)
-            except ValueError:
-                new_dist = dista[new_dist]
+            elif re.match(r'((-\d+)|(\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?)', new_dist):
+                raise TypeError("Allowed distance is only positive integer")
+            elif new_dist in dista:
+                if dista[new_dist] >= 0:
+                    new_dist = dista[new_dist]
+                else:
+                    raise TypeError("Allowed distance is only positive integer")
+            else:
+                error = f'There is no variable for distance named "{new_dist}"'
+                raise TypeError(error)
             ret.append(new_dist)
             new_dist = ""
         else:
