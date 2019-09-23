@@ -10,17 +10,15 @@ Possible values are: zeros, ones or random(float <1).
 > ar rcs lib_init_dyn_array.a init_dyn_array.o 
 
 ### master branch
-##### create_kernels_with_deps.py:
-
 ##### input.json:
-_</br> array_sizes_:variables for array sizes
-_</br> type_:init array with type "float"/"double"/"int"
-_</br> init_with_:init array with values "ones"/"zeros"/"random"
-_</br> distances:_ variables for distances
-_</br> loop_nest_level:_ int 
-_</br> unique_arrays_write:_ destination arrays/left-side arrays. Name and size. Variables from array_sizes can be used.
-_</br> unique_arrays_read:_ source arrays/right-side arrays. Name and size. Variables from array_sizes can be used.
-_</br> dependencies:_ list of each type of dependencies: flow/anti/input/output.
+_array_sizes_: variables for array sizes
+_</br> type_: init array with type "float"/"double"/"int"
+_</br> init_with_: init array with values "ones"/"zeros"/"random"
+_</br> distances_: variables for distances
+_</br> loop_nest_level_: int 
+_</br> unique_arrays_write_: destination arrays/left-side arrays. Name and size. Variables from array_sizes can be used.
+_</br> unique_arrays_read_: source arrays/right-side arrays. Name and size. Variables from array_sizes can be used.
+_</br> dependencies_: list of each type of dependencies: flow/anti/input/output.
 </br> Each dependency is described like:
         
         {
