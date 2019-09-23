@@ -12,25 +12,25 @@ Possible values are: zeros, ones or random(float <1).
 ### master branch
 ##### input.json:
 _array_sizes_: variables for array sizes
-_</br> type_: init array with type "float"/"double"/"int"
-_</br> init_with_: init array with values "ones"/"zeros"/"random"
+_</br> type_: init array with type float/double/int
+_</br> init_with_: init array with values ones/zeros/random
 _</br> distances_: variables for distances
-_</br> loop_nest_level_: int 
-_</br> unique_arrays_write_: destination arrays/left-side arrays. Name and size. Variables from array_sizes can be used.
-_</br> unique_arrays_read_: source arrays/right-side arrays. Name and size. Variables from array_sizes can be used.
+_</br> loop_nest_level_: int number
+_</br> unique_arrays_write_: destination arrays(left-side arrays). Name and size. Variables from array_sizes can be used.
+_</br> unique_arrays_read_: source arrays(right-side arrays). Name and size. Variables from array_sizes can be used.
 _</br> dependencies_: list of each type of dependencies: flow/anti/input/output.
 </br> Each dependency is described like:
         
         {
           "array_name": ,
           "distance": chain of distances(at least one). Variables from 'distances' can be used
-          "mix_in": "num_val"/"random"
+          "mix_in": num_val/random
           "left_side_index": tuple with values to add/subtract from left-side indexes. 
         },
-,where
-</br> distance: describes the distance when dependency occurs(the same iteration means distance is 0)
-</br> mix_in: statements can be filled with numerical values (no extra dependencies will be created) or random (it can contain numerical values as well as arrays, so new dependencies can be created)
-</br> left_side_index: which indexes are expected for destination array(for flow and anti dependency), for first statement(for input and output dependencies)
+where
+_</br> distance_: describes the distance in dependency between iterations (the same iteration means distance is 0)
+_</br> mix_in_: statements can be filled with numerical values (no extra dependencies will be created) or random (it can contain numerical values as well as arrays, so new dependencies can be created)
+_</br> left_side_index_: which indexes are expected for destination array(for flow and anti dependencies), for first statement(for input and output dependencies)
    
 Example "input.json":
 you can find an example of input file "input/input.json"
