@@ -22,14 +22,6 @@ Possible values are: zeros, ones or random(float <1).
           "unique_arrays_read": source arrays(right-side arrays). Name and size. Variables from array_sizes can be used.
           "dependencies": list of each type of dependencies: flow/anti/input/output.
           }
-_array_sizes_: variables for array sizes
-_</br> type_: init array with type float/double/int
-_</br> init_with_: init array with values ones/zeros/random
-_</br> distances_: variables for distances
-_</br> loop_nest_level_: int number
-_</br> unique_arrays_write_: destination arrays(left-side arrays). Name and size. Variables from array_sizes can be used.
-_</br> unique_arrays_read_: source arrays(right-side arrays). Name and size. Variables from array_sizes can be used.
-_</br> dependencies_: list of each type of dependencies: flow/anti/input/output.
 </br> Each dependency is described like:
         
         {
