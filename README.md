@@ -11,6 +11,17 @@ Possible values are: zeros, ones or random(float <1).
 
 ### master branch
 ##### input.json:
+
+          {
+          "array_sizes": variables for array sizes
+          "type": init array with type float/double/int
+          "init_with": init array with values ones/zeros/random
+          "distances": variables for distances 
+          "loop_nest_level": int number
+          "unique_arrays_write": destination arrays(left-side arrays). Name and size. Variables from array_sizes can be used.
+          "unique_arrays_read": source arrays(right-side arrays). Name and size. Variables from array_sizes can be used.
+          "dependencies": list of each type of dependencies: flow/anti/input/output.
+          }
 _array_sizes_: variables for array sizes
 _</br> type_: init array with type float/double/int
 _</br> init_with_: init array with values ones/zeros/random
