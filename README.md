@@ -37,7 +37,7 @@ Each dependency is described like:
           "mix_in": num_val/random
           "left_side_index"(optional): tuple with values to add/subtract from left-side indexes. 
         },
-,where
+, where
 _</br> distance_: describes the distance in dependency between iterations (the same iteration means distance is 0)
 _</br> mix_in_: statements can be filled with numerical values (no extra dependencies will be created) or 
 random (it can contain numerical values as well as arrays, so new dependencies can be created)

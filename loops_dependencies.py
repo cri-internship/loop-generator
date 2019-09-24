@@ -41,7 +41,7 @@ init_with = ['ones', 'zeros', 'random']
 
 
 def gen_random_scalar():
-    if typ == 'int':
+    if type_to_init == 'int':
         return random.randint(0, 50)
     else:
         return round(random.random(), 3)
@@ -176,7 +176,7 @@ def gen_scalar_part_anti(dest_array_name, source_array_name, optimize):
             result = stmt_body['destination'][0] + '=' + stmt_body['source'][0]
             populate_values(stmt_body['destination'][0], stmt_body['source'][0])
     else:
-        stmt_body['destination'] = [f'{generate_var(typ)}', dest_array_name]
+        stmt_body['destination'] = [f'{generate_var(type_to_init)}', dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}',
                                f'{gen_random_scalar()}']
         result = gen_based_on_usage_anti(stmt_body, source_array_name)
@@ -268,7 +268,7 @@ def input_dependency(dest_array_name, source_array_name, __, mix_in):
             f'{source_array_name}{gen_calc_for_read(random.choice(rand_num_of_calculations), arr_def)}']
         result = gen_based_on_usage(source_array_name, arr_def, stmt_body)
     else:
-        stmt_body['destination'] = [f'{generate_var(typ)}', f'{generate_var(typ)}']
+        stmt_body['destination'] = [f'{generate_var(type_to_init)}', f'{generate_var(type_to_init)}']
         stmt_body['source'] = [f'{dest_array_name}{random.choice(maths_operations)}{gen_random_scalar()}',
                                f'{source_array_name}{random.choice(maths_operations)}{gen_random_scalar()}']
         result = gen_based_on_usage(source_array_name, arr_def, stmt_body)
@@ -344,9 +344,9 @@ def parse_string_array(name_with_dims):
             sizes[iter] = int(size)
         elif re.match(r'((-\d+)|(\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?)', size):
             raise TypeError("Allowed sizes for arrays are only positive integer")
-        elif size in array_sizes:
-            if array_sizes[size] > 0:
-                sizes[iter] = array_sizes[size]
+        elif size in array_sizes_vars:
+            if array_sizes_vars[size] > 0:
+                sizes[iter] = array_sizes_vars[size]
             else:
                 raise TypeError("Allowed array size is only positive integer")
         else:
@@ -420,8 +420,6 @@ def generate_arrays_helper1(arrays_drew_by_lot, num_of_calculations, arr_def):
 
 
 def generate_operators(num_of_calculations):
-    global maths_operations_size
-    maths_operations_size = len(maths_operations)
     if coin_flip > 0.5:
         num_of_calculations += 1
     return generate_operators_helper([], num_of_calculations)
@@ -429,7 +427,7 @@ def generate_operators(num_of_calculations):
 
 def generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations):
     if num_of_calculations > 0:
-        tmp = random.sample(maths_operations, min(num_of_calculations, maths_operations_size))
+        tmp = random.sample(maths_operations, min(num_of_calculations, len(maths_operations)))
         maths_oper_drew_by_lot += tmp
         num_of_calculations -= len(tmp)
         generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations)
@@ -439,16 +437,15 @@ def generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations):
 def parse_input():
     """Parse input, init global variables, call validate sizes for arrays. Put all arrays to 'unused'"""
     with open(input_file, 'r') as file:
-        data = json.load(file)
-        data = data[0]
-        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes, dista, typ, rand_num_of_calculations, init_with
+        data = json.load(file)[0]
+        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes_vars, distances_vars, type_to_init, rand_num_of_calculations, init_with
         loop_nest_level = validate_loop_nest_lvl(data['loop_nest_level'])
-        typ = validate_type(data['type'])
+        type_to_init = validate_type(data['type'])
         init_with = validate_init_value(data['init_with'])
         unparsed_arrays_write = data['unique_arrays_write']
         unparsed_arrays_read = data['unique_arrays_read']
-        array_sizes = data['array_sizes']
-        dista = data['distances']
+        array_sizes_vars = data['array_sizes']
+        distances_vars = data['distances']
         for arr in unparsed_arrays_write:
             unique_arrays_write['unused'].add(parse_string_array(arr))
         for arr in unparsed_arrays_read:
@@ -484,13 +481,13 @@ def validate_init_value(init_to_validate):
 
 
 def parse_dependencies(all_dependencies):
+    """:arg all_dependencies: not parsed dependencies.
+    Check if left_side_index and distances are correct, parse indexes, check if optimization is possible
+    :return dependencies with parsed indexes
     """
-    CHANGE FROM STRING TO ARRAY OF DISTANCES
-    """
-    for dependency_name, deps in all_dependencies.items():
-        for dependency in deps:
-
-            array_name = dependency['array_name']
+    for dependency_name, arrays in all_dependencies.items():
+        for array in arrays:
+            array_name = array['array_name']
             try:
                 all_arrays[array_name]
             except KeyError:
@@ -498,78 +495,82 @@ def parse_dependencies(all_dependencies):
                 raise TypeError(error)
 
             flip = random.choice(('-1', '+1'))
-            tmp = []
+            tmp_distance = []
 
-            deps_to_parse = re.findall(r'\(.*?\)', dependency['distance'])
+            deps_to_parse = re.findall(r'\(.*?\)', array['distance'])
             distances = []
-            for one_el in deps_to_parse:
-                distances.append(parse_json_tuple(one_el))
+            for dep in deps_to_parse:
+                distances.append(parse_indexes(dep))
 
+            # if at least one distance consists of 0, it can't be optimized
             optimize = True
             for dist in distances:
                 filtered_dist = list(filter(lambda x: x == 0, dist))
                 if len(filtered_dist) == len(dist):
                     optimize = False
-            dependency['optimize'] = optimize
+            array['optimize'] = optimize
 
-            if 'left_side_index' in dependency:
-                left_side_index = parse_json_tuple(dependency['left_side_index'])
+            # parse left_side_index
+            if 'left_side_index' in array:
+                left_side_index = parse_indexes(array['left_side_index'])
             else:
                 left_side_index = tuple(0 for _ in range(0, len(distances[0])))
-            dependency['left_side_index'] = left_side_index
+            array['left_side_index'] = left_side_index
 
+            # check if left_side_index has the same size as array
             if not len(all_arrays[array_name]) == len(left_side_index):
                 error = f'Array {array_name} has wrong left side index'
                 raise TypeError(error)
 
+            # check if distance has the same size as array
             if not len(list(filter(lambda x: len(x) == len(all_arrays[array_name]), distances))) == len(distances):
                 error = f'Array {array_name} has wrong distance size in dependency'
                 raise TypeError(error)
 
             for index in range(len(distances[0])):
                 dest_dist = left_side_index[index]
+                # check if distance is a positive number less then size
                 for d in distances:
                     if d[index] < 0 or d[index] > all_arrays[array_name][index]:
                         error = f'Array {array_name} has wrong distance in dependency'
                         raise TypeError(error)
+
                 if dependency_name == 'FLOW':
                     distance = [-d[index] + dest_dist for d in distances]
                 elif dependency_name == 'ANTI':
                     distance = [d[index] + dest_dist for d in distances]
                 else:
                     distance = [eval(flip) * d[index] + dest_dist for d in distances]
+
                 distance.insert(0, dest_dist)
                 distance = tuple(distance)
-                tmp.append(distance)
-            distance = tuple(tmp)
-            dependency['distance'] = distance
+                tmp_distance.append(distance)
+            array['distance'] = tuple(tmp_distance)
     return all_dependencies
 
 
-def parse_json_tuple(string_to_parse):
-    ret = []
-    string_to_parse = string_to_parse.replace(" ", "")
-    string_to_parse = string_to_parse[1:-1]
-    new_dist = ""
-    for d in string_to_parse:
-        if d is ',':
-            if re.match(r'(\d+)', new_dist):
-                new_dist = int(new_dist)
-            elif re.match(r'((-\d+)|(\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?)', new_dist):
-                raise TypeError("Allowed distance is only positive integer")
-            elif new_dist in dista:
-                if dista[new_dist] >= 0:
-                    new_dist = dista[new_dist]
-                else:
-                    raise TypeError("Allowed distance is only positive integer")
+def parse_indexes(tuple_to_parse):
+    """:arg tuple_to_parse: tuple to parse from json with 'left_side_index' or 'distance'.
+        Check if it is a positive int or variable from 'distances', otherwise throws exception
+       :return parsed tuple
+    """
+    parsed_indexes = []
+    tuple_to_parse = tuple_to_parse.replace(" ", "")[1:-2]
+    tuple_to_parse = tuple_to_parse.split(',')
+    for index in tuple_to_parse:
+        if re.match(r'(\d+)', index):
+            parsed_indexes.append(int(index))
+        elif re.match(r'((-\d+)|(\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?)', index):
+            raise TypeError("Allowed distance is only positive integer")
+        elif index in distances_vars:
+            if distances_vars[index] >= 0:
+                parsed_indexes.append(distances_vars[index])
             else:
-                error = f'There is no variable for distance named "{new_dist}"'
-                raise TypeError(error)
-            ret.append(new_dist)
-            new_dist = ""
+                raise TypeError("Allowed distance is only positive integer")
         else:
-            new_dist += d
-    return tuple(ret)
+            error = f'There is no variable for distance named "{index}"'
+            raise TypeError(error)
+    return tuple(parsed_indexes)
 
 
 def generate_nested_loops(loop_nest_depth, affine):
@@ -626,21 +627,23 @@ def create_nested_loop():
 def init_arrays(file=result_c_file):
     """Init all arrays"""
     for array_name, array_size in all_arrays.items():
-        lgr.write_init_array(array_name, array_size, file, typ, init_with)
+        lgr.write_init_array(array_name, array_size, file, type_to_init, init_with)
 
 
 def run_dependencies():
-    """Go throw all dependencies, create each dependency with prepared functions and put it into c.Statement
-    :return c.Block containing all dependencies with c.Statement
+    """Go throw all dependencies, find indexes for each dependency and put each
+     created dependency into c.Statement
+    :return c.Block containing all statements
     """
-    block_with_dependencies = []
-    for dependency, arrays in dependencies.items():
+    block_with_statements = []
+    for dependency_name, arrays in dependencies.items():
         if arrays:
             for array in arrays:
                 array_name = array['array_name']
                 distances = array['distance']
                 optimize = array['optimize']
                 mix_in = array['mix_in']
+
                 for arr_name, arr_size in all_arrays.items():
                     if array_name == arr_name:
                         dest_array = array_name
@@ -665,26 +668,26 @@ def run_dependencies():
                             src_array_str = ''
                             for src in src_array:
                                 src_array_str += src + random.choice(maths_operations)
-                        stmt = dependency_function[dependency](dest_array, src_array_str[:-1], optimize, mix_in)
+                        stmt = dependency_function[dependency_name](dest_array, src_array_str[:-1], optimize, mix_in)
                         if stmt:
-                            block_with_dependencies.append(c.Statement('\n' + add_indent() + stmt))
-    return c.Block(block_with_dependencies)
+                            block_with_statements.append(c.Statement('\n' + add_indent() + stmt))
+    return c.Block(block_with_statements)
 
 
 def validate_array_sizes():
-    """Make union of read and write arrays, check with the dict if the sizes for similar arrays are the same,
-    if not raise an error
-    :return set with all arrays
+    """Make union of read and write arrays, add array to array_dict if it's not there, otherwise
+     checks if the sizes for similar arrays are the same if not raise an error
+    :return dict with arrays name as key and size as value
     """
-    uni = unique_arrays_write['unused'].union(unique_arrays_read['unused'])
-    hash_dict = {}
-    for el in uni:
-        if el[0] in hash_dict and el[1] != hash_dict[el[0]]:
+    arrays_union = unique_arrays_write['unused'].union(unique_arrays_read['unused'])
+    arrays_dict = {}
+    for el in arrays_union:
+        if el[0] in arrays_dict and el[1] != arrays_dict[el[0]]:
             error = f'Arrays {el[0]} have different sizes'
             raise TypeError(error)
         else:
-            hash_dict[el[0]] = el[1]
-    return hash_dict
+            arrays_dict[el[0]] = el[1]
+    return arrays_dict
 
 
 def adjust_bounds(affine_fcts):
@@ -735,10 +738,10 @@ def populate_literal_values(literal_values_set, data):
         literal_values_set[res][0] += 1
 
 
-def get_arrays_from_string(str):
-    str = re.findall(r'(\w+(\[.*?\])+)', str)
-    str = [i[0] for i in str]
-    return str
+def get_arrays_from_string(string_with_arrays):
+    """Extract and return the list of arrays with name and its indexes"""
+    string_with_arrays = re.findall(r'(\w+(\[.*?\])+)', string_with_arrays)
+    return [i[0] for i in string_with_arrays]
 
 
 def add_indent():
