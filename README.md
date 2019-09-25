@@ -54,7 +54,7 @@ C files from 'src' folder and add an executable programs to 'obj' folder.
 
 
 
-##### create_random_kernels.py:
+##### branch feature1/loopnest
 run for generating random loops. It's possible to set max parameters for amount of array, dims, dim size, 
 loop nest depth. All these parameters are chosen randomly. Every dim of every array will have the same size.
 
