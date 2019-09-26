@@ -5,17 +5,20 @@ specified properties, like: loop data dependencies(flow, anti, input, output), a
 loop nest level, which can be extended in the future. Program optimizes an amount of statements, checking if 
 it is already exists.
 
+## Built With:
+python3.7
+</br>cgen
 
+## Getting Started
 #### Library init_dyn_array.c:
-C library contains implementation of C functions, which init one, two or three dimensional arrays with float, double or int values.
-Possible values are: zeros, ones or random(float <1). 
+C library contains implementation of C functions, which init one, two or three dimensional arrays with float,
+double or int values. Possible values are: zeros, ones or random(float <1). 
 
 ###### To connect library:
 > cd init_array_lib </br>
 > gcc -fPIC -c init_dyn_array.c </br>
 > ar rcs lib_init_dyn_array.a init_dyn_array.o 
 
-### master branch
 ##### input.json:
 To provide code features, it is necessary to write an "input/input.json".
 
@@ -46,8 +49,12 @@ for first statement(for input and output dependencies). By default it is 0.
    
 You can find an example of input file "input/input.json"
 
+Run 'create_kernels_with_deps.py', which uses 'input/input.json'. There is a Makefile, which can compile all
+C files from 'src' folder and add an executable programs to 'obj' folder. 
 
 
-##### create_random_kernels.py:
-run for generating random loops. It's possible to set max parameters for amount of array, dims, dim size, loop nest depth. All these parameters are chosen randomly. Every dim of every array will have the same size.
+
+##### branch feature1/loopnest
+run for generating random loops. It's possible to set max parameters for amount of array, dims, dim size, 
+loop nest depth. All these parameters are chosen randomly. Every dim of every array will have the same size.
 

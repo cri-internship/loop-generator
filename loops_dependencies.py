@@ -34,6 +34,7 @@ dependency_function = {'FLOW': (lambda dest, source, optimize, mix_in: flow_depe
 
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
+array_init_functions = {1: 'create_one_dim_', 2: 'create_two_dim_', 3: 'create_three_dim_'}
 
 """
 Dicts used to keep control of arrays used in statements. 
@@ -103,8 +104,14 @@ def gen_random_stmt(unique_arrays):
         el = random.sample(unique_arrays['used'], 1)[0]
     curr = el[0]
     for size in range(len(el[1])):
-        curr += f'[{lgr.generate_loop_index(size % loop_nest_level)}]'
+        curr += f'[{generate_loop_index(size % loop_nest_level)}]'
     return curr
+
+
+def generate_loop_index(loop_level):
+    first_iterator = 'a'
+    calculated_iterator = chr(ord(first_iterator) + loop_level % 26)
+    return calculated_iterator
 
 
 def parse_string_array(name_with_dims):
@@ -181,7 +188,7 @@ def generate_arrays_with_indexes1(num_of_calculations, arr_def):  # todo rename 
         curr = el[0]
         if type(el[1]) is tuple:
             for size in range(len(el[1])):
-                curr += f'[{lgr.generate_loop_index(size % loop_nest_level)}]'
+                curr += f'[{generate_loop_index(size % loop_nest_level)}]'
         else:
             curr = el[1]
         res.append(curr)
@@ -415,6 +422,7 @@ def print_loop_structure(loop_index, lower_bound, upper_bound, affine, fun):
     gen_scalar_part += str(abs(curr_val))
     return c.For('int {} = {}'.format(loop_index, affine[0][0]),
                  '{} < '.format(loop_index)
+                 # + str(upper_bound)
                  + str(affine[1][0]),
                  '{}++'.format(loop_index),
                  fun)
@@ -434,7 +442,20 @@ def create_nested_loop():
 def init_arrays(file=result_c_file):
     """Init all arrays"""
     for array_name, array_size in all_arrays.items():
-        lgr.write_init_array(array_name, array_size, file, type_to_init, init_with)
+        write_init_array(array_name, array_size, file, type_to_init, init_with)
+
+def write_init_array(array_name, array_sizes, file, typ='float', init_with='random'):
+    """Write declaration and calling functions to init arrays to file"""
+    if type(array_sizes) == tuple and len(array_sizes) == 1:
+        init_array = c.Statement('\n\t{} {}{} = {}{}({}, "{}")'.format(typ, '*' * len(array_sizes), array_name,
+                                                                       array_init_functions[len(array_sizes)], typ,
+                                                                       str(array_sizes)[1:-2], init_with))
+    else:
+        init_array = c.Statement('\n\t{} {}{} = {}{}({}, "{}")'.format(typ, '*' * len(array_sizes), array_name,
+                                                                       array_init_functions[len(array_sizes)], typ,
+                                                                       str(array_sizes)[1:-1], init_with))
+    with open(file, 'a+') as file:
+        file.write(str(init_array))
 
 
 def run_dependencies():
@@ -470,8 +491,8 @@ def run_dependencies():
                                     src_dist = str(distance[i])
                                 else:
                                     src_dist = '+' + str(distance[i])
-                                src_array[i - 1] += f'[{lgr.generate_loop_index(index % loop_nest_level)}{src_dist}]'
-                            dest_array += f'[{lgr.generate_loop_index(index % loop_nest_level)}{dest_dist}]'
+                                src_array[i - 1] += f'[{generate_loop_index(index % loop_nest_level)}{src_dist}]'
+                            dest_array += f'[{generate_loop_index(index % loop_nest_level)}{dest_dist}]'
                             src_array_str = ''
                             for src in src_array:
                                 src_array_str += src + random.choice(maths_operations)
