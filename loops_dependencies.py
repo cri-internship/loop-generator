@@ -35,8 +35,16 @@ dependency_function = {'FLOW': (lambda dest, source, optimize, mix_in: flow_depe
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 
-literal_values_source = {} #
-literal_values_destination = {} #
+"""
+Dicts used to keep control of arrays used in statements. 
+Needed to optimize (reduce) the number of statements.
+KEYS: string, used arrays with their access functions
+VALUES: int, represents number of line of code (within statements) 
+in which this array access function was used for the first time.
+<destination> = <source>
+"""
+literal_values_source = {}
+literal_values_destination = {}
 
 stmt_counter = 0
 
@@ -53,12 +61,9 @@ def gen_random_scalar():
         return round(random.random(), 3)
 
 
-def populate_values(destination, source):
+def populate_values(destination, source):  # todo rename
     """
-    Update
-    :param destination:
-    :param source:
-    :return:
+    Update dicts of destination and sources array usages.
     """
     populate_literal_values(literal_values_destination, destination)
     populate_literal_values(literal_values_source, source)
@@ -66,14 +71,17 @@ def populate_values(destination, source):
 
 def inc_stmt_counter():
     """
-
-    :return:
+    Increment statement counter by 1 when a new statement is added.
     """
     global stmt_counter
     stmt_counter += 1
 
 
 def generate_var(type):
+    """
+    Generate names for variables to store data when "init_with" in input file is set to "num_val"
+    so as not to generate any new dependencies.
+    """
     global amount_of_vars
     first_iterator = 'a'
     calculated_iterator = chr(ord(first_iterator) + amount_of_vars % 26)
@@ -83,8 +91,9 @@ def generate_var(type):
 
 
 def gen_random_stmt(unique_arrays):
-    """If there are any unused arrays, get one, other way choose randomly from used.
-    Add indexes to array(less than loops nest depth)
+    """
+    If there are any unused arrays, get one, other way choose randomly from used.
+    Add indexes to array (less than loops nest depth).
     """
     if unique_arrays['unused']:
         el = random.sample(unique_arrays['unused'], 1)[0]
@@ -124,6 +133,10 @@ def parse_string_array(name_with_dims):
 
 
 def gen_calc_for_read(num_of_calculations, arr_def):
+    """
+    Random right-hand side of a statement is created by merging
+    arrays and operators drew by lot.
+    """
     stmt = ""
     arrays = generate_arrays_with_indexes1(num_of_calculations, arr_def)
     operators = generate_operators(num_of_calculations)
@@ -133,8 +146,14 @@ def gen_calc_for_read(num_of_calculations, arr_def):
     return stmt
 
 
-def generate_arrays_with_indexes1(num_of_calculations, arr_def):
-    # temporarily remove the array on which we do dependencies
+def generate_arrays_with_indexes1(num_of_calculations, arr_def):  # todo rename to generate_arrays_with_indexes
+    """
+    Generate a right-hand side of a statement.
+    Favor to use unused arrays from "unique_arrays_read".
+    :return: an array of array names
+    """
+
+    # temporarily remove the array on which we create dependencies so as not to use it again in the same stmt
     tmp_used, tmp_unused = False, False
     if arr_def in unique_arrays_read['unused']:
         tmp_unused = True
@@ -150,9 +169,10 @@ def generate_arrays_with_indexes1(num_of_calculations, arr_def):
     if tmp_used:
         unique_arrays_read['used'].add(arr_def)
 
+    # reduce number of numerical values by adding them only with 24% of probability
     global coin_flip
     coin_flip = random.random()
-    if coin_flip > 0.75:
+    if coin_flip > 0.75:  # todo clean code extract to another function
         scalar_position_in_arr = random.randrange(0, len(gen_arr))
         gen_arr.append(gen_arr[scalar_position_in_arr])
         gen_arr[scalar_position_in_arr] = ('', gen_random_scalar())
@@ -169,6 +189,10 @@ def generate_arrays_with_indexes1(num_of_calculations, arr_def):
 
 
 def generate_arrays_helper1(arrays_drew_by_lot, num_of_calculations, arr_def):
+    """
+    Draw arrays by lot from the unique_arrays_read so as to use them as a right-hand side of a stmt.
+    :return: arrays of array names drew by lot
+    """
     if num_of_calculations > 0:
         unused_arr_size = len(unique_arrays_read['unused'])
         if unused_arr_size > 0:
@@ -186,14 +210,20 @@ def generate_arrays_helper1(arrays_drew_by_lot, num_of_calculations, arr_def):
 
 
 def generate_operators(num_of_calculations):
+    """
+    :return: an array of mathematical operators from {+, -, *, /} drew by lot
+    """
     global maths_operations_size
     maths_operations_size = len(maths_operations)
-    if coin_flip > 0.5:
+    if coin_flip > 0.75:  # if there is a scalar added increase the number of operators
         num_of_calculations += 1
     return generate_operators_helper([], num_of_calculations)
 
 
 def generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations):
+    """
+    Use recursion to generate expected amount of maths_operations.
+    """
     if num_of_calculations > 0:
         tmp = random.sample(maths_operations, min(num_of_calculations, len(maths_operations)))
         maths_oper_drew_by_lot += tmp
@@ -203,7 +233,9 @@ def generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations):
 
 
 def parse_input():
-    """Parse input, init global variables, call validate sizes for arrays. Put all arrays to 'unused'"""
+    """
+    Parse input, init global variables, call validate sizes for arrays. Put all arrays to 'unused'.
+    """
     with open(input_file, 'r') as file:
         data = json.load(file)[0]
         global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes_vars, distances_vars, type_to_init, rand_num_of_calculations, init_with
@@ -249,8 +281,9 @@ def validate_init_value(init_to_validate):
 
 
 def parse_dependencies(all_dependencies):
-    """:arg all_dependencies: not parsed dependencies.
-    Check if left_side_index and distances are correct, parse indexes, check if optimization is possible
+    """
+    Check if left_side_index and distances are correct, parse indexes, check if optimization is possible.
+    :arg all_dependencies: not parsed dependencies
     :return dependencies with parsed indexes
     """
     for dependency_name, arrays in all_dependencies.items():
@@ -318,9 +351,10 @@ def parse_dependencies(all_dependencies):
 
 
 def parse_indexes(tuple_to_parse):
-    """:arg tuple_to_parse: tuple to parse from json with 'left_side_index' or 'distance'.
-        Check if it is a positive int or variable from 'distances', otherwise throws exception
-       :return parsed tuple
+    """
+    Check if it is a positive int or variable from 'distances', otherwise throws exception.
+    :arg tuple_to_parse: tuple to parse from json with 'left_side_index' or 'distance'
+    :return parsed tuple
     """
     parsed_indexes = []
     tuple_to_parse = tuple_to_parse.replace(" ", "")[1:-2]
@@ -342,12 +376,13 @@ def parse_indexes(tuple_to_parse):
 
 
 def generate_nested_loops(loop_nest_depth, affine):
-    """:arg loop_nest_depth: the loop nest depth
-       recursively function to create for loop with depth d.
-       The most inner loop run dependencies.
-       Choose upper bound by going through each appropriate size of each array.
-       :return for loop with depth d
-       """
+    """
+    :arg loop_nest_depth: the loop nest depth
+    recursively function to create for loop with depth d.
+    The most inner loop run dependencies.
+    Choose upper bound by going through each appropriate size of each array.
+    :return for loop with depth d
+    """
     loop_index = lgr.generate_loop_index(loop_nest_depth - 1)
     lower_bound = 0
     upper_bound = float("inf")
@@ -368,6 +403,9 @@ def generate_nested_loops(loop_nest_depth, affine):
 
 
 def print_loop_structure(loop_index, lower_bound, upper_bound, affine, fun):
+    """
+    Print loop structure: for(int {} = {}; {} < {}; {}++){ ... }
+    """
     gen_scalar_part = ''
     curr_val = affine[1][0]
     if curr_val > 0:
@@ -377,14 +415,15 @@ def print_loop_structure(loop_index, lower_bound, upper_bound, affine, fun):
     gen_scalar_part += str(abs(curr_val))
     return c.For('int {} = {}'.format(loop_index, affine[0][0]),
                  '{} < '.format(loop_index)
-                 # + str(upper_bound)
                  + str(affine[1][0]),
                  '{}++'.format(loop_index),
                  fun)
 
 
 def create_nested_loop():
-    """Calls generate_nested_loops(d, i) and write it to file"""
+    """
+    Calls generate_nested_loops(d, i) and write it to file
+    """
     with open(result_c_file, 'a+') as file:
         file.write('\n\n')
         for line in str(
@@ -459,6 +498,9 @@ def validate_array_sizes():
 
 
 def adjust_bounds(affine_fcts):
+    """
+    Calculate loop bounds (lower and upper) for for-loops.
+    """
     max_tuple_size = 0
     for tupl in affine_fcts:
         max_tuple_size = max(max_tuple_size, len(tupl[1]))
@@ -488,7 +530,11 @@ def adjust_bounds(affine_fcts):
 
 
 def global_bounds():
-    global concat_depen
+    """
+    todo
+    :return:
+    """
+    global concat_depen #todo rename
     concat_depen = []
     for dependency_name, arrays in dependencies.items():
         if arrays:
@@ -498,6 +544,9 @@ def global_bounds():
 
 
 def populate_literal_values(literal_values_set, data):
+    """
+    Assign to each array[index] its first usage line.
+    """
     data = "".join(data.split())  # remove all whitespaces
     expresion_as_string = get_arrays_from_string(data)
     for res in expresion_as_string:
@@ -507,7 +556,9 @@ def populate_literal_values(literal_values_set, data):
 
 
 def get_arrays_from_string(string_with_arrays):
-    """Extract and return the list of arrays with name and its indexes"""
+    """
+    Extract and return the list of arrays with name and its indexes
+    """
     string_with_arrays = re.findall(r'(\w+(\[.*?\])+)', string_with_arrays)
     return [i[0] for i in string_with_arrays]
 

@@ -18,7 +18,6 @@ def gen_random_part(dest_array_name, source_array_name, optimize, arr_def):
         stmt_body['destination'] = [dest_array_name]
         stmt_body['source'] = [
             f'{source_array_name}{ld.gen_calc_for_read(random.choice(ld.rand_num_of_calculations), arr_def)}']
-        # result = gen_based_on_usage_flow(stmt_body)
         if dest_array_name in ld.literal_values_destination.keys() and source_array_name in ld.literal_values_source.keys():
             result = ""
         else:
@@ -234,7 +233,7 @@ def gen_based_on_usage(source_array_name, arr_def, stmt_body):
     if source_array_name in ld.literal_values_source.keys():
         source_usage = ld.literal_values_source[source_array_name][0]
         if source_usage >= 2:
-            result = ""  # TODO maybe None???
+            result = ""
         elif source_usage == 1:
             result = gen_stmt_input(stmt_body, 0)
     else:
