@@ -1,0 +1,45 @@
+[
+  {
+    "array_sizes": {
+      "xA": 100,
+      "xB": 50,
+      "xC": 40,
+      "yC": 150,
+      "zC": 80
+    },
+    "type": "float",
+    "init_with": "random",
+    "distances": {
+      "x": 50
+    },
+    "loop_nest_level": 3,
+    "unique_arrays_write": [
+      "A[100]",
+      "B[xB,xB]"
+    ],
+    "unique_arrays_read": [
+      "A[xA]",
+      "B[50,50]",
+      "C[xC,yC,zC]"
+    ],
+    "dependencies": {
+      "FLOW": [
+        {
+          "array_name": "A",
+          "distance": "(0,), (2,)",
+          "mix_in": "random",
+          "left_side_index": "(x, )"
+        },
+        {
+          "array_name": "B",
+          "distance": "(0,x,)",
+          "mix_in": "random",
+          "left_side_index": "(3,2,)"
+        }
+      ],
+      "ANTI": [],
+      "OUTPUT": [],
+      "INPUT": []
+    }
+  }
+]
