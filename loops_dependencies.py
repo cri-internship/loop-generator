@@ -50,7 +50,7 @@ stmt_counter = 0
 
 maths_operations = ['+', '-', '*', '/']
 amount_of_vars = 0
-type_to_init = ['int', 'float', 'double']
+types_to_init = ['int', 'float', 'double']
 init_with = ['ones', 'zeros', 'random']
 
 
@@ -271,10 +271,10 @@ def validate_loop_nest_lvl(lvl_to_validate):
 
 
 def validate_type(type_to_validate):
-    if type_to_validate in type_to_init:
+    if type_to_validate in types_to_init:
         return type_to_validate
     else:
-        error = f'Possible types are: {type_to_init}'
+        error = f'Possible types are: {types_to_init}'
         raise TypeError(error)
 
 
@@ -443,6 +443,7 @@ def init_arrays(file=result_c_file):
     for array_name, array_size in all_arrays.items():
         write_init_array(array_name, array_size, file, type_to_init, init_with)
 
+
 def write_init_array(array_name, array_sizes, file, typ='float', init_with='random'):
     """Write declaration and calling functions to init arrays to file"""
     if type(array_sizes) == tuple and len(array_sizes) == 1:
@@ -554,7 +555,7 @@ def global_bounds():
     todo
     :return:
     """
-    global concat_depen #todo rename
+    global concat_depen  # todo rename
     concat_depen = []
     for dependency_name, arrays in dependencies.items():
         if arrays:
@@ -585,7 +586,3 @@ def get_arrays_from_string(string_with_arrays):
 
 def add_indent():
     return " " * (loop_nest_level + 3)
-
-
-if __name__ == '__main__':
-    pass
