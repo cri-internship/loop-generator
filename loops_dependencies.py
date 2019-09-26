@@ -6,7 +6,6 @@ import re
 import cgen as c
 import datetime
 
-import loops_gen_random as lgr
 from dependencies_templates import flow_dependency, anti_dependency, output_dependency, input_dependency
 
 
@@ -390,7 +389,7 @@ def generate_nested_loops(loop_nest_depth, affine):
     Choose upper bound by going through each appropriate size of each array.
     :return for loop with depth d
     """
-    loop_index = lgr.generate_loop_index(loop_nest_depth - 1)
+    loop_index = generate_loop_index(loop_nest_depth - 1)
     lower_bound = 0
     upper_bound = float("inf")
     for array_name, array_size in all_arrays.items():
