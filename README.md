@@ -55,6 +55,10 @@ C files from 'src' folder and add an executable programs to 'obj' folder.
 
 
 ##### branch feature1/loopnest
-run for generating random loops. It's possible to set max parameters for amount of array, dims, dim size, 
+Run for generating random loops. It's possible to set max parameters for amount of array, dims, dim size, 
 loop nest depth. All these parameters are chosen randomly. Every dim of every array will have the same size.
+
+##### branch analyzer
+Contains the code that can be used to perform statycal code analysis of already benchmarks. It extracts code features such as: loop depth, unique arrays read, unique arrays write, statements per loop level, unique arrays read per statement, dimensions per array read
+
 
