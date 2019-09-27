@@ -115,7 +115,7 @@ def generate_loop_index(loop_level):
 
 def parse_string_array(name_with_dims):
     """From string array in input make a tuple (name, (sizes))"""
-    name_with_dims = name_with_dims.split('[')
+    name_with_dims = name_with_dims.replace(" ", "").split('[')
     array_name = name_with_dims[0]
     sizes = name_with_dims[1][:-1].split(',')
     iter = 0
@@ -244,7 +244,8 @@ def parse_input():
     """
     with open(input_file, 'r') as file:
         data = json.load(file)[0]
-        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes_vars, distances_vars, type_to_init, rand_num_of_calculations, init_with
+        global loop_nest_level, unique_arrays_write, unique_arrays_read, dependencies, all_arrays, array_sizes_vars, \
+            distances_vars, type_to_init, rand_num_of_calculations, init_with
         loop_nest_level = validate_loop_nest_lvl(data['loop_nest_level'])
         type_to_init = validate_type(data['type'])
         init_with = validate_init_value(data['init_with'])
@@ -366,9 +367,9 @@ def parse_indexes(tuple_to_parse):
     tuple_to_parse = tuple_to_parse.replace(" ", "")[1:-2]
     tuple_to_parse = tuple_to_parse.split(',')
     for index in tuple_to_parse:
-        if re.match(r'(\d+)', index):
+        if re.match(r'(\d+)|(-\d+)', index):
             parsed_indexes.append(int(index))
-        elif re.match(r'((-\d+)|(\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?)', index):
+        elif re.match(r'((\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?)', index):
             raise TypeError("Allowed distance is only positive integer")
         elif index in distances_vars:
             if distances_vars[index] >= 0:
@@ -471,6 +472,8 @@ def run_dependencies():
                 distances = array['distance']
                 optimize = array['optimize']
                 mix_in = array['mix_in']
+                if not mix_in=='random' and not mix_in=='num_val':
+                    raise KeyError("Mix_in can be only 'random' or 'num_val'")
 
                 for arr_name, arr_size in all_arrays.items():
                     if array_name == arr_name:

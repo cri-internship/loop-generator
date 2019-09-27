@@ -130,7 +130,7 @@ def gen_scalar_part_anti(dest_array_name, source_array_name, optimize):
             result = stmt_body['destination'][0] + '=' + stmt_body['source'][0]
             ld.populate_values(stmt_body['destination'][0], stmt_body['source'][0])
     else:
-        stmt_body['destination'] = [f'{ld.generate_var(ld.typ)}', dest_array_name]
+        stmt_body['destination'] = [f'{ld.generate_var(ld.type_to_init)}', dest_array_name]
         stmt_body['source'] = [f'{source_array_name}{random.choice(ld.maths_operations)}{ld.gen_random_scalar()}',
                                f'{ld.gen_random_scalar()}']
         result = gen_based_on_usage_anti(stmt_body, source_array_name)
@@ -222,7 +222,7 @@ def input_dependency(dest_array_name, source_array_name, __, mix_in):
             f'{source_array_name}{ld.gen_calc_for_read(random.choice(ld.rand_num_of_calculations), arr_def)}']
         result = gen_based_on_usage(source_array_name, arr_def, stmt_body)
     else:
-        stmt_body['destination'] = [f'{ld.generate_var(ld.typ)}', f'{ld.generate_var(ld.typ)}']
+        stmt_body['destination'] = [f'{ld.generate_var(ld.type_to_init)}', f'{ld.generate_var(ld.type_to_init)}']
         stmt_body['source'] = [f'{dest_array_name}{random.choice(ld.maths_operations)}{ld.gen_random_scalar()}',
                                f'{source_array_name}{random.choice(ld.maths_operations)}{ld.gen_random_scalar()}']
         result = gen_based_on_usage(source_array_name, arr_def, stmt_body)
