@@ -6,6 +6,9 @@ import os
 from auxillary_functions import get_timestamp
 from generation_settings import *
 from generation_settings import json_input_path
+from auxillary_functions import do_for_all_files_in_directory
+from generation_settings import PROJECT_PATH
+from auxillary_functions import delete
 
 
 def generate_arrays_randomly():
@@ -112,15 +115,22 @@ def generate_and_save_json():
     fill_in_read_and_writes(json_file, reads_and_writes[0], to_read=True)
     fill_in_read_and_writes(json_file, reads_and_writes[1], to_read=False)
     fill_in_dependencies(json_file, dependencies)
-    filename = get_timestamp()
+    filename = get_timestamp() +'.json'
     file_destination = os.path.join(json_input_path, filename)
     with open(file_destination, 'w') as fp:
         json.dump([json_file], fp)
 
 
+def create_code_based_on_json(filename):
+    script_path = os.path.join(PROJECT_PATH, 'create_kernels_with_deps.py')
+    os.system('python {} {}'.format(script_path, filename))
+
+
 def main():
+    do_for_all_files_in_directory(json_input_path,'json',delete)
     for iterations in range(number_of_iterations_for_random_generation):
         generate_and_save_json()
+    do_for_all_files_in_directory(json_input_path, 'json', create_code_based_on_json)
 
 
 if __name__ == '__main__':

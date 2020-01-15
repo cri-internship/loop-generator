@@ -18,5 +18,5 @@ array_init_options = ['ones','zeros','random']
 dependence_type_options = ['FLOW','ANTI','INPUT','OUTPUT']
 mix_in_options = ['num_val','random']
 
-number_of_iterations_for_random_generation = 10
+number_of_iterations_for_random_generation = 1
 
