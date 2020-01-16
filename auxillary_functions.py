@@ -16,7 +16,6 @@ def get_timestr():
 
 
 def do_for_all_files_in_directory(path, extension, f, *args):
-    os.chdir(path)
     files = os.listdir(path)
     for item in files:
         if item.endswith(extension):

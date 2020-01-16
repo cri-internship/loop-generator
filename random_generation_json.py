@@ -7,7 +7,7 @@ from auxillary_functions import get_timestamp
 from generation_settings import *
 from generation_settings import json_input_path
 from auxillary_functions import do_for_all_files_in_directory
-from generation_settings import PROJECT_PATH
+from generation_settings import PROJECT_PATH, src_path
 from auxillary_functions import delete
 
 
@@ -19,7 +19,7 @@ def generate_arrays_randomly():
         number_of_dimensions = randint(dimensions_of_array_range[0], dimensions_of_array_range[1])
         dimensions = []
         for dimension_index in range(number_of_dimensions):
-            dimension = randint(dimension_range[0], dimension_range[1])
+            dimension = randint(dimension_range[0], dimension_range[1]) * 10
             dimensions.append(dimension)
         arrays.append((array_name, dimensions))
     return arrays
@@ -33,36 +33,47 @@ def generate_code_options_randomly():
 
 
 def generate_unique_reads_and_writes_randomly(arrays):
-    unique_reads = sample(arrays, randint(0, len(arrays)))
-    unique_writes = sample(arrays, randint(0, len(arrays)))
+    unique_reads = sample(arrays, randint(1, len(arrays)))
+    unique_writes = sample(arrays, randint(1, len(arrays)))
     return unique_reads, unique_writes
 
 
-def generate_dependencies_randomly(arrays):
+def intersection(lst1, lst2):
+    lst3 = [value for value in lst1 if value in lst2]
+    return lst3
+
+
+def generate_dependencies_randomly(arrays_for_read, arrays_for_write):
+    intersection_of_read_and_writes = intersection(arrays_for_read, arrays_for_write)
+
     dependencies = []
     number_of_dependencies = randint(number_of_dependencies_range[0], number_of_dependencies_range[1])
-    for dependence_index in range(number_of_dependencies):
+    while len(dependencies) != number_of_dependencies:
+        valid_dependence = True
         dependence_type = choice(dependence_type_options)
-        array = choice(arrays)
-        mix_in = choice(mix_in_options)
-        number_of_dimensions = len(array[1])
-        distance = [0] * number_of_dimensions
-        for idx, dist in enumerate(distance):
-            distance[idx] = randint(distances_range[0], distances_range[1])
-        dependencies.append((dependence_type, array, mix_in, distance))
+        if dependence_type == 'INPUT' and len(arrays_for_write) > 0:
+            array = choice(arrays_for_write)
+        elif dependence_type == 'OUTPUT' and len(arrays_for_read) > 0:
+            array = choice(arrays_for_read)
+        elif (dependence_type == 'FLOW' or dependence_type == 'ANTI') and len(intersection_of_read_and_writes) > 0:
+            array = choice(intersection_of_read_and_writes)
+        else:
+            valid_dependence = False
+        if valid_dependence:
+            mix_in = choice(mix_in_options)
+            number_of_dimensions = len(array[1])
+            distance = [0] * number_of_dimensions
+            for idx, dist in enumerate(distance):
+                distance[idx] = randint(distances_range[0], distances_range[1])
+            dependencies.append((dependence_type, array, mix_in, distance))
     return dependencies
 
 
 def init_of_json_file(code_options):
     loop_nest_level, array_type, array_init = code_options
-    generated_file = {}
-    generated_file["array_sizes"] = {}
-    generated_file["type"] = array_type
-    generated_file["init_with"] = array_init
-    generated_file["loop_nest_level"] = loop_nest_level
-    generated_file["unique_arrays_write"] = []
-    generated_file["unique_arrays_read"] = []
-    generated_file["dependencies"] = {"FLOW": [], "ANTI": [], "OUTPUT": [], "INPUT": []}
+    generated_file = {"array_sizes": {}, "distances": {"d1": 0}, "type": array_type, "init_with": array_init,
+                      "loop_nest_level": loop_nest_level, "unique_arrays_write": [], "unique_arrays_read": [],
+                      "dependencies": {"FLOW": [], "ANTI": [], "OUTPUT": [], "INPUT": []}}
     return generated_file
 
 
@@ -104,33 +115,32 @@ def fill_in_dependencies(generated_file, dependencies):
         generated_file["dependencies"][type_of_dependence].append(
             {'array_name': array_with_dependence, "distance": distance, "mix_in": dependence_mix_in})
 
+    for dependence_type in list(generated_file["dependencies"].keys()):
+        if len(generated_file["dependencies"][dependence_type]) == 0:
+            del generated_file["dependencies"][dependence_type]
+
 
 def generate_and_save_json():
     arrays = generate_arrays_randomly()
     code_options = generate_code_options_randomly()
     reads_and_writes = generate_unique_reads_and_writes_randomly(arrays)
-    dependencies = generate_dependencies_randomly(arrays)
+    dependencies = generate_dependencies_randomly(reads_and_writes[0], reads_and_writes[1])
     json_file = init_of_json_file(code_options)
     fill_in_arrays(json_file, arrays)
     fill_in_read_and_writes(json_file, reads_and_writes[0], to_read=True)
     fill_in_read_and_writes(json_file, reads_and_writes[1], to_read=False)
     fill_in_dependencies(json_file, dependencies)
-    filename = get_timestamp() +'.json'
+    filename = get_timestamp() + '.json'
     file_destination = os.path.join(json_input_path, filename)
     with open(file_destination, 'w') as fp:
         json.dump([json_file], fp)
 
 
-def create_code_based_on_json(filename):
-    script_path = os.path.join(PROJECT_PATH, 'create_kernels_with_deps.py')
-    os.system('python {} {}'.format(script_path, filename))
-
-
 def main():
-    do_for_all_files_in_directory(json_input_path,'json',delete)
+    do_for_all_files_in_directory(json_input_path, 'json', delete)
+    do_for_all_files_in_directory(src_path, 'c', delete)
     for iterations in range(number_of_iterations_for_random_generation):
         generate_and_save_json()
-    do_for_all_files_in_directory(json_input_path, 'json', create_code_based_on_json)
 
 
 if __name__ == '__main__':

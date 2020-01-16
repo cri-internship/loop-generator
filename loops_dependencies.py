@@ -1,3 +1,5 @@
+import os
+import sys
 import json
 import math
 import random
@@ -17,7 +19,7 @@ def create_file_name():
 
 
 result_c_file = create_file_name()
-input_file = 'input/input.json'
+input_file =  sys.argv[1]
 dependency_function = {'FLOW': (lambda dest, source, optimize, mix_in: flow_dependency(dest, source, optimize, mix_in)),
                        'ANTI': (lambda dest, source, optimize, mix_in: anti_dependency(dest, source, optimize, mix_in)),
                        'OUTPUT': (
