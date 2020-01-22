@@ -21,3 +21,10 @@ def do_for_all_files_in_directory(path, extension, f, *args):
         if item.endswith(extension):
             target_path = os.path.join(path, item)
             f(target_path, *args)
+
+
+def get_content(path):
+    with open(path) as f:
+        content = f.readlines()
+    content = [x.strip() for x in content]
+    return content

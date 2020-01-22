@@ -1,14 +1,12 @@
-from random import randint
-from random import choice
-from random import sample
 import json
-import os
+from random import choice
+from random import randint
+from auxillary_functions import delete
+from auxillary_functions import do_for_all_files_in_directory
 from auxillary_functions import get_timestamp
 from generation_settings import *
 from generation_settings import json_input_path
-from auxillary_functions import do_for_all_files_in_directory
-from generation_settings import PROJECT_PATH, src_path
-from auxillary_functions import delete
+from generation_settings import src_path
 
 
 def generate_arrays_randomly():
@@ -33,8 +31,8 @@ def generate_code_options_randomly():
 
 
 def generate_unique_reads_and_writes_randomly(arrays):
-    #unique_reads = sample(arrays, randint(1, len(arrays)))
-    #unique_writes = sample(arrays, randint(1, len(arrays)))
+    # unique_reads = sample(arrays, randint(1, len(arrays)))
+    # unique_writes = sample(arrays, randint(1, len(arrays)))
     unique_reads = arrays
     unique_writes = arrays
     return unique_reads, unique_writes
@@ -67,38 +65,18 @@ def intersection(lst1, lst2):
     return possibility'''
 
 
-
-def generate_dependencies_randomly(arrays_for_read, arrays_for_write):
-    intersection_of_read_and_writes = intersection(arrays_for_read, arrays_for_write)
-
+def generate_dependencies_randomly(arrays):
     dependencies = []
     number_of_dependencies = randint(number_of_dependencies_range[0], number_of_dependencies_range[1])
-    while len(dependencies) != number_of_dependencies:
-        valid_dependence = True
-        possibility_of_random = True
+    for i in range(number_of_dependencies):
         dependence_type = choice(dependence_type_options)
-
-        if dependence_type == 'INPUT':
-            array = choice(arrays_for_write)
-            #possibility_of_random = check_possibility_for_dependence_generation(arrays_for_read, arrays_for_write,
-              #                                                                  'INPUT')
-        elif dependence_type == 'OUTPUT':
-            array = choice(arrays_for_read)
-           # possibility_of_random = check_possibility_for_dependence_generation(arrays_for_read, arrays_for_write,
-                                                                          #      'OUTPUT')
-        elif (dependence_type == 'FLOW' or dependence_type == 'ANTI'):
-            array = choice(intersection_of_read_and_writes)
-            #possibility_of_random = check_possibility_for_dependence_generation(arrays_for_read, arrays_for_write,
-                                                                        #        'FLOW')
-        else:
-            valid_dependence = False
-        if valid_dependence:
-            mix_in = choice(mix_in_options)
-            number_of_dimensions = len(array[1])
-            distance = [0] * number_of_dimensions
-            for idx, dist in enumerate(distance):
-                distance[idx] = randint(distances_range[0], distances_range[1])
-            dependencies.append((dependence_type, array, mix_in, distance))
+        array = choice(arrays)
+        mix_in = choice(mix_in_options)
+        number_of_dimensions = len(array[1])
+        distance = [0] * number_of_dimensions
+        for idx, dist in enumerate(distance):
+            distance[idx] = randint(distances_range[0], distances_range[1])
+        dependencies.append((dependence_type, array, mix_in, distance))
     return dependencies
 
 
@@ -136,10 +114,6 @@ def fill_in_read_and_writes(generated_file, arrays, to_read=True):
             generated_file["unique_arrays_write"].append(array_to_fill_in)
 
 
-
-
-
-
 def fill_in_dependencies(generated_file, dependencies):
     for dependence in dependencies:
         type_of_dependence = dependence[0]
@@ -161,7 +135,7 @@ def generate_and_save_json():
     arrays = generate_arrays_randomly()
     code_options = generate_code_options_randomly()
     reads_and_writes = generate_unique_reads_and_writes_randomly(arrays)
-    dependencies = generate_dependencies_randomly(reads_and_writes[0], reads_and_writes[1])
+    dependencies = generate_dependencies_randomly(arrays)
     json_file = init_of_json_file(code_options)
     fill_in_arrays(json_file, arrays)
     fill_in_read_and_writes(json_file, reads_and_writes[0], to_read=True)
