@@ -14,6 +14,6 @@ def create_code_based_on_json(directory, extension):
 def main():
     create_code_based_on_json(json_input_path, 'json')
 
+
 if __name__ == '__main__':
     main()
-

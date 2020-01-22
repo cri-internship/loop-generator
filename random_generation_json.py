@@ -33,14 +33,39 @@ def generate_code_options_randomly():
 
 
 def generate_unique_reads_and_writes_randomly(arrays):
-    unique_reads = sample(arrays, randint(1, len(arrays)))
-    unique_writes = sample(arrays, randint(1, len(arrays)))
+    #unique_reads = sample(arrays, randint(1, len(arrays)))
+    #unique_writes = sample(arrays, randint(1, len(arrays)))
+    unique_reads = arrays
+    unique_writes = arrays
     return unique_reads, unique_writes
 
 
 def intersection(lst1, lst2):
     lst3 = [value for value in lst1 if value in lst2]
     return lst3
+
+
+'''def check_possibility_for_dependence_generation(arrays_for_read, arrays_for_write, dep_type):
+    possibility = True
+
+    if dep_type == 'FLOW' or dep_type == 'ANTI':
+        if len(arrays_for_write) > 1 and len(arrays_for_read) > 1:
+            pass
+        else:
+            possibility = False
+    elif dep_type == 'OUTPUT':
+        if len(arrays_for_write) > 0:
+            pass
+        else:
+            possibility = False
+    else:
+        if len(arrays_for_read) > 0:
+            pass
+        else:
+            possibility = False
+
+    return possibility'''
+
 
 
 def generate_dependencies_randomly(arrays_for_read, arrays_for_write):
@@ -50,13 +75,21 @@ def generate_dependencies_randomly(arrays_for_read, arrays_for_write):
     number_of_dependencies = randint(number_of_dependencies_range[0], number_of_dependencies_range[1])
     while len(dependencies) != number_of_dependencies:
         valid_dependence = True
+        possibility_of_random = True
         dependence_type = choice(dependence_type_options)
-        if dependence_type == 'INPUT' and len(arrays_for_write) > 0:
+
+        if dependence_type == 'INPUT':
             array = choice(arrays_for_write)
-        elif dependence_type == 'OUTPUT' and len(arrays_for_read) > 0:
+            #possibility_of_random = check_possibility_for_dependence_generation(arrays_for_read, arrays_for_write,
+              #                                                                  'INPUT')
+        elif dependence_type == 'OUTPUT':
             array = choice(arrays_for_read)
-        elif (dependence_type == 'FLOW' or dependence_type == 'ANTI') and len(intersection_of_read_and_writes) > 0:
+           # possibility_of_random = check_possibility_for_dependence_generation(arrays_for_read, arrays_for_write,
+                                                                          #      'OUTPUT')
+        elif (dependence_type == 'FLOW' or dependence_type == 'ANTI'):
             array = choice(intersection_of_read_and_writes)
+            #possibility_of_random = check_possibility_for_dependence_generation(arrays_for_read, arrays_for_write,
+                                                                        #        'FLOW')
         else:
             valid_dependence = False
         if valid_dependence:
@@ -97,10 +130,14 @@ def fill_in_read_and_writes(generated_file, arrays, to_read=True):
             name_index += 1
         dim_name_separated = dim_name_separated[:len(dim_name_separated) - 1]
         array_to_fill_in = array[0] + '[{}]'.format(dim_name_separated)
-        if (to_read):
+        if to_read:
             generated_file["unique_arrays_read"].append(array_to_fill_in)
         else:
             generated_file["unique_arrays_write"].append(array_to_fill_in)
+
+
+
+
 
 
 def fill_in_dependencies(generated_file, dependencies):
