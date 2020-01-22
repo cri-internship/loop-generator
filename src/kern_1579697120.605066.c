@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "../init_array_lib/init_dyn_array.h"
+
+
+int main( int argc, const char* argv[] )
+{
+    srand(time(NULL));
+
+    
+	double ***A = create_three_dim_double(30, 470, 970, "random");
+	double ***B = create_three_dim_double(170, 40, 340, "random");
+
+	for (int b = 4; b < 35; b++)
+	  for (int a = 3; a < 27; a++)
+	  {
+	    
+	     A[a][b][a]=A[a-3][b-3][a-1]*0.697;
+	    
+	     A[a][b][a]=A[a-2][b-4][a-2]-0.166;
+	    
+	     B[a][b][a]=B[a+2][b][a+3]/0.105;
+	    
+	     A[a][b][a]=A[a][b+3][a+2]+0.485;
+	    
+	     B[a][b][a]=A[a][b][a];
+	    
+	     A[a][b][a]=A[a][b][a]/B[a][b][a];
+	     B[a][b][a]=A[a][b-2][a-1]*B[a][b][a];
+	  }
+
+    return 0;
+}

@@ -1,0 +1,1 @@
+[{"array_sizes": {"xA": 240, "yA": 810}, "distances": {"d1": 0}, "type": "double", "init_with": "zeros", "loop_nest_level": 4, "unique_arrays_write": ["A[xA,yA]"], "unique_arrays_read": ["A[xA,yA]"], "dependencies": {"OUTPUT": [{"array_name": "A", "distance": "(1,1,)", "mix_in": "random"}]}}]
