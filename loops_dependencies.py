@@ -1,3 +1,5 @@
+import os
+import sys
 import json
 import math
 import random
@@ -5,25 +7,19 @@ import string
 import re
 import cgen as c
 import datetime
+from auxillary_functions import get_timestamp
 
 from dependencies_templates import flow_dependency, anti_dependency, output_dependency, input_dependency
 
 
 def create_file_name():
-    """
-    Creates a unique filename - uses current date and time.
-    :return: string "kern_yyyymd_hmsm"
-    """
-    now = datetime.datetime.now()
-    str_date = f'{now.year}{now.month}{now.day}'
-    str_time = f'{now.hour}{now.minute}{now.second}{now.microsecond}'
     extension = '.c'
-    file_name = 'src/kern' + '_' + str_date + '_' + str_time + extension
+    file_name = 'src/kern' + '_' + get_timestamp() + extension
     return file_name
 
 
 result_c_file = create_file_name()
-input_file = 'input/input.json'
+input_file =  sys.argv[1]
 dependency_function = {'FLOW': (lambda dest, source, optimize, mix_in: flow_dependency(dest, source, optimize, mix_in)),
                        'ANTI': (lambda dest, source, optimize, mix_in: anti_dependency(dest, source, optimize, mix_in)),
                        'OUTPUT': (
