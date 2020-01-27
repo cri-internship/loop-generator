@@ -1,5 +1,5 @@
 from auxillary_functions import get_content, do_for_all_files_in_directory, delete
-from generation_settings import src_path
+from settings import src_path
 
 
 def check_code_for_correctness(path):

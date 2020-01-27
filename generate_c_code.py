@@ -1,18 +1,15 @@
-from generation_settings import json_input_path, PROJECT_PATH
+from settings import json_input_path, generation_script_path
+from auxillary_functions import  do_for_all_files_in_directory
 import os
 
 
-def create_code_based_on_json(directory, extension):
-    files = os.listdir(directory)
-    for item in files:
-        if item.endswith(extension):
-            target_path = os.path.join(directory, item)
-            script_path = os.path.join(PROJECT_PATH, 'create_kernels_with_deps.py')
-            os.system('python {} {}'.format(script_path, target_path))
+def create_c_code_based_on_json(filename):
+    script_path = generation_script_path
+    os.system('python {} {}'.format(script_path, filename ))
 
 
 def main():
-    create_code_based_on_json(json_input_path, 'json')
+    do_for_all_files_in_directory(json_input_path,'json', create_c_code_based_on_json)
 
 
 if __name__ == '__main__':

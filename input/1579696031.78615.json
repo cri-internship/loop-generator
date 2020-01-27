@@ -1,1 +1,0 @@
-[{"array_sizes": {"xA": 550, "xB": 270}, "distances": {"d1": 0}, "type": "float", "init_with": "zeros", "loop_nest_level": 2, "unique_arrays_write": ["A[xA]", "B[xB]"], "unique_arrays_read": ["A[xA]", "B[xB]"], "dependencies": {"FLOW": [{"array_name": "B", "distance": "(3,)", "mix_in": "num_val"}], "ANTI": [{"array_name": "B", "distance": "(2,)", "mix_in": "random"}]}}]

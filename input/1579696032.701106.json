@@ -1,1 +1,0 @@
-[{"array_sizes": {"xA": 140, "yA": 520, "zA": 590, "xB": 150, "yB": 760, "xC": 80}, "distances": {"d1": 0}, "type": "float", "init_with": "random", "loop_nest_level": 1, "unique_arrays_write": ["A[xA,yA,zA]", "B[xB,yB]", "C[xC]"], "unique_arrays_read": ["A[xA,yA,zA]", "B[xB,yB]", "C[xC]"], "dependencies": {"ANTI": [{"array_name": "B", "distance": "(3,0,)", "mix_in": "random"}]}}]

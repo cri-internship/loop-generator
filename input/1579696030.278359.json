@@ -1,1 +1,0 @@
-[{"array_sizes": {"xA": 990, "xB": 910, "yB": 740, "xC": 890, "yC": 950}, "distances": {"d1": 0}, "type": "double", "init_with": "ones", "loop_nest_level": 2, "unique_arrays_write": ["A[xA]", "B[xB,yB]", "C[xC,yC]"], "unique_arrays_read": ["A[xA]", "B[xB,yB]", "C[xC,yC]"], "dependencies": {"OUTPUT": [{"array_name": "B", "distance": "(5,4,)", "mix_in": "num_val"}]}}]

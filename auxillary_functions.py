@@ -12,7 +12,7 @@ def delete(path):
 
 
 def get_timestr():
-    return time.strftime("%Y%m%d-%H%M%S") + '.json'
+    return time.strftime("%Y%m%d-%H%M%S")
 
 
 def do_for_all_files_in_directory(path, extension, f, *args):
