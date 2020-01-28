@@ -3,6 +3,7 @@ import os
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 json_input_path = os.path.join(PROJECT_PATH, 'input')
 src_path = os.path.join(PROJECT_PATH, 'src')
+init_array_path = os.path.join(PROJECT_PATH, 'init_array_lib')
 generation_script_path = os.path.join(PROJECT_PATH, 'create_kernels_with_deps.py')
 
 array_names = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
