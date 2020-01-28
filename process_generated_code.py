@@ -4,7 +4,7 @@ from settings import src_path
 
 def check_code_for_correctness(path):
     content = get_content(path)
-    if content[-1][-1] != '}':  # last character of a file
+    if len(content[-1]) == 0:  # last string of a file
         delete(path)
 
 
