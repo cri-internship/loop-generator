@@ -19,9 +19,19 @@ int main( int argc, const char* argv[] )
         file.write(start_c)
 
 
+def add_time():
+    statement = """
+    clock_t start = clock();"""
+    with open(ld.result_c_file, 'a') as file:
+        file.write(statement)
+
+
 def create_cfile_tail():
     """Append the end to the feature.c"""
     end_c = """
+    clock_t stop = clock();
+    double elapsed = ((double)(stop - start)) / CLOCKS_PER_SEC;
+    printf("%f", elapsed);
     return 0;
 }"""
     with open(ld.result_c_file, 'a+') as file:
@@ -32,5 +42,6 @@ if __name__ == '__main__':
     ld.parse_input()
     create_cfile_head()
     ld.init_arrays()
+    add_time()
     ld.create_nested_loop()
     create_cfile_tail()
