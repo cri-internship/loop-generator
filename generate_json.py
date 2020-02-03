@@ -9,7 +9,7 @@ from settings import json_input_path
 from settings import src_path
 
 
-def generate_arrays_randomly():
+def generate_arrays_randomly(loop_nest_level):
     arrays = []
     number_of_arrays = randint(number_of_array_range[0], number_of_array_range[1])
     for array_index in range(number_of_arrays):
@@ -17,7 +17,7 @@ def generate_arrays_randomly():
         number_of_dimensions = randint(dimensions_of_array_range[0], dimensions_of_array_range[1])
         dimensions = []
         for dimension_index in range(number_of_dimensions):
-            dimension = randint(dimension_range[0], dimension_range[1]) * 10
+            dimension = choice(dimension_range[loop_nest_level-1])
             dimensions.append(dimension)
         arrays.append((array_name, dimensions))
     return arrays
@@ -103,8 +103,9 @@ def fill_in_dependencies(generated_file, dependencies):
 
 
 def generate_and_save_json():
-    arrays = generate_arrays_randomly()
+
     code_options = generate_code_options_randomly()
+    arrays = generate_arrays_randomly(code_options[0])
     reads_and_writes = generate_unique_reads_and_writes_randomly(arrays)
     dependencies = generate_dependencies_randomly(arrays)
     json_file = init_of_json_file(code_options)

@@ -10,7 +10,7 @@ array_names = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 dimension_names = 'xyzv'
 number_of_array_range = (1, 5)  # the first value is a min number of arrays, second one is the maximum
 dimensions_of_array_range = (1, 3)
-dimension_range = (1, 100)
+dimension_range = [[2**10],[2**5],[2**4,2**5], [2**4]]
 loop_nest_level_range = (1, 4)
 distances_range = (0, 5)
 number_of_dependencies_range = (1, 7)
@@ -19,4 +19,3 @@ array_init_options = ['ones', 'zeros', 'random']
 dependence_type_options = ['FLOW', 'ANTI', 'INPUT', 'OUTPUT']
 mix_in_options = ['num_val', 'random']
 number_of_iterations_for_random_generation = 0
-
