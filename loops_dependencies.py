@@ -47,7 +47,7 @@ stmt_counter = 0
 
 maths_operations = ['+', '-', '*']
 amount_of_vars = 0
-types_to_init = ['int']  # ['int', 'float', 'double']
+types_to_init = ['int', 'float', 'double']
 init_with = ['ones', 'zeros', 'random']
 
 
