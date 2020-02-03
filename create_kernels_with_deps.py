@@ -40,7 +40,7 @@ def create_cfile_tail():
     with open(ld.result_c_file, 'a+') as file:
         file.write(end_c)
 
-    ld.dealloc_arrays()
+    #ld.dealloc_arrays()
 
     with open(ld.result_c_file, 'a+') as file:
         file.write(return_c)
@@ -50,7 +50,8 @@ def create_cfile_tail():
 if __name__ == '__main__':
     ld.parse_input()
     create_cfile_head()
-    ld.init_arrays()
+    #ld.init_dyn_arrays() #TODO: ADD DYN INIT SUPPORT LATER
+    ld.init_static_arrays()
     add_time()
     ld.create_nested_loop()
     create_cfile_tail()

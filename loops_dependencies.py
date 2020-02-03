@@ -436,13 +436,13 @@ def create_nested_loop():
             file.write('\t{}\n'.format(line))
 
 
-def init_arrays(file=result_c_file):
+def init_dyn_arrays(file=result_c_file):
     """Init all arrays"""
     for array_name, array_size in all_arrays.items():
-        write_init_array(array_name, array_size, file, type_to_init, init_with)
+        write_init_dyn_array(array_name, array_size, file, type_to_init, init_with)
 
 
-def write_init_array(array_name, array_sizes, file, typ='float', init_with='random'):
+def write_init_dyn_array(array_name, array_sizes, file, typ='float', init_with='random'):
     """Write declaration and calling functions to init arrays to file"""
     if type(array_sizes) == tuple and len(array_sizes) == 1:
         init_array = c.Statement('\n\t{} {}{} = {}{}({}, "{}")'.format(typ, '*' * len(array_sizes), array_name,
@@ -452,6 +452,25 @@ def write_init_array(array_name, array_sizes, file, typ='float', init_with='rand
         init_array = c.Statement('\n\t{} {}{} = {}{}({}, "{}")'.format(typ, '*' * len(array_sizes), array_name,
                                                                        array_init_functions[len(array_sizes)], typ,
                                                                        str(array_sizes)[1:-1], init_with))
+    with open(file, 'a+') as file:
+        file.write(str(init_array))
+
+
+def init_static_arrays(file=result_c_file):
+    """Init all arrays"""
+    for array_name, array_size in all_arrays.items():
+        write_init_static_array(array_name, array_size, file, type_to_init)
+
+
+def write_init_static_array(array_name, array_sizes, file, typ='int'):
+    number_of_dimensions = len(array_sizes)
+    if number_of_dimensions == 1:
+        init_array = c.Statement('\n\t {} {}[{}] = {{0}}'.format(typ, array_name,*array_sizes))
+    elif number_of_dimensions == 2:
+        init_array = c.Statement('\n\t {} {}[{}][{}] = {{0}}'.format(typ, array_name, *array_sizes))
+    else:
+        init_array = c.Statement(
+            '\n\t {} {}[{}][{}][{}] = {{0}}'.format(typ, array_name,*array_sizes))
     with open(file, 'a+') as file:
         file.write(str(init_array))
 
