@@ -151,6 +151,11 @@ int *create_one_dim_int(int size_dim1, char init_with[])
 }
 
 
+
+
+
+
+
 int **create_two_dim_int(int size_dim1, int size_dim2, char init_with[])
 {
     // Allocating two dimensional dynamic array
@@ -194,4 +199,28 @@ int ***create_three_dim_int(int size_dim1, int size_dim2, int size_dim3, char in
 				    array[k][i][j] = rand() % 20 + 1;
 
 	return array;
+}
+
+void deallocate_1d_array(int *a) {
+    free(a);
+}
+void deallocate_2d_array(int **a, int l, int m) {
+    int i;
+    for (i = 0; i < l; ++i) {
+        free(a[i]);
+    }
+    free(a);
+}
+void deallocate_3d_array(int*** a,int l,int m, int k)
+{
+    int i,j;
+    for(i=0;i<l;i++)
+    {
+        for(int j=0;j<m;j++)
+        {
+                free(a[i][j]);
+        }
+        free(a[i]);
+    }
+    free(a);
 }

@@ -17,7 +17,7 @@ def generate_arrays_randomly(loop_nest_level):
         number_of_dimensions = randint(dimensions_of_array_range[0], dimensions_of_array_range[1])
         dimensions = []
         for dimension_index in range(number_of_dimensions):
-            dimension = choice(dimension_range[loop_nest_level-1])
+            dimension = choice(dimension_range[loop_nest_level-1][number_of_dimensions-1])
             dimensions.append(dimension)
         arrays.append((array_name, dimensions))
     return arrays
