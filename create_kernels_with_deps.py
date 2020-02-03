@@ -31,11 +31,20 @@ def create_cfile_tail():
     end_c = """
     clock_t stop = clock();
     double elapsed = ((double)(stop - start)) / CLOCKS_PER_SEC;
-    printf("%f", elapsed);
-    return 0;
-}"""
+    printf("%f", elapsed); """
+
+    return_c = '''
+    return 0; 
+    }'''
+
     with open(ld.result_c_file, 'a+') as file:
         file.write(end_c)
+
+    ld.dealloc_arrays()
+
+    with open(ld.result_c_file, 'a+') as file:
+        file.write(return_c)
+
 
 
 if __name__ == '__main__':

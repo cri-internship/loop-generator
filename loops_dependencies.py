@@ -19,7 +19,7 @@ def create_file_name():
 
 
 result_c_file = create_file_name()
-input_file =  sys.argv[1]
+input_file = sys.argv[1]
 dependency_function = {'FLOW': (lambda dest, source, optimize, mix_in: flow_dependency(dest, source, optimize, mix_in)),
                        'ANTI': (lambda dest, source, optimize, mix_in: anti_dependency(dest, source, optimize, mix_in)),
                        'OUTPUT': (
@@ -30,6 +30,7 @@ dependency_function = {'FLOW': (lambda dest, source, optimize, mix_in: flow_depe
 unique_arrays_write = {"used": set(), "unused": set()}
 unique_arrays_read = {"used": set(), "unused": set()}
 array_init_functions = {1: 'create_one_dim_', 2: 'create_two_dim_', 3: 'create_three_dim_'}
+array_dealloc_functions = {1: 'deallocate_1d_array', 2: 'deallocate_2d_array', 3: 'deallocate_3d_array'}
 
 """
 Dicts used to keep control of arrays used in statements. 
@@ -46,7 +47,7 @@ stmt_counter = 0
 
 maths_operations = ['+', '-', '*']
 amount_of_vars = 0
-types_to_init = ['int', 'float', 'double']
+types_to_init = ['int']  # ['int', 'float', 'double']
 init_with = ['ones', 'zeros', 'random']
 
 
@@ -455,6 +456,22 @@ def write_init_array(array_name, array_sizes, file, typ='float', init_with='rand
         file.write(str(init_array))
 
 
+def dealloc_arrays(file=result_c_file):
+    for array_name, array_size in all_arrays.items():
+        write_dealloc_array(array_name, array_size, file)
+
+
+def write_dealloc_array(array_name, array_sizes, file):
+    number_of_dimensions = len(array_sizes)
+    if number_of_dimensions == 1:
+        dealloc_array = c.Statement('\n\t{}({})'.format(array_dealloc_functions[number_of_dimensions], array_name))
+    else:
+        dealloc_array = c.Statement('\n\t{}({}, {})'.format(array_dealloc_functions[number_of_dimensions], array_name,
+                                                            str(array_sizes)[1:-1]))
+    with open(file, 'a+') as file:
+        file.write(str(dealloc_array))
+
+
 def run_dependencies():
     """Go throw all dependencies, find indexes for each dependency and put each
      created dependency into c.Statement
@@ -468,7 +485,7 @@ def run_dependencies():
                 distances = array['distance']
                 optimize = array['optimize']
                 mix_in = array['mix_in']
-                if not mix_in=='random' and not mix_in=='num_val':
+                if not mix_in == 'random' and not mix_in == 'num_val':
                     raise KeyError("Mix_in can be only 'random' or 'num_val'")
 
                 for arr_name, arr_size in all_arrays.items():
