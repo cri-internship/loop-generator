@@ -26,4 +26,4 @@ array_type_options = ['int']
 array_init_options = ['ones', 'zeros', 'random']
 dependence_type_options = ['FLOW', 'ANTI', 'INPUT', 'OUTPUT']
 mix_in_options = ['num_val', 'random']
-number_of_iterations_for_random_generation = 100
+number_of_iterations_for_random_generation = 0
