@@ -1,5 +1,6 @@
 import json
-from random import choice
+import random
+from numpy.random import choice
 from random import randint
 from auxillary_functions import delete
 from auxillary_functions import do_for_all_files_in_directory
@@ -9,15 +10,17 @@ from settings import json_input_path
 from settings import src_path
 
 
+
+
 def generate_arrays_randomly(loop_nest_level):
     arrays = []
-    number_of_arrays = randint(number_of_array_range[0], number_of_array_range[1])
+    number_of_arrays = int(choice(number_of_array_range,1,p=number_of_arrays_weights))
     for array_index in range(number_of_arrays):
         array_name = array_names[array_index]
-        number_of_dimensions = randint(dimensions_of_array_range[0], dimensions_of_array_range[1])
+        number_of_dimensions =  random.choice([1,2,3]) # random.choice([1,2,3]) min(3,loop_nest_level)
         dimensions = []
         for dimension_index in range(number_of_dimensions):
-            dimension = choice(dimension_range[loop_nest_level-1][number_of_dimensions-1])
+            dimension = random.choice(nest_eq_dimensionality_pattern[number_of_dimensions-1])
             dimensions.append(dimension)
         arrays.append((array_name, dimensions))
     return arrays
@@ -25,8 +28,8 @@ def generate_arrays_randomly(loop_nest_level):
 
 def generate_code_options_randomly():
     loop_nest_level = randint(loop_nest_level_range[0], loop_nest_level_range[1])
-    array_type = choice(array_type_options)
-    array_init = choice(array_init_options)
+    array_type = random.choice(array_type_options)
+    array_init = random.choice(array_init_options)
     return loop_nest_level, array_type, array_init
 
 
@@ -38,11 +41,11 @@ def generate_unique_reads_and_writes_randomly(arrays):
 
 def generate_dependencies_randomly(arrays):
     dependencies = []
-    number_of_dependencies = randint(number_of_dependencies_range[0], number_of_dependencies_range[1])
+    number_of_dependencies = int(choice(number_of_dependencies_range,1,p=number_of_dependencies_weights))
     for dependence_index in range(number_of_dependencies):
-        dependence_type = choice(dependence_type_options)
-        array = choice(arrays)
-        mix_in = choice(mix_in_options)
+        dependence_type = random.choice(dependence_type_options)
+        array = random.choice(arrays)
+        mix_in = random.choice(mix_in_options)
         number_of_dimensions = len(array[1])
         distance = [0] * number_of_dimensions
         for idx, dist in enumerate(distance):
