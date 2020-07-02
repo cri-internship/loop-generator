@@ -1,5 +1,9 @@
 import os
 
+
+number_of_iterations_for_random_generation = 10
+
+
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 json_input_path = os.path.join(PROJECT_PATH, 'input')
 src_path = os.path.join(PROJECT_PATH, 'src')
@@ -14,7 +18,7 @@ dimensions_of_array_range = (1, 3)
 nest_eq_dimensionality_pattern = [[2 ** 18, 2 ** 19, 2 ** 17, 2 ** 16], [2 ** 9, 2 ** 8, 2 ** 7],
                                   [2 ** 6, 2 ** 5, 2 ** 4], [2 ** 6, 2 ** 5, 2 ** 4]]
 
-huge_ranges = [[2 ** 15, 2 ** 21, 2 ** 27, 2 ** 26], [2 ** 14, 2 ** 13, 2 ** 12],
+huge_ranges = [[ 2 ** 21], [2 ** 14, 2 ** 13, 2 ** 12],
                                   [2 ** 10, 2 ** 9, 2 ** 8], [2 ** 10, 2 ** 9, 2 ** 8]]
 loop_nest_level_range = (1, 4)
 distances_range = (0, 5)
@@ -26,4 +30,4 @@ array_type_options = ['int']
 array_init_options = ['ones', 'zeros', 'random']
 dependence_type_options = ['FLOW', 'ANTI', 'INPUT', 'OUTPUT']
 mix_in_options = ['num_val', 'random']
-number_of_iterations_for_random_generation = 0
+

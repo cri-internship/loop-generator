@@ -1,6 +1,7 @@
 import time
 import datetime
 import os
+import glob
 
 
 def get_timestamp():
@@ -8,7 +9,10 @@ def get_timestamp():
 
 
 def delete(path):
-    os.remove(path)
+    path += '/*'
+    files = glob.glob(path)
+    for f in files:
+        os.remove(f)
 
 
 def get_timestr():
