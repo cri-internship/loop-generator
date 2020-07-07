@@ -1,7 +1,7 @@
 import os
 
 
-number_of_iterations_for_random_generation = 10
+number_of_iterations_for_random_generation = 1
 
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
