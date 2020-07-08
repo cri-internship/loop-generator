@@ -8,6 +8,12 @@ import cgen as c
 from dependencies_templates import DependenciesTemplates
 from parse_input import ParseInput
 from auxillary_functions import get_timestamp
+from settings import mix_in_options, array_init_options, maths_operations
+from write_to_file import WriteToFile
+
+ArrayData = Tuple[str, Tuple[int]]
+NAME = 0
+SIZE = 1
 
 
 class LoopsDependencies:
@@ -17,53 +23,42 @@ class LoopsDependencies:
                      'calculated': '',
                      'auxiliary': ''}
 
-
         self.dependencies_templates = DependenciesTemplates(self)
         self.write_to_file = WriteToFile(self)
+
         self.result_c_file = self.create_file_name()
-        self.input_file = filename
-        self.dependency_function = {
-            'FLOW': (lambda dest, source, optimize, mix_in: self.dependencies_templates.flow_dependency(dest, source, optimize, mix_in)),
-            'ANTI': (lambda dest, source, optimize, mix_in: self.dependencies_templates.anti_dependency(dest, source, optimize, mix_in)),
-            'OUTPUT': (
-                lambda dest, source, optimize, mix_in: self.dependencies_templates.output_dependency(dest, source, optimize, mix_in)),
-            'INPUT': (
-                lambda dest, source, optimize, mix_in: self.dependencies_templates.input_dependency(dest, source, optimize, mix_in))}
+        # self.input_file = filename
+
+        # data = self.read_file_data(filename)
+        # raw_input = self.read_input(data)
+
+        self.init_values()
 
         self.unique_arrays_write = {"used": set(), "unused": set()}
         self.unique_arrays_read = {"used": set(), "unused": set()}
         self.array_init_functions = {1: 'create_one_dim_', 2: 'create_two_dim_', 3: 'create_three_dim_'}
         self.array_dealloc_functions = {1: 'deallocate_1d_array', 2: 'deallocate_2d_array', 3: 'deallocate_3d_array'}
 
-        """
-        Dicts used to keep control of arrays used in statements. 
-        Needed to optimize (reduce) the number of statements.
-        KEYS: string, used arrays with their access functions
-        VALUES: int, represents number of line of code (within statements) 
-        in which this array access function was used for the first time.
-        <destination> = <source>
-        """
-
         self.literal_values_source = {}  # todo later it is assumed that this is a set
         self.literal_values_destination = {}  # todo the same -set
 
-        self.stmt_counter = 0
+        self.maths_operations = maths_operations
 
-        self.maths_operations = ['+', '-', '*']
+        self.stmt_counter = 0
         self.amount_of_vars = 0
-        self.types_to_init = ['int', 'float', 'double']
-        self.init_with = ['ones', 'zeros', 'random']
+        self.coin_flip = random.random()
+
+        self.types_to_init = ['int', 'float', 'double']  # todo settings.array_type_options
+        self.init_with = array_init_options
 
         self.loop_nest_level, self.type_to_init, self.init_with, self.unparsed_arrays_write, \
         self.unparsed_arrays_read, self.array_sizes_vars, self.distances_vars, self.all_arrays, \
-        self.dependencies, self.rand_num_of_calculations = self.parse_input()
+        self.dependencies, self.rand_num_of_calculations = self.parse_input(filename)
 
-
-    def parse_input(self):
+    def parse_input(self, filename):
         """
         Parse input, init global variables, call validate sizes for arrays. Put all arrays to 'unused'.
         """
-        filename = self.input_file
         data = self.read_file_data(filename)
 
         loop_nest_level = ParseInput.validate_loop_nest_level(data['loop_nest_level'])
@@ -89,7 +84,7 @@ class LoopsDependencies:
         self.unique_arrays_write['unused'] = set(self.parse_to_array(self.unparsed_arrays_write, self.array_sizes_vars))
         self.unique_arrays_read['unused'] = set(self.parse_to_array(self.unparsed_arrays_read, self.array_sizes_vars))
 
-    def calculate_num_of_calculations(self, array): #self.unique_arrays_read["unused"]
+    def calculate_num_of_calculations(self, array):  # self.unique_arrays_read["unused"]
         return [i + 1 for i in range(len(array) - 1)]
 
     def parse_to_array(self, array, array_sizes_vars):
@@ -108,31 +103,30 @@ class LoopsDependencies:
         }
         return raw_input
 
-    # def parse_input(self, input):
-    #     input = {
-    #         'loop_nest_level': ParseInput.validate_loop_nest_level(input['loop_nest_level']),
-    #         'type_to_init': ParseInput.validate_type(input['type'], self.types_to_init),
-    #         'init_with': ParseInput.validate_init_value(input['init_with'], self.init_with),
-    #         'arrays_write': data['unique_arrays_write'],
-    #         'arrays_read': data['unique_arrays_read'],
-    #         'array_sizes_vars': data['array_sizes'],
-    #         'distances_vars': input['distances'], #todo also check
-    #         'dependencies': ParseInput.parse_dependencies(input['dependencies']),
-    #         'all_arrays': ParseInput.validate_array_sizes(self.unique_arrays_write, self.unique_arrays_read)
-    #         'rand_num_of_calculations': []
-    #     }
-    #     return input
+    def parse_input_1(self, input):
+        input = {
+            'loop_nest_level': ParseInput.validate_loop_nest_level(input['loop_nest_level']),
+            'type_to_init': ParseInput.validate_type(input['type'], self.types_to_init),
+            'init_with': ParseInput.validate_init_value(input['init_with'], self.init_with),
+            # 'unique_arrays_write': data['unique_arrays_write'],
+            # 'unique_arrays_write': data['unique_arrays_write'],
+            'array_sizes_vars': input['array_sizes'],  # todo also check
+            'distances_vars': input['distances'],  # todo also check
+            'dependencies': ParseInput.parse_dependencies(input['dependencies']),
+            'all_arrays': ParseInput.validate_array_sizes(self.unique_arrays_write, self.unique_arrays_read),
+            'rand_num_of_calculations': []
+        }
+        return input
 
-
-    def read_file_data(self, filename): #todo extract to file handling class
+    def read_file_data(self, filename):  # todo extract to file handling class
         with open(filename, 'r') as file:
             data = json.load(file)[0]
             return data
 
-
     def create_file_name(self):
         extension = '.c'
-        file_name = 'src/kern' + '_' + get_timestamp() + extension
+        prefix = 'src/kern_'
+        file_name = prefix + get_timestamp() + extension
         return file_name
 
     def gen_random_scalar(self):
@@ -165,32 +159,60 @@ class LoopsDependencies:
     def inc_amount_of_vars(self):
         self.amount_of_vars += 1
 
-    def gen_random_stmt(self, unique_arrays: Dict) -> str:
-        # input {'used': {('B', (16, 32, 32))}, 'unused': {('A', (64, 32, 64)), ('C', (256, 128))}}
-        # ouput: A[a][a][a], B[a][a][a], A[a][b][c]
+    def get_destination_array(self, unique_arrays: Dict) -> str:
         """
-        If there are any unused arrays, get one, other way choose randomly from used.
-        Add indexes to array (less than loops nest depth).
+        Receives all available arrays. Arbitrarily chooses one and translates it to array with indexes.
+        Example:
+            in: {'used': {}, 'unused': {('A', (16, 32, 64))}}
+            out: 'A[a][b][c]'
         """
+        array_name, array_sizes = self.get_arbitrary_array(unique_arrays)
+        number_of_dimensions = len(array_sizes)
+        array_with_indexes = self.translate_array_to_array_with_indexed(array_name, number_of_dimensions)
+        return array_with_indexes
+
+    def translate_array_to_array_with_indexed(self, array_name: str, number_of_dimensions: int) -> str:
+        """
+        Translate array name with the number of dimensions to an indexed array for for-loops usage.
+        Example:
+              in: 'A', 3
+              out: 'A[a][b][c]'
+        """
+        indexes_in_square_brackets = [f'[{self.get_loop_index(dim)}]' for dim in range(number_of_dimensions)]
+        array_with_indexes = array_name + "".join(indexes_in_square_brackets)
+        return array_with_indexes
+
+    def get_arbitrary_array(self, unique_arrays: Dict) -> ArrayData:
+        """
+        Get an arbitrary array from all available. Ensure that the unused arrays are used first.
+        If if was the first usage of the array, move it to the used arrays set.
+        Example:
+              in: {'used': {}, 'unused': {('A', (16, 32, 64))}}
+              out: ('A', (16, 32, 64))
+        """
+        sample_size = 1
         if unique_arrays['unused']:
-            el = random.sample(unique_arrays['unused'], 1)[0]
-            unique_arrays['unused'].remove(el)
-            unique_arrays['used'].add(el)
+            array = random.sample(unique_arrays['unused'], sample_size)[0]  # returns an array with sample_size elements
+            unique_arrays['unused'].remove(array)
+            unique_arrays['used'].add(array)
         else:
-            el = random.sample(unique_arrays['used'], 1)[0]
-        curr = el[0]
-        for size in range(len(el[1])):
-            curr += f'[{self.generate_loop_index(size % self.loop_nest_level)}]'
-        return curr
+            array = random.sample(unique_arrays['used'], sample_size)[0]
+        return array
 
-    def generate_loop_index(self, loop_level: int) -> str:  # it returns just a letter
-        first_iterator = 'a'
-        calculated_iterator = chr(ord(first_iterator) + loop_level % 26)
-        return calculated_iterator
+    def get_loop_index(self, loop_level: int) -> str:
+        """ Generate a letter as an index for the loop_level with respect to the loop nest depth. """
+        loop_level = loop_level % self.loop_nest_level
+        index = self.calculate_index(loop_level)
+        return index
 
+    def calculate_index(self, loop_level: int) -> str:
+        """ Return index for the given loop level. """
+        first_index = 'a'
+        number_of_indexes = ord('z') - ord('a') + 1
+        index = chr(ord(first_index) + loop_level % number_of_indexes)
+        return index
 
-
-    def gen_calc_for_read(self, num_of_calculations: int, arr_def: Tuple[str, Tuple[int]]) -> str:
+    def gen_calc_for_read(self, num_of_calculations: int, arr_def: ArrayData) -> str:
         # in_1: just a number (like 1)
         # in_2: tuple ('B', (32, 64, 64)) || ('A', (16, 32, 16))
         # out: +A[a][b][a] || -B[a][b][a] || +34
@@ -208,6 +230,7 @@ class LoopsDependencies:
 
     def generate_arrays_with_indexes1(self, num_of_calculations: int, arr_def: Tuple[
         str, Tuple[int]]) -> List:  # todo rename to generate_arrays_with_indexes
+        print("HERE I AM")
         # in_1: just a number (like 1 || 2)
         # in_2: tuple ('B', (32, 64, 64)) || ('A', (16, 32, 16))
         # out: [12, 'B[a][b]', 'A[a][b][c]'] || ['A[a][b][c]', 'B[a][b]'] || [0, 'C[a][b]']
@@ -225,59 +248,28 @@ class LoopsDependencies:
             tmp_used = True
             self.unique_arrays_read['used'].remove(arr_def)
 
-        gen_arr = self.generate_arrays_helper1([], num_of_calculations, arr_def)
+        gen_arr = self.get_k_arrays(num_of_calculations)
 
-        if tmp_unused:
+        if tmp_unused:  # todo IDK...
             self.unique_arrays_read['unused'].add(arr_def)
         if tmp_used:
             self.unique_arrays_read['used'].add(arr_def)
 
-        # reduce number of numerical values by adding them only with 24% of probability
-        global coin_flip
-        coin_flip = random.random()
-        if coin_flip > 0.75:  # todo clean code extract to another function
-            scalar_position_in_arr = random.randrange(0, len(gen_arr))
-            gen_arr.append(gen_arr[scalar_position_in_arr])
-            gen_arr[scalar_position_in_arr] = ('', self.gen_random_scalar())
-        res = []
-        for el in gen_arr:
-            curr = el[0]
-            if type(el[1]) is tuple:
-                for size in range(len(el[1])):
-                    curr += f'[{self.generate_loop_index(size % self.loop_nest_level)}]'
-            else:
-                curr = el[1]
-            res.append(curr)
-        return res
+        self.add_numerical_value(gen_arr)
+        return gen_arr
 
-    def generate_arrays_helper1(self, arrays_drew_by_lot: List[Tuple[str, Tuple[int]]], num_of_calculations: int,
-                                arr_def: Tuple[str, Tuple[int]]) -> List[Tuple[str, Tuple[int]]]:
-        """
-        :param arrays_drew_by_lot: [] || [('C', (32, 64, 32)), ('A', (128, 256))] #todo the type can be wrong for []
-        :param num_of_calculations: just an integer 1 || 2
-        :param arr_def: ('B', (131072,))
-        :return: [('A', (128, 256)), ('C', (32, 64, 32))]
-        """
-        """
-        Draw arrays by lot from the unique_arrays_read so as to use them as a right-hand side of a stmt.
-        :return: arrays of array names drew by lot
-        """
-        if num_of_calculations > 0:
-            unused_arr_size = len(self.unique_arrays_read['unused'])
-            if unused_arr_size > 0:
-                random_sample = random.sample(self.unique_arrays_read['unused'],
-                                              min(num_of_calculations, unused_arr_size))
-                for el in random_sample:
-                    self.unique_arrays_read['unused'].remove(el)
-                    self.unique_arrays_read['used'].add(el)
-            else:
-                random_sample = random.sample(self.unique_arrays_read['used'],
-                                              min(num_of_calculations, len(self.unique_arrays_read['used'])))
-            num_of_calculations -= len(random_sample)
-            arrays_drew_by_lot += random_sample
-            self.generate_arrays_helper1(arrays_drew_by_lot, num_of_calculations, arr_def)
-        return arrays_drew_by_lot
+    def add_numerical_value(self, array):
+        probability_threshold = 0.25
+        if self.coin_flip < probability_threshold:
+            scalar_position_in_arr = random.randrange(0, len(array))
+            array.append(array[scalar_position_in_arr])
+            array[scalar_position_in_arr] = self.gen_random_scalar()
 
+    def get_k_arrays(self, k):
+        # :return: ['B[a][b]', 'A[a][b][c]']
+        return [self.get_destination_array(self.unique_arrays_read) for _ in range(k)]
+
+    #####
     def generate_operators(self, num_of_calculations: int) -> List[str]:
         """
         :param num_of_calculations: just an integer 1 || 2
@@ -288,7 +280,7 @@ class LoopsDependencies:
         """
         global maths_operations_size
         maths_operations_size = len(self.maths_operations)
-        if coin_flip > 0.75:  # if there is a scalar added increase the number of operators
+        if self.coin_flip > 0.75:  # if there is a scalar added increase the number of operators
             num_of_calculations += 1
         return self.generate_operators_helper([], num_of_calculations)
 
@@ -308,8 +300,6 @@ class LoopsDependencies:
             self.generate_operators_helper(maths_oper_drew_by_lot, num_of_calculations)
         return maths_oper_drew_by_lot
 
-
-
     def generate_nested_loops(self, loop_nest_depth: int, affine: List[List[int]]):  # -> List[List[int]]:
         """
         :param loop_nest_depth: integer 2 || 1
@@ -323,7 +313,7 @@ class LoopsDependencies:
         Choose upper bound by going through each appropriate size of each array.
         :return for loop with depth d
         """
-        loop_index = self.generate_loop_index(loop_nest_depth - 1)
+        loop_index = self.get_loop_index(loop_nest_depth - 1)
         lower_bound = 0
         upper_bound = float("inf")
         for array_name, array_size in self.all_arrays.items():
@@ -369,15 +359,11 @@ class LoopsDependencies:
                      '{}++'.format(loop_index),
                      fun)
 
-
-
     def init_dyn_arrays(self):
         """Init all arrays"""
         file = self.result_c_file
         for array_name, array_size in self.all_arrays.items():
             self.write_to_file.write_init_dyn_array(array_name, array_size, file, self.type_to_init, self.init_with)
-
-
 
     def init_static_arrays(self):  # todo unused function
         file = self.result_c_file
@@ -385,14 +371,10 @@ class LoopsDependencies:
         for array_name, array_size in self.all_arrays.items():
             self.write_to_file.write_init_static_array(array_name, array_size, file, self.type_to_init)
 
-
-
     def dealloc_arrays(self):
         file = self.result_c_file
         for array_name, array_size in self.all_arrays.items():
             self.write_to_file.write_dealloc_array(array_name, array_size, file)
-
-
 
     def run_dependencies(self):  # todo split this function into subfunctions
         """
@@ -421,7 +403,7 @@ class LoopsDependencies:
                     distances = array['distance']
                     optimize = array['optimize']
                     mix_in = array['mix_in']
-                    if not mix_in == 'random' and not mix_in == 'num_val':
+                    if mix_in not in mix_in_options:
                         raise KeyError("Mix_in can be only 'random' or 'num_val'")
 
                     for arr_name, arr_size in self.all_arrays.items():
@@ -443,19 +425,21 @@ class LoopsDependencies:
                                         src_dist = str(distance[i])
                                     else:
                                         src_dist = '+' + str(distance[i])
-                                    src_array[i - 1] += f'[{self.generate_loop_index(index % self.loop_nest_level)}{src_dist}]'
-                                dest_array += f'[{self.generate_loop_index(index % self.loop_nest_level)}{dest_dist}]'
-                                src_array_str = ''
-                                for src in src_array:
-                                    src_array_str += src + random.choice(self.maths_operations)
-                            stmt = self.dependency_function[dependency_name](dest_array, src_array_str[:-1], optimize,
-                                                                             mix_in)
-                            if stmt:
-                                block_with_statements.append(c.Statement('\n' + self.add_indent() + stmt))
-        res = c.Block(block_with_statements)
+                                    src_array[i - 1] += \
+                                        f'[{self.get_loop_index(index % self.loop_nest_level)}{src_dist}]'
+                                    dest_array += \
+                                        f'[{self.get_loop_index(index % self.loop_nest_level)}{dest_dist}]'
+                                    src_array_str = ''
+                                    for src in src_array:
+                                        src_array_str += src + random.choice(self.maths_operations)
+                                    stmt = self.dependency_function[dependency_name](dest_array, src_array_str[:-1],
+                                                                                     optimize,
+                                                                                     mix_in)
+                                    if stmt:
+                                        block_with_statements.append(c.Statement('\n' + self.add_indent() + stmt))
+                                    res = c.Block(block_with_statements)
+
         return res
-
-
 
     def adjust_bounds(self, affine_fcts: List):
         """
@@ -537,100 +521,28 @@ class LoopsDependencies:
     def add_indent(self):
         return " " * (self.loop_nest_level + 3)
 
-    def create_nested_loop(self): #todo refactor
-        string_to_write = str(self.generate_nested_loops(self.loop_nest_level, self.adjust_bounds(self.global_bounds()))).splitlines()
+    def create_nested_loop(self):  # todo refactor
+        string_to_write = str(
+            self.generate_nested_loops(self.loop_nest_level, self.adjust_bounds(self.global_bounds()))).splitlines()
         self.write_to_file.create_nested_loop_1(string_to_write)
 
-###***************************************************
-###***************************************************
-
-
-class WriteToFile:
-    #todo this functions should not need to know loops_dependencies, it's just a string to write!!!
-    def __init__(self, loops_dependencies):
-        self.ld = loops_dependencies
-
-    def create_nested_loop_1(self, string_to_write):
-        """
-        ['for (int d = 3; d < 64; d++)', '  for (int c = 4; c < 16; c++)', '    for (int b = 5; b < 16; b++)', '      for (int a = 5; a < 16; a++)', '      {', '        ', '       C[a][b][c]=C[a-5][b-4][c-3]-A[a][b];', '        ', '       B[a][b]=B[a][b+2]*50;', '        ', '       A[a][b]=A[a+5][b+2]-B[a][b];', '        ', '       A[a][b]=B[a][b];', '        ', '       B[a][b]=31;', '      }']
-        if printed element by element
-        for (int d = 3; d < 64; d++)
-        for (int c = 4; c < 16; c++)
-        for (int b = 5; b < 16; b++)
-          for (int a = 5; a < 16; a++)
-          {
-
-           C[a][b][c]=C[a-5][b-4][c-3]-A[a][b];
-
-           B[a][b]=B[a][b+2]*50;
-
-           A[a][b]=A[a+5][b+2]-B[a][b];
-
-           A[a][b]=B[a][b];
-
-           B[a][b]=31;
-          }
-        :return:
-        """
-        """
-        Calls generate_nested_loops(d, i) and write it to file
-        """
-        with open(self.ld.result_c_file, 'a+') as file:
-            file.write('\n\n')
-            for line in string_to_write:  # todo: rewrite
-                file.write('\t{}\n'.format(line))
-
-    def write_init_dyn_array(self, array_name: str, array_sizes: Tuple[int], file, typ='float', init_with='random'):
-        """
-                int ***A = create_three_dim_int(16, 64, 64, "zeros");
-
-        :param array_name: str C || A
-        :param array_sizes: Tuple[int] (524288,) || (16, 64, 64)
-        :param file:
-        :param typ:
-        :param init_with:
-        :return:
-        """
-        """Write declaration and calling functions to init arrays to file"""
-        if type(array_sizes) == tuple and len(array_sizes) == 1:  # todo why is there a difference in [1:-2] [1:-1]
-            init_array = c.Statement('\n\t{} {}{} = {}{}({}, "{}")'.format(typ, '*' * len(array_sizes), array_name,
-                                                                           self.ld.array_init_functions[len(array_sizes)],
-                                                                           typ,
-                                                                           str(array_sizes)[1:-2], init_with))
-        else:
-            init_array = c.Statement('\n\t{} {}{} = {}{}({}, "{}")'.format(typ, '*' * len(array_sizes), array_name,
-                                                                           self.ld.array_init_functions[len(array_sizes)],
-                                                                           typ,
-                                                                           str(array_sizes)[1:-1], init_with))
-        with open(file, 'a+') as file:
-            file.write(str(init_array))
-
-    def write_init_static_array(self, array_name, array_sizes, file, typ='int'):  # todo never invoked
-        print("array_name", array_name, type(array_name))
-        print("array_sizes", array_sizes, type(array_sizes))
-
-        number_of_dimensions = len(array_sizes)
-        if number_of_dimensions == 1:
-            init_array = c.Statement('\n\t {} {}[{}] = {{0}}'.format(typ, array_name, *array_sizes))
-        elif number_of_dimensions == 2:
-            init_array = c.Statement('\n\t {} {}[{}][{}] = {{0}}'.format(typ, array_name, *array_sizes))
-        else:
-            init_array = c.Statement(
-                '\n\t {} {}[{}][{}][{}] = {{0}}'.format(typ, array_name, *array_sizes))
-        print("init_array", str(init_array))
-
-        with open(file, 'a+') as file:
-            file.write(str(init_array))
-
-    def write_dealloc_array(self, array_name, array_sizes, file):
-        number_of_dimensions = len(array_sizes)
-        if number_of_dimensions == 1:
-            dealloc_array = c.Statement(
-                '\n\t{}({})'.format(self.ld.array_dealloc_functions[number_of_dimensions], array_name))
-        else:
-            dealloc_array = c.Statement(
-                '\n\t{}({}, {})'.format(self.ld.array_dealloc_functions[number_of_dimensions], array_name,
-                                        str(array_sizes)[1:-1]))
-        with open(file, 'a+') as file:
-            file.write(str(dealloc_array))
-
+    def init_values(self):
+        self.dependency_function = {
+            'FLOW': (lambda dest, source, optimize, mix_in: self.dependencies_templates.flow_dependency(dest,
+                                                                                                        source,
+                                                                                                        optimize,
+                                                                                                        mix_in)),
+            'ANTI': (lambda dest, source, optimize, mix_in: self.dependencies_templates.anti_dependency(dest,
+                                                                                                        source,
+                                                                                                        optimize,
+                                                                                                        mix_in)),
+            'OUTPUT': (
+                lambda dest, source, optimize, mix_in: self.dependencies_templates.output_dependency(dest,
+                                                                                                     source,
+                                                                                                     optimize,
+                                                                                                     mix_in)),
+            'INPUT': (
+                lambda dest, source, optimize, mix_in: self.dependencies_templates.input_dependency(dest,
+                                                                                                    source,
+                                                                                                    optimize,
+                                                                                                    mix_in))}

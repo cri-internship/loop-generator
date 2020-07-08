@@ -26,8 +26,9 @@ number_of_dependencies_range = [1, 2, 3, 4, 5, 6, 7]
 number_of_dependencies_weights = [0.15,0.2,0.2,0.15,0.15,0.1,0.05]
 
 
-array_type_options = ['int']
+array_type_options = ['int'] #['int', 'float', 'double']
 array_init_options = ['ones', 'zeros', 'random']
 dependence_type_options = ['FLOW', 'ANTI', 'INPUT', 'OUTPUT']
 mix_in_options = ['num_val', 'random']
+maths_operations = ['+', '-', '*'] #why not '/'
 

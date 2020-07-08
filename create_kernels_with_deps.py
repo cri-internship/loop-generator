@@ -55,7 +55,7 @@ if __name__ == '__main__':
     loops_dependencies = ld_gen.LoopsDependencies(filename)
     create_kernel_with_deps = CreateKernelsWithDeps(loops_dependencies)
 
-    create_kernel_with_deps.ld.parse_input()
+    create_kernel_with_deps.ld.parse_input(filename) #todo extract to init
     create_kernel_with_deps.create_cfile_head()
     create_kernel_with_deps.ld.init_dyn_arrays()  # TODO: ADD DYN INIT SUPPORT LATER
     # ld.init_static_arrays()
