@@ -30,5 +30,10 @@ array_type_options = ['int'] #['int', 'float', 'double']
 array_init_options = ['ones', 'zeros', 'random']
 dependence_type_options = ['FLOW', 'ANTI', 'INPUT', 'OUTPUT']
 mix_in_options = ['num_val', 'random']
-maths_operations = ['+', '-', '*'] #why not '/'
+maths_symbols = ['+', '-', '*'] #why not '/'
+
+##
+first_index = 'a'
+number_of_indexes = ord('z') - ord('a') + 1
+
 
