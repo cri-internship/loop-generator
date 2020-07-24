@@ -41,8 +41,11 @@ class DataClass:
         self.all_arrays = validate_array_sizes(self.unique_arrays_write,
                                                self.unique_arrays_read)
 
-        self.dependencies = parse_dependencies(self.dependencies, self.all_arrays,
-                                               distances_vars)
+        # self.dependencies = parse_dependencies(self.dependencies, self.all_arrays,
+        #                                        distances_vars)
+
+        parse_dependencies(self.dependencies, self.all_arrays,
+                           distances_vars)
         self.rand_num_of_calculations = calculate_num_of_calculations(
             self.unique_arrays_read["unused"])
 
@@ -90,16 +93,22 @@ def validate_array_sizes(unique_arrays_write, unique_arrays_read):
 
 
 def parse_dependencies(all_dependencies, all_arrays, distances_vars):
-    # in: IN_1     {'INPUT': [{'array_name': 'A', 'distance': '(1,2,5,)', 'mix_in': 'num_val'}, {'array_name': 'B', 'distance': '(5,5,4,)', 'mix_in': 'num_val'}]} <class 'dict'>
-    # out:{'INPUT': [{'array_name': 'A', 'distance': ((0, 1), (0, 2), (0, 5)), 'mix_in': 'num_val', 'optimize': True, 'left_side_index': (0, 0, 0)}, {'array_name': 'B', 'distance': ((0, -5), (0, -5), (0, -4)), 'mix_in': 'num_val', 'optimize': True, 'left_side_index': (0, 0, 0)}]} * <class 'dict'>
+    """
+in:  {'INPUT':
+        [{'array_name': 'A', 'distance': '(1,2,5,)', 'mix_in': 'num_val'},
+        {'array_name': 'B', 'distance': '(5,5,4,)', 'mix_in': 'num_val'}]} <class 'dict'>
+out:{'INPUT': [{'array_name': 'A', 'distance': ((0, 1), (0, 2), (0, 5)), 'mix_in': 'num_val', 'optimize': True, 'left_side_index': (0, 0, 0)},
+        {'array_name': 'B', 'distance': ((0, -5), (0, -5), (0, -4)), 'mix_in': 'num_val', 'optimize': True, 'left_side_index': (0, 0, 0)}]} * <class 'dict'>
+    """
 
     """
     Check if left_side_index and distances are correct, parse indexes, check if optimization is possible.
     :arg all_dependencies: not parsed dependencies
     :return dependencies with parsed distances
     """
-    for dependency_name, arrays in all_dependencies.items():
-        for array in arrays:
+
+    for dependency_name, arrays in all_dependencies.items():  # here we extract types like 'FLOW', 'ANTI', 'OUTPUT', 'INPUT' and arrays on which we need to make changes
+        for array in arrays:  # ex. for every 'INPUT' -> A and B
             array_name = array['array_name']
             try:
                 all_arrays[array_name]
@@ -107,13 +116,13 @@ def parse_dependencies(all_dependencies, all_arrays, distances_vars):
                 error = f'Array "{array_name}" does not exist'
                 raise TypeError(error)
 
-            flip = random.choice(('-1', '+1'))
-            tmp_distance = []
+            flip = random.choice(('-1', '+1'))  # todo why is it needed???
 
-            deps_to_parse = re.findall(r'\(.*?\)', array['distance'])
+            deps_to_parse = re.findall(r'\(.*?\)', array[
+                'distance'])  # in 'distance' we can also have variables like d1, d2, ...
             distances = []
             for dep in deps_to_parse:
-                distances.append(parse_indexes(dep, distances_vars))
+                distances.append(parse_indexes(dep, **distances_vars))
 
             # if at least one distance consists of 0, it can't be optimized
             optimize = True
@@ -126,7 +135,7 @@ def parse_dependencies(all_dependencies, all_arrays, distances_vars):
             # parse left_side_index
             if 'left_side_index' in array:
                 left_side_index = parse_indexes(array['left_side_index'],
-                                                distances_vars)
+                                                **distances_vars)
             else:
                 left_side_index = tuple(0 for _ in range(0, len(distances[0])))
             array['left_side_index'] = left_side_index
@@ -143,6 +152,7 @@ def parse_dependencies(all_dependencies, all_arrays, distances_vars):
                 error = f'Array {array_name} has wrong distance size in dependency'
                 raise TypeError(error)
 
+            tmp_distance = []
             for index in range(len(distances[0])):
                 dest_dist = left_side_index[index]
                 # check if distance is a positive number less then size
@@ -162,87 +172,39 @@ def parse_dependencies(all_dependencies, all_arrays, distances_vars):
                 distance = tuple(distance)
                 tmp_distance.append(distance)
             array['distance'] = tuple(tmp_distance)
-    return all_dependencies
+
+def validate_distance_parameters():
+    pass
 
 
-def parse_indexes(tuple_to_parse: str, distances_vars):  # -> Tuple[int]
-    """
-    :param tuple_to_parse: (0,5,3,) || (1,5,5,) as strings
-    :return: (0,5,3,) || (1,5,5,) as tuples of ints
-    """
-    """
-    Check if it is a positive int or variable from 'distances', otherwise throws exception.
-    :arg tuple_to_parse: tuple to parse from json with 'left_side_index' or 'distance'
-    :return parsed tuple
-    """
-    parsed_indexes = []
-    tuple_to_parse = tuple_to_parse.replace(" ", "")[1:-2]
-    tuple_to_parse = tuple_to_parse.split(',')
-    for index in tuple_to_parse:
-        if re.match(r'(\d+)|(-\d+)', index):
-            parsed_indexes.append(int(index))
-        elif re.match(r'((\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?)', index):
-            raise TypeError("Allowed distance is only positive integer")
-        elif index in distances_vars:
-            if distances_vars[index] >= 0:
-                parsed_indexes.append(distances_vars[index])
-            else:
-                raise TypeError("Allowed distance is only positive integer")
-        else:
-            error = f'There is no variable for distance named "{index}"'
-            raise TypeError(error)
-    return tuple(parsed_indexes)
+def parse_indexes(str, **kwargs):  # todo exception can be rised and cought in
+    try:
+        return eval(str, kwargs)
+    except NameError as err:
+        print(err)
 
 
-def parse_string_array(name_with_dims: str, array_sizes_vars) -> Tuple[str, Tuple[int]]:
+def parse_string_array(name_with_dims: str, **array_sizes_vars) -> Tuple[str, Tuple[int]]:
     # todo this type might not be correct
     # in: A[xA,yA,zA] || C[xC,yC] || B[16,32]
     # out: (A, (16,64,16)) || (B,(65536,))
     """From string array in input make a tuple (name, (sizes))"""
-    name_with_dims = name_with_dims.replace(" ", "").split('[')
-    array_name = name_with_dims[0]
-    sizes = name_with_dims[1][:-1].split(',')
-    iter = 0
-    for size in sizes:
-        size.replace(" ", "")
-        if re.match(r'(\d+)', size):
-            sizes[iter] = int(size)
-        elif re.match(r'((-\d+)|(\d+\.\d*)|(\d*\.\d+)([eE][+-]?\d+)?)', size):
-            raise TypeError("Allowed sizes for arrays are only positive integer")
-        elif size in array_sizes_vars:
-            if array_sizes_vars[size] > 0:
-                sizes[iter] = array_sizes_vars[size]
-            else:
-                raise TypeError("Allowed array size is only positive integer")
-        else:
-            error = f'There is no variable for array size named "{size}"'
-            raise TypeError(error)
-        iter += 1
-    sizes = tuple(map(int, sizes))
-    return (array_name, sizes)
+    # Eliminate whitespaces
+    name_with_dims = name_with_dims.replace(" ", "")
+    left_bracket_pos = name_with_dims.find('[')
+    right_bracket_pos = name_with_dims.find(']')
 
+    array_name = name_with_dims[:left_bracket_pos]
+    eval_sizes = name_with_dims[left_bracket_pos:right_bracket_pos + 1]
 
-# def validate_string_array():
-#     pass
-#
-#     # validate_array_name() #the first sign should be a letter
-#     # validate_array_sizes()
-#
-# def validate_array_sizes_bla(mystring):
-#     sizes = mystring[mystring.find("[") + 1: mystring.find("]")]
-#     for size in sizes:
-#         size.isdigit() or size not in array_sizes_vars or #true or false
+    sizes = tuple(parse_indexes(eval_sizes, **array_sizes_vars))
 
-
-# parse_string_array does too many things at once
-# at first it should just validate input
-#   1) is not integer
-#   2) is
+    return array_name, sizes
 
 
 def parse_to_array(array, array_sizes_vars):
-    return [parse_string_array(arr, array_sizes_vars) for arr in array]
+    return [parse_string_array(arr, **array_sizes_vars) for arr in array]
 
 
-def calculate_num_of_calculations(array):  # self.unique_arrays_read["unused"]
+def calculate_num_of_calculations(array):
     return [i + 1 for i in range(len(array) - 1)]

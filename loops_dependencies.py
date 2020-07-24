@@ -363,7 +363,7 @@ class LoopsDependencies:
 
         # print("the_smallest_dims ", the_smallest_dims)
 
-        print("self.data.loop_nest_level ", self.data.loop_nest_level, "  len(the_smallest_dims) ", len(the_smallest_dims))
+        # print("self.data.loop_nest_level ", self.data.loop_nest_level, "  len(the_smallest_dims) ", len(the_smallest_dims))
         k = min(self.data.loop_nest_level, len(the_smallest_dims))
         # print("loop nest level ", k)
         # print("problem ", [the_smallest_dims[i::k] for i in range(k) if the_smallest_dims[i::k] != [] ])
