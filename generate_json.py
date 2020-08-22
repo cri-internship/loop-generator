@@ -10,17 +10,15 @@ from settings import json_input_path
 from settings import src_path
 
 
-
-
 def generate_arrays_randomly(loop_nest_level):
     arrays = []
-    number_of_arrays = int(choice(number_of_array_range,1,p=number_of_arrays_weights))
+    number_of_arrays = int(choice(number_of_array_range, 1, p=number_of_arrays_weights))
     for array_index in range(number_of_arrays):
         array_name = array_names[array_index]
-        number_of_dimensions =  random.choice([1,2,3]) # random.choice([1,2,3]) min(3,loop_nest_level)
+        number_of_dimensions = random.choice([1, 2, 3])  # random.choice([1,2,3]) min(3,loop_nest_level)
         dimensions = []
         for dimension_index in range(number_of_dimensions):
-            dimension = random.choice(nest_eq_dimensionality_pattern[number_of_dimensions-1])
+            dimension = random.choice(nest_eq_dimensionality_pattern[number_of_dimensions - 1])
             dimensions.append(dimension)
         arrays.append((array_name, dimensions))
     return arrays
@@ -41,7 +39,7 @@ def generate_unique_reads_and_writes_randomly(arrays):
 
 def generate_dependencies_randomly(arrays):
     dependencies = []
-    number_of_dependencies = int(choice(number_of_dependencies_range,1,p=number_of_dependencies_weights))
+    number_of_dependencies = int(choice(number_of_dependencies_range, 1, p=number_of_dependencies_weights))
     for dependence_index in range(number_of_dependencies):
         dependence_type = random.choice(dependence_type_options)
         array = random.choice(arrays)
@@ -106,7 +104,6 @@ def fill_in_dependencies(generated_file, dependencies):
 
 
 def generate_and_save_json():
-
     code_options = generate_code_options_randomly()
     arrays = generate_arrays_randomly(code_options[0])
     reads_and_writes = generate_unique_reads_and_writes_randomly(arrays)
