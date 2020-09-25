@@ -1,0 +1,73 @@
+[
+  {
+    "array_sizes": {
+      "xA": 64,
+      "yA": 32,
+      "zA": 128,
+      "xC": 128
+    },
+    "distances": {
+      "d1": 0,
+      "d2": 2
+    },
+    "type": "int",
+    "init_with": "random",
+    "loop_nest_level": 4,
+    "arrays": [
+      "A[xA,yA,zA]",
+      "B[256,256]",
+      "C[xC]"
+    ],
+    "instructions": [
+      {
+        "array_name": "A",
+        "index_permutation": "(3,1,0,2)",
+        "dependencies": {
+          "distance": "[(-3, -2, -1), (1, 2, 3)]"
+        },
+        "additional_computation": [
+          {
+            "array_name": "B",
+            "array_access_function": "[[1,1,0,0,8], [2,0,-2,0,8]]"
+          },
+          {
+            "array_name": "C",
+            "array_access_function": "[[2,0,0,-1,8]]"
+          }
+        ]
+      },
+      {
+        "array_name": "B",
+        "index_permutation": "(2,3,0,1)",
+        "dependencies": {
+          "distance": "[(1, 1)]"
+        }
+      },
+      {
+        "array_name": "A",
+        "index_permutation": "(3,1,0,2)",
+        "dependencies": {
+          "distance": "[(-3, -2, -1), (1, 2, 3)]"
+        },
+        "additional_computation": [
+          {
+            "array_name": "B",
+            "array_access_function": "[[1,1,0,0,8], [2,0,-2,0,8]]"
+          },
+          {
+            "array_name": "C",
+            "array_access_function": "[[2,0,0,-1,8]]"
+          }
+        ]
+      },
+      {
+        "array_name": "B",
+        "index_permutation": "(2,3,0,1)",
+        "dependencies": {
+          "distance": "[(1, 1)]"
+        }
+      }
+    ]
+  }
+]
+
