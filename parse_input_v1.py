@@ -16,7 +16,7 @@ class DataClass:
     loop_nest_level: int
     arrays: List
     instructions: List
-    all_arrays: dict = field(init=False)
+    array_sizes__: dict = field(init=False)
 
     def __post_init__(self):
         # validate_loop_nest_level(self.loop_nest_level)
@@ -26,7 +26,7 @@ class DataClass:
         unparsed_arrays = self.arrays
         array_sizes_vars = self.array_sizes
         res = parse_to_array(unparsed_arrays, array_sizes_vars)
-        self.all_arrays = get_arrays_with_sizes(res)
+        self.array_sizes__ = get_arrays_with_sizes(res)
 
 def validate_loop_nest_level(loop_nest_lvl):
     if not isinstance(loop_nest_lvl, int) or loop_nest_lvl < 1:  # todo define min loop nest level

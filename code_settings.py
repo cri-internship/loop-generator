@@ -25,3 +25,10 @@ pips_dict = {'max': {
         10: 'pips_min_10'
     }
 }
+
+array_init_functions = {1: 'create_one_dim_',
+                        2: 'create_two_dim_',
+                        3: 'create_three_dim_'}
+array_dealloc_functions = {1: 'deallocate_1d_array',
+                           2: 'deallocate_2d_array',
+                           3: 'deallocate_3d_array'}
