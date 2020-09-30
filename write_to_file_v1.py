@@ -94,6 +94,7 @@ class WriteToFile:
 #include <stdlib.h>
 #include <time.h>
 #include "../init_array_lib/init_dyn_array.h"
+#include "../pips_lib/define_script.h"
 
 
 int main(int argc, const char* argv[])
@@ -125,6 +126,6 @@ int main(int argc, const char* argv[])
 
     def create_file_name(self):
         extension = '.c'
-        prefix = 'output/kern_'
+        prefix = 'src/kern_'
         file_name = prefix + get_timestamp() + extension
         return file_name
