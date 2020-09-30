@@ -20,6 +20,10 @@ class WriteToFile:
         self.add_time()
         self.append_sequence_of_text(expression)
         self.create_cfile_tail()
+        for item in arrays.items():
+            array_name = item[0]
+            array_sizes = item[1]
+            self.write_dealloc_array(array_name, array_sizes)
         self.create_cfile_tail_1()
 
     def append_text_to_file(self, text):
