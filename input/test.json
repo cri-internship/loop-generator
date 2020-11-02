@@ -1,0 +1,1 @@
+[{"array_sizes": {}, "distances": {}, "type": "float", "init_with": "random", "loop_nest_level": 3, "arrays": ["A[32,32,32]", "B[32,32,32]"], "instructions": [{"array_name": "A", "index_permutation": "(2, 1, 0)", "dependencies": {"distance": "[(0, 0, 0)]"}}, {"array_name": "B", "index_permutation": "(2, 1, 0)", "dependencies": {"distance": "[(0, 0, 0)]"}}]}]
