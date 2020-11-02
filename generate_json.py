@@ -181,7 +181,7 @@ def initial_strategy():
     no_deps = (0, 0)
     deps = (-5, 5)
     # arrays_numbers = [[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,2,0],[0,0,3]]
-    arrays_numbers = [[0, 0, 2]]
+    arrays_numbers = [[0, 0, 1]]
     permutations = list(itertools.permutations([0, 1, 2]))
     for array_number in arrays_numbers:
         generate_and_save_json_bruteforce(*array_number, cache_size_sienne, init_bytes, permutations, deps)

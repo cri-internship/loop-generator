@@ -119,6 +119,8 @@ def add_includes(generated_code, kernel_name):
     generated_code.append('#include <math.h>')
     generated_code.append('#include <polybench.h>')
     generated_code.append('#include <stdio.h>')
+    generated_code.append('# include <time.h>')
+    generated_code.append('# include <stdlib.h>')
     generated_code.append('#include "{}.h"'.format(kernel_name))
 
 
@@ -252,7 +254,11 @@ def init_arrays(generated_code, arrays):
     generated_code.append('static void init_array({})'.format(whole_argument))
 
     generated_code.append('{')
+    generated_code.append('srand(time(NULL));')
     generated_code.append('int i,j,k,l;')
+
+    random_function = 'rand()%50;'
+
     for array in arrays:
         argument_string, array_name, array_dim, _ = generate_argument_string(array)
         for i in range(len(array_dim)):
@@ -260,7 +266,7 @@ def init_arrays(generated_code, arrays):
             generated_code.append(
                 'for ({} = 0; {} < {}; {}++) {{'.format(iterators[i], iterators[i], current_var, iterators[i]))
         generated_code.append(
-            '{} = {};'.format(generate_array_reference(array_name, array_dim), random.randint(1, 100)))
+            '{} = {};'.format(generate_array_reference(array_name, array_dim), random_function))
         generated_code.append(r'}' * len(array_dim.keys()))
     generated_code.append('}')
 
