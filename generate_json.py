@@ -200,7 +200,8 @@ def generate_and_save_json_bruteforce(number_of_1D_arrays, number_of_2D_arrays, 
 def initial_strategy():
     no_deps = (0,0)
     deps = (-5,5)
-    arrays_numbers = [[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,2,0],[0,0,3]]
+    #arrays_numbers = [[0,0,1],[0,0,2],[0,1,0],[0,1,1],[0,2,0],[0,0,3]]
+    arrays_numbers = [[0, 0, 2]]
     permutations = list(itertools.permutations([0,1,2]))
     for array_number in arrays_numbers:
         generate_and_save_json_bruteforce(*array_number, cache_size_sienne, init_bytes, permutations, deps)
@@ -209,8 +210,8 @@ def initial_strategy():
 def main():
 
 
-    do_for_all_files_in_directory(json_input_path, 'json', delete)
-    do_for_all_files_in_directory(src_path, 'c', delete)
+    do_for_all_files_in_directory(json_input_path, '.json', delete)
+    do_for_all_files_in_directory(src_path, '.c', delete)
     initial_strategy()
 
 
