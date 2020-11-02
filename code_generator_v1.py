@@ -504,4 +504,4 @@ if __name__ == '__main__':
     # print(loop_body)
     print('// needed macros ' + str(pips_macros))
 
-    wf = WriteToFile(LOOP_BODY, _all_arrays, _data_type, _init_with)
+    wf = WriteToFile(LOOP_BODY, _all_arrays, _data_type, _init_with, filename)

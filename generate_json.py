@@ -188,7 +188,7 @@ def generate_and_save_json_bruteforce(number_of_1D_arrays, number_of_2D_arrays, 
         json_file = init_of_json_file(code_options)
         fill_in_arrays(json_file, arrays)
         fill_in_instructions(json_file, *instruction_block)
-        filename = get_timestamp() + '.json'
+        filename = get_timestamp().replace(".",'') + '.json'
         file_destination = os.path.join(json_input_path, filename)
         with open(file_destination, 'w') as fp:
             json.dump([json_file], fp)

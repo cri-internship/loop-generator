@@ -1,13 +1,15 @@
 from typing import Tuple
 from auxillary_functions import get_timestamp
 import cgen as c
+from settings import src_path
+from os import path
 
 from code_settings import array_init_functions, array_dealloc_functions
 
 
 class WriteToFile:
-    def __init__(self, expression, arrays, data_type, init_with):
-        self.file_name = self.create_file_name()
+    def __init__(self, expression, arrays, data_type, init_with, filename):
+        self.file_name = self.create_file_name(filename)
         self.create_c_file(expression, arrays, data_type, init_with)
 
     def create_c_file(self, expression, arrays, data_type, init_with):
@@ -124,8 +126,8 @@ int main(int argc, const char* argv[])
 
         self.append_text_to_file(str(return_c))
 
-    def create_file_name(self):
+    def create_file_name(self, filename):
         extension = '.c'
-        prefix = 'src/kern_'
-        file_name = prefix + get_timestamp() + extension
+        kernel_name = filename[filename.rfind('/')+1:filename.rfind('.')] + extension
+        file_name = path.join(src_path, kernel_name)
         return file_name

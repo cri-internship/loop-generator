@@ -4,7 +4,6 @@ from settings import header_string
 import json
 from settings import dimension_names
 
-
 iterators = ['i', 'j', 'k', 'l']
 
 
@@ -37,10 +36,14 @@ def array_declaration(generated_code, arrays):
     code_arrays = []
     for array in arrays:
         _, array_name, number_of_dims, argument_string = generate_argument_string(array)
+
+        restricted_argument_string = argument_string[argument_string.index(',') + 1:]  # no array name
+
         generated_code.append(
-            'POLYBENCH_{}D_ARRAY_DECL({}, DATA_TYPE,'.format(str(number_of_dims), array_name) + argument_string + ');')
-        code_arrays.append('POLYBENCH_{}D({},{})'.format(str(number_of_dims), array_name, argument_string))
-        return code_arrays
+            'POLYBENCH_{}D_ARRAY_DECL({}, DATA_TYPE,'.format(str(len(number_of_dims.keys())),
+                                                             array_name) + restricted_argument_string + ');')
+        code_arrays.append('POLYBENCH_{}D({})'.format(str(len(number_of_dims.keys())), argument_string))
+    return code_arrays
 
 
 def init_and_kernel_call(generated_code, arrays, code_vars, kernel_name):
@@ -52,10 +55,18 @@ def init_and_kernel_call(generated_code, arrays, code_vars, kernel_name):
     :param kernel_name: string, name of our kernel
     """
     argument_string = ''
-    for var in code_vars:
-        argument_string += var + ','
-    for array in arrays:
+    final_index = 0
+    for idx, array in enumerate(arrays):
+        number_of_dim = len(array[1].keys())
+
+        start_index = final_index
+        final_index += number_of_dim
+
+        for variable_index in range(start_index, final_index):
+            argument_string += code_vars[variable_index] + ','
+
         argument_string += 'POLYBENCH_ARRAY({})'.format(array[0]) + ','
+
     argument_string = argument_string[:-1]
     generated_code.append('init_array({});'.format(argument_string))
     generated_code.append('kernel_{}({});'.format(kernel_name, argument_string))
@@ -71,17 +82,28 @@ def array_dealocation(generated_code, arrays):
         generated_code.append('POLYBENCH_FREE_ARRAY({});'.format(array[0]))
 
 
-def prevent_elimination(generated_code, arrays):
+def prevent_elimination(generated_code, arrays, code_vars):
     """
     This function apppends strings to generated code that prevent code elimination
     :param generated_code: list of strings, strings stores generated code
     :param arrays: dict, stores information about arrays
     """
-    array = arrays[0]
+
     argument_string = ''
-    for dim in array[1]:
-        argument_string += dim + ','
-    argument_string += 'POLYBENCH_ARRAY({})'.format(array[0])
+    final_index = 0
+    for idx, array in enumerate(arrays):
+        number_of_dim = len(array[1].keys())
+
+        start_index = final_index
+        final_index += number_of_dim
+
+        for variable_index in range(start_index, final_index):
+            argument_string += code_vars[variable_index] + ','
+
+        argument_string += 'POLYBENCH_ARRAY({})'.format(array[0]) + ','
+
+    argument_string = argument_string[:-1]
+
     generated_code.append('polybench_prevent_dce(print_array({}));'.format(argument_string))
 
 
@@ -121,9 +143,9 @@ def print_array(generated_code, arrays):
     whole_argument = whole_argument[:len(whole_argument) - 1]
     generated_code.append('static void print_array({})'.format(whole_argument))
     generated_code.append('{')
+    generated_code.append('int i,j,k,l;')
     for array in arrays:
         argument_string, array_name, array_dim, _ = generate_argument_string(array)
-        generated_code.append('int i,j,k,l;')
         generated_code.append("POLYBENCH_DUMP_START;")
         generated_code.append("POLYBENCH_DUMP_BEGIN(\"{}\");".format(array_name))
         generated_code.append("POLYBENCH_DUMP_START;")
@@ -171,10 +193,14 @@ def generate_function_call(generated_code, kernel_name, code_vars, code_arrays, 
     :param folder: path, path to the folder with kernels
     """
     function_signature = 'void kernel_{}('.format(kernel_name)
-    for code_var in code_vars:
-        function_signature += 'int {},'.format(code_var)
 
+    final_index = 0
     for code_array in code_arrays:
+        number_of_dims = code_array[code_array.index('_') + 1:code_array.index('_') + 2]
+        start_index = final_index
+        final_index += int(number_of_dims)
+        for idx in range(start_index, final_index):
+            function_signature += 'int {},'.format(code_vars[idx])
         function_signature += 'DATA_TYPE {},'.format(code_array)
 
     function_signature = function_signature[:-1]
@@ -226,9 +252,9 @@ def init_arrays(generated_code, arrays):
     generated_code.append('static void init_array({})'.format(whole_argument))
 
     generated_code.append('{')
+    generated_code.append('int i,j,k,l;')
     for array in arrays:
         argument_string, array_name, array_dim, _ = generate_argument_string(array)
-        generated_code.append('int i,j,k,l;')
         for i in range(len(array_dim)):
             current_var = list(array_dim.keys())[i].lower()
             generated_code.append(
@@ -273,16 +299,26 @@ def generate_source_code(kernel_name, arrays, folder):
     code_vars = variable_assignment(generated_code, arrays)
     code_arrays = array_declaration(generated_code, arrays)
     init_and_kernel_call(generated_code, arrays, code_vars, kernel_name)
-    prevent_elimination(generated_code, arrays)
+    prevent_elimination(generated_code, arrays, code_vars)
     array_dealocation(generated_code, arrays)
     add_main_end(generated_code)
     generate_function_call(generated_code, kernel_name, code_vars, code_arrays, folder)
     return generated_code
 
 
-def generate_header(kernel_name):
-    header_code = ['#ifndef _{}_H'.format(kernel_name), '#define _{}_H'.format(kernel_name), header_string]
+def generate_header(kernel_name, arrays):
+    vars_assignement = create_var_defines_for_header(arrays)
+    header_code = ['#ifndef _{}_H'.format(kernel_name), '#define _{}_H'.format(kernel_name)] + vars_assignement + [header_string]
     return header_code
+
+
+def create_var_defines_for_header(arrays):
+    vars_assignement = []
+    for array in arrays:
+        vars = array[1]
+        for key in vars.keys():
+            vars_assignement.append('# define {} {}'.format(key, str(vars[key])))
+    return vars_assignement
 
 
 def generate_source_code_and_header(kernel_name, folder_name, arrays, writing_path):
@@ -294,7 +330,7 @@ def generate_source_code_and_header(kernel_name, folder_name, arrays, writing_pa
     :param writing_path: path, path to the directory with target files
     """
     generated_code = generate_source_code(kernel_name, arrays, folder_name)
-    header_code = generate_header(kernel_name)
+    header_code = generate_header(kernel_name, arrays)
     generated_code_path = os.path.join(writing_path, kernel_name + '.c')
     generated_header_path = os.path.join(writing_path, kernel_name + '.h')
     with open(generated_code_path, 'w') as f:
@@ -305,8 +341,6 @@ def generate_source_code_and_header(kernel_name, folder_name, arrays, writing_pa
             f.write("%s\n" % item)
 
 
-
-
 def get_array_information_from_json(file):
     arrays = []
     with open(file) as json_file:
@@ -314,21 +348,17 @@ def get_array_information_from_json(file):
     data = data[0]['arrays']
     for unprocessed_array in data:
         name = unprocessed_array[:unprocessed_array.find('[')]
-        dim_string = unprocessed_array[unprocessed_array.find('[')+1:unprocessed_array.find(']')]
+        dim_string = unprocessed_array[unprocessed_array.find('[') + 1:unprocessed_array.find(']')]
         dimensions = dim_string.split(',')
         dimension_dict = {}
         for idx, dim in enumerate(dimensions):
-            dimension_dict[dimension_names[idx] +name] = dim
-
+            dimension_dict[dimension_names[idx] + name] = dim
         arrays.append((name, dimension_dict))
     return arrays
 
 
-
-
-x = get_array_information_from_json('/Users/Maxim/PycharmProjects/generator/input/test.json')
-z = generate_source_code_and_header('test','/Users/Maxim/PycharmProjects/generator/src',x,'/Users/Maxim/PycharmProjects/generator')
-
-
-
-y = 1
+def polybench_pipeline_single_file(filename, json_path, src_path, target_path):
+    kernel_name = filename[filename.rfind('/') + 1:filename.rfind('.')].replace(".", "")
+    json_file = os.path.join(json_path, kernel_name + '.json')
+    arrays = get_array_information_from_json(json_file)
+    generate_source_code_and_header(kernel_name, src_path, arrays, target_path)
