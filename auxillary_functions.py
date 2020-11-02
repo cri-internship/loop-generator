@@ -32,3 +32,8 @@ def get_content(path):
         content = f.readlines()
     content = [x.strip() for x in content]
     return content
+
+def rewrite(path, file):
+    with open(path, 'w+') as f:
+        for item in file:
+            f.write("%s\n" % item)

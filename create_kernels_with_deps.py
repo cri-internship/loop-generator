@@ -1,7 +1,12 @@
-import loops_dependencies as ld
+import json
+import sys
+
+import loops_dependencies as ld_gen
+from auxillary_functions import get_timestamp
+from parse_input import DataClass
 
 
-def create_cfile_head():
+def create_cfile_head(output_file):
     """Read C functions from functions_for_c.txt and write it to feature.c """
     start_c = """#include <stdio.h>
 #include <stdlib.h>
@@ -9,49 +14,72 @@ def create_cfile_head():
 #include "../init_array_lib/init_dyn_array.h"
 
 
-int main( int argc, const char* argv[] )
+int main(int argc, const char* argv[])
 {
     srand(time(NULL));
 
     """
 
-    with open(ld.result_c_file, 'w') as file:
+    with open(output_file, 'w') as file:
         file.write(start_c)
 
 
-def add_time():
+def add_time(output_file):
     statement = """
     clock_t start = clock();"""
-    with open(ld.result_c_file, 'a') as file:
+    with open(output_file, 'a') as file:
         file.write(statement)
 
 
-def create_cfile_tail():
+def create_cfile_tail(output_file):
     """Append the end to the feature.c"""
     end_c = """
     clock_t stop = clock();
     double elapsed = ((double)(stop - start)) / CLOCKS_PER_SEC;
     printf("%f", elapsed); """
+    with open(output_file, 'a+') as file:
+        file.write(end_c)
 
+
+def create_cfile_tail_1(output_file): #todo rename
     return_c = '''
     return 0; 
     }'''
 
-    with open(ld.result_c_file, 'a+') as file:
-        file.write(end_c)
-
-    ld.dealloc_arrays()
-
-    with open(ld.result_c_file, 'a+') as file:
+    with open(output_file, 'a+') as file:
         file.write(return_c)
 
 
+def read_file_data(filename):  # todo extract to file handling class
+    with open(filename, 'r') as file:
+        data = json.load(file)[0]
+        return data
+
+
+def create_file_name():
+    extension = '.c'
+    prefix = 'src/kern_'
+    file_name = prefix + get_timestamp() + extension
+    return file_name
+
 
 if __name__ == '__main__':
-    ld.parse_input()
-    create_cfile_head()
-    ld.init_dyn_arrays() #TODO: ADD DYN INIT SUPPORT LATER
-    #ld.init_static_arrays()
-    add_time()
-    ld.create_nested_loop()
-    create_cfile_tail()
+    filename = sys.argv[1]
+    input_data = read_file_data(filename)
+
+    data = DataClass.from_dict(input_data)
+
+    output_file = create_file_name()
+
+    loops_dependencies = ld_gen.LoopsDependencies(data, output_file)
+
+    create_cfile_head(output_file)
+    loops_dependencies.init_dyn_arrays()
+    add_time(output_file)
+    loops_dependencies.create_nested_loop(output_file)
+    create_cfile_tail(output_file)
+    loops_dependencies.dealloc_arrays()
+    create_cfile_tail_1(output_file)
+
+
+
