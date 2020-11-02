@@ -5,7 +5,7 @@ import os
 
 def create_c_code_based_on_json(filename):
     script_path = generation_script_path
-    os.system('python {} {}'.format(script_path, filename ))
+    os.system('python3 {} {}'.format(script_path, filename ))
 
 
 def main():
