@@ -1,23 +1,34 @@
 import os
 
-number_of_repititions = 10
+loop_nest_level = 3
+
+number_of_repititions = 100
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 json_input_path = os.path.join(PROJECT_PATH, 'input')
 src_path = os.path.join(PROJECT_PATH, 'src')
 init_array_path = os.path.join(PROJECT_PATH, 'init_array_lib')
 generation_script_path = os.path.join(PROJECT_PATH, 'code_generator_v1.py')
-target_path = os.path.join(PROJECT_PATH,'poly_code')
+target_path = os.path.join(PROJECT_PATH, 'poly_code')
+
+kernel_list = os.path.join(target_path, 'kernel_list')
 
 array_names = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 dimension_names = 'xyzv'
 
-cache_size_sienne = 1024 * 11228
+coef = 1
+
+cache_size_sienne = 12000000 * coef
 init_bytes = 4
-deps_range = (-5, 5)
+
+number_of_instructions_range = (2,2)
+number_of_computations_range = (1, 4)
+number_of_arrays = (1, 4)
+
+deps_range = (0, 0)
 loop_nest_level_range = (3, 3)
 
-array_type_options = ['float']
+array_type_options = ['int']
 array_init_options = ['random']
 mix_in_options = ['num_val', 'random']
 maths_symbols = ['+', '-', '*']

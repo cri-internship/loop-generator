@@ -317,6 +317,8 @@ def evaluate_expression(expression):
         expression = '-i-j-8' -> 'string', '-i-j-8'
     """
     try:
+        if expression == '':
+            expression = '0'
         expression = math.floor(eval(expression))
         expression_type = 'numerical'
     except NameError:
