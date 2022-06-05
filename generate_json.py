@@ -39,7 +39,8 @@ def generate_list_of_instructions(n: int, arrays: List[str], index_permutation: 
     instructions = []
     for i in range(n):
         instructions.append(
-            generate_instruction(arrays[0], index_permutation[i], dependencies[i], additional_computations[i]))
+            #generate_instruction(arrays[0], index_permutation[i], dependencies[i], additional_computations[i]))
+            generate_instruction(arrays[0], index_permutation[i], dependencies[i], []))
     return instructions
 
 
@@ -84,24 +85,28 @@ def random_generation_of_instructions(number_of_instructions: int, arrays: List[
         computations.append(random_generation_of_computations(arrays[0]))
 
     dependencies = []
-    for i in range(number_of_instructions):
-        first_dep = random.randint(-5,5)
-        second_dep = random.randint(-5,5)
-        dependencies.append(generate_dependency([(first_dep, second_dep)]))
+    for i in range(number_of_instructions + 1):
+        a = random.randint(-5, 5)
+        b = random.randint(-5, 5)
+        c = random.randint(-5, 5)
+        d = random.randint(-5, 5)
 
+        # dependencies.append(generate_dependency([(first_dep, second_dep),(random.randint(-5,5), random.randint(-5,
+        # 5))]))
+        dependencies.append(generate_dependency([(a, b), (c, d)]))
     return generate_list_of_instructions(number_of_instructions, names, permutations, dependencies, computations)
 
 
 def instruction_generation(arrays, n=1):
-    n = random.randint(2,2)
+    n = random.randint(1, 1)
     return random_generation_of_instructions(n, arrays)
 
 
 def generate_arrays():
-    n = random.randint(2, 4)
+    n = random.randint(1, 1)
     arrays = []
     for i in range(n):
-        arrays.append(((array_names[i]), [1024, 1024]))
+        arrays.append(((array_names[i]), [4096, 4096]))
     return [arrays]
 
 
@@ -116,7 +121,7 @@ def get_unique_arrays(generated_arrays):
     return unique_arrays
 
 
-def init_of_json_file(code_options=(3, 'float', 'random')):
+def init_of_json_file(code_options=(2, 'float', 'random')):
     loop_nest_level, array_type, array_init = code_options
     generated_file = {"array_sizes": {}, "distances": {}, "type": array_type, "init_with": array_init,
                       "loop_nest_level": loop_nest_level, "arrays": [], "instructions": []}

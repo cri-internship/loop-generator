@@ -1,8 +1,8 @@
 import os
 
-loop_nest_level = 3
+loop_nest_level = 2
 
-number_of_repititions = 100
+number_of_repititions = 1
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 json_input_path = os.path.join(PROJECT_PATH, 'input')
@@ -21,12 +21,12 @@ coef = 1
 cache_size_sienne = 12000000 * coef
 init_bytes = 4
 
-number_of_instructions_range = (2,2)
-number_of_computations_range = (1, 4)
-number_of_arrays = (1, 4)
+number_of_instructions_range = (1,3)
+number_of_computations_range = (1, 1)
+number_of_arrays = (1, 2)
 
-deps_range = (0, 0)
-loop_nest_level_range = (3, 3)
+deps_range = (-5,5)
+loop_nest_level_range = (2, 2)
 
 array_type_options = ['int']
 array_init_options = ['random']
