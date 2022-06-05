@@ -61,4 +61,17 @@ loop nest depth. All these parameters are chosen randomly. Every dim of every ar
 ##### branch analyzer
 Contains the code that can be used to perform statycal code analysis of already benchmarks. It extracts code features such as: loop depth, unique arrays read, unique arrays write, statements per loop level, unique arrays read per statement, dimensions per array read
 
+## Creating of benchmarks:
+We encourange you to create your own automatic generation strategy according to your need. Example of generating strategy is shown in the file
+'generate_json.py.py' that describes how we can automatize the process of json generation and generate many files.
+
+##### running the generation process
+
+Just run
+> do_all_job.sh
+
+It will generate the files accrding to the strategy in 'generate_json.py.py' ana parameters in 'settings.py 
+
+
+
 
