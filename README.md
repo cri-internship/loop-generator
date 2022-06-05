@@ -70,7 +70,12 @@ We encourange you to create your own automatic generation strategy according to 
 Just run
 > do_all_job.sh
 
-It will generate the files accrding to the strategy in 'generate_json.py.py' ana parameters in 'settings.py 
+It will generate the files accrding to the strategy in 'generate_json.py' and parameters in 'settings.py'
+
+
+##### output files
+
+Output files are stored in 
 
 
 
