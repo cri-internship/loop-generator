@@ -28,6 +28,7 @@ class DataClass:
         res = parse_to_array(unparsed_arrays, array_sizes_vars)
         self.array_sizes__ = get_arrays_with_sizes(res)
 
+
 def validate_loop_nest_level(loop_nest_lvl):
     if not isinstance(loop_nest_lvl, int) or loop_nest_lvl < 1:  # todo define min loop nest level
         error_msg = 'Wrong loop nest level. Expected a positive integer.'
@@ -45,7 +46,7 @@ def validate_init_value(init_value, acceptable_init_values) -> str:
     """ Expected init values are: 'ones', 'zeros', or 'random'. """
     if init_value not in acceptable_init_values:
         error_msg = 'Wrong option of array initialization. ' \
-            f'Expected one of: {acceptable_init_values}'
+                    f'Expected one of: {acceptable_init_values}'
         raise TypeError(error_msg)
 
 
@@ -56,7 +57,7 @@ def get_arrays_with_sizes(arrays):
     """
     arrays_dict = {}
     for array in arrays:
-            arrays_dict[array[0]] = array[1]
+        arrays_dict[array[0]] = array[1]
     return arrays_dict
 
 

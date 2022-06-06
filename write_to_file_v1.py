@@ -1,10 +1,10 @@
-from typing import Tuple
-from auxillary_functions import get_timestamp
-import cgen as c
-from settings import src_path
 from os import path
+from typing import Tuple
+
+import cgen as c
 
 from code_settings import array_init_functions, array_dealloc_functions
+from settings import src_path
 
 
 class WriteToFile:

@@ -53,6 +53,31 @@ def add_3D_tiling_label(filename):
     rewrite(filename, content)
 
 
+def add_2D_tiling_label(filename):
+    content = get_content(filename)
+    start_index = False
+    first = -1
+
+    second_entry = False
+
+    for idx, line in enumerate(content):
+        if 'clock_t start = clock();' in line:
+            start_index = True
+        if 'clock_t stop = clock();' in line:
+            start_index = False
+        if start_index and 'for' in line:
+            if first < 0:
+                first = idx
+                second_entry = True
+            else:
+                if second_entry:
+                    first = idx
+                    second_entry = False
+
+    content[first] = '#pragma @ICE loop=tile \n' + content[first]
+    rewrite(filename, content)
+
+
 def iterator_init(filename):
     content = get_content(filename)
 
@@ -136,6 +161,7 @@ def process_file(filename):
     iterator_init(filename)
     add_constant(filename)
     add_3D_tiling_label(filename)
+    #add_2D_tiling_label(filename)
     get_kernel_name(filename)
-    bounds_processing(filename)
+    # bounds_processing(filename)
     preprocess_time(filename)
