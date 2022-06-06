@@ -75,7 +75,7 @@ It will generate the files accrding to the strategy in 'generate_json.py' and pa
 
 ##### output files
 
-Output files are stored in 
+Output files are stored in poly_code and could be compiled as gcc poly_code/filename.c polybench/polybench.c -I polybench/ -I poly_code -DPOLYBENCH_TIME
 
 
 
