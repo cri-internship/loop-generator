@@ -2,8 +2,9 @@ from typing import Tuple
 
 import cgen as c
 
+
 class WriteToFile:
-    #todo this functions should not need to know loops_dependencies, it's just a string to write!!!
+    # todo this functions should not need to know loops_dependencies, it's just a string to write!!!
     def __init__(self, loops_dependencies):
         self.ld = loops_dependencies
 
@@ -51,12 +52,14 @@ class WriteToFile:
         """Write declaration and calling functions to init arrays to file"""
         if type(array_sizes) == tuple and len(array_sizes) == 1:  # todo why is there a difference in [1:-2] [1:-1]
             init_array = c.Statement('\n\t{} {}{} = {}{}({}, "{}")'.format(typ, '*' * len(array_sizes), array_name,
-                                                                           self.ld.array_init_functions[len(array_sizes)],
+                                                                           self.ld.array_init_functions[
+                                                                               len(array_sizes)],
                                                                            typ,
                                                                            str(array_sizes)[1:-2], init_with))
         else:
             init_array = c.Statement('\n\t{} {}{} = {}{}({}, "{}")'.format(typ, '*' * len(array_sizes), array_name,
-                                                                           self.ld.array_init_functions[len(array_sizes)],
+                                                                           self.ld.array_init_functions[
+                                                                               len(array_sizes)],
                                                                            typ,
                                                                            str(array_sizes)[1:-1], init_with))
         with open(file, 'a+') as file:

@@ -3,10 +3,10 @@ import json
 import random
 from random import randint
 from typing import List, Dict, Tuple
-
 from auxillary_functions import get_timestamp
 from settings import *
 from settings import loop_nest_level
+from settings import json_input_path
 
 
 def generate_additional_computation(array_name: str, array_access_function: List[int]) -> Dict:
@@ -91,8 +91,6 @@ def random_generation_of_instructions(number_of_instructions: int, arrays: List[
         c = random.randint(-5, 5)
         d = random.randint(-5, 5)
 
-        # dependencies.append(generate_dependency([(first_dep, second_dep),(random.randint(-5,5), random.randint(-5,
-        # 5))]))
         dependencies.append(generate_dependency([(a, b), (c, d)]))
     return generate_list_of_instructions(number_of_instructions, names, permutations, dependencies, computations)
 
@@ -121,7 +119,7 @@ def get_unique_arrays(generated_arrays):
     return unique_arrays
 
 
-def init_of_json_file(code_options=(2, 'float', 'random')):
+def init_of_json_file(code_options=(loop_nest_level, 'float', 'random')):
     loop_nest_level, array_type, array_init = code_options
     generated_file = {"array_sizes": {}, "distances": {}, "type": array_type, "init_with": array_init,
                       "loop_nest_level": loop_nest_level, "arrays": [], "instructions": []}
@@ -152,13 +150,13 @@ def generation_pipeline():
     fill_in_arrays(file, get_unique_arrays(arrays))
     file["instructions"] = instructions
     filename = get_timestamp().replace(".", "") + '.json'
-    file_destination = os.path.join('/home/maksim/PycharmProjects/loop-generator/input', filename)
+    file_destination = os.path.join(json_input_path, filename)
     with open(file_destination, 'w') as fp:
         json.dump([file], fp)
 
 
 def generate_files():
-    for _ in range(number_of_repititions):
+    for _ in range(number_of_programs_to_generate):
         generation_pipeline()
 
 

@@ -2,7 +2,7 @@ import os
 
 loop_nest_level = 2
 
-number_of_repititions = 1
+number_of_programs_to_generate = 1
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 json_input_path = os.path.join(PROJECT_PATH, 'input')
@@ -10,7 +10,6 @@ src_path = os.path.join(PROJECT_PATH, 'src')
 init_array_path = os.path.join(PROJECT_PATH, 'init_array_lib')
 generation_script_path = os.path.join(PROJECT_PATH, 'code_generator_v1.py')
 target_path = os.path.join(PROJECT_PATH, 'poly_code')
-
 kernel_list = os.path.join(target_path, 'kernel_list')
 
 array_names = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -21,11 +20,11 @@ coef = 1
 cache_size_sienne = 12000000 * coef
 init_bytes = 4
 
-number_of_instructions_range = (1,3)
+number_of_instructions_range = (1, 3)
 number_of_computations_range = (1, 1)
 number_of_arrays = (1, 2)
 
-deps_range = (-5,5)
+deps_range = (-5, 5)
 loop_nest_level_range = (2, 2)
 
 array_type_options = ['int']
